@@ -1,0 +1,46 @@
+/* A4 Content */
+#content {
+  width: 210mm;               /* Exact A4 width */
+  min-height: 297mm;          /* Exact A4 height so bottom text never cut */
+  padding: 15mm;
+  background-color: white;
+  color: #1f2937;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+/* --- Bottom Sheet Overlay (click outside to close) --- */
+.bottomSheetOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(2px);
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.bottomSheetOverlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --- Bottom Sheet Panel --- */
+.bottomSheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 100;     /* Above overlay */
+}
+
+.bottomSheet.open {
+  transform: translateY(0);
+}

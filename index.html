@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Builder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+
+<body class="bg-gray-100 min-h-screen flex">
+
+  <!-- ============================
+       HAMBURGER SIDE MENU
+  ============================= -->
+  <div id="menuOverlay"
+       class="fixed inset-0 bg-black bg-opacity-40 z-[90] hidden md:hidden"></div>
+
+  <div id="sideMenu"
+       class="fixed top-0 left-0 w-64 h-full bg-white shadow-md border-r border-gray-300 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-[100]">
+
+    <h2 class="text-xl font-bold p-4 border-b">Menu</h2>
+
+    <nav class="flex flex-col p-4 space-y-2">
+      <button class="hover:bg-gray-200 p-2 rounded">Edit Page</button>
+      <button class="hover:bg-gray-200 p-2 rounded">Template</button>
+      <button class="hover:bg-gray-200 p-2 rounded">My PDF</button>
+      <button class="hover:bg-gray-200 p-2 rounded">About Us</button>
+    </nav>
+  </div>
+
+  <!-- Hamburger Button (mobile only) -->
+  <button id="hamburger"
+          class="md:hidden fixed top-4 left-4 z-[120] bg-white p-2 rounded shadow-md">
+    &#9776;
+  </button>
+
+  <!-- ============================
+       MAIN CONTENT
+  ============================= -->
+  <div class="flex-1 p-6 md:ml-64 overflow-auto">
+
+    <!-- CV Content (A4 area) -->
+    <div id="content"
+         class="shadow border border-gray-300 rounded mb-6 bg-white p-6">
+         
+      <div class="text-center mb-6">
+        <img id="avatarImg" src="" class="w-24 h-24 rounded-full mx-auto mb-2" alt="Avatar">
+        <h1 id="nameDisplay" class="text-3xl font-bold">John Doe</h1>
+        <p id="titleDisplay" class="text-gray-600">Software Engineer</p>
+        <p id="contactDisplay" class="text-gray-600">johndoe@example.com | +1 234 567 8901</p>
+        <p id="linksDisplay" class="text-gray-600">linkedin.com/in/johndoe | github.com/johndoe</p>
+      </div>
+
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold border-b border-gray-300 pb-1 mb-2">Summary</h2>
+        <p id="summaryDisplay" class="text-gray-700 text-sm">
+          Highly motivated software engineer with 5+ years of experience...
+        </p>
+      </div>
+
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold border-b border-gray-300 pb-1 mb-2">Experience</h2>
+        <div id="experienceDisplay"></div>
+      </div>
+
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold border-b border-gray-300 pb-1 mb-2">Education</h2>
+        <div id="educationDisplay"></div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
+      <button id="openUserInfoBottomSheet"
+              class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+        Edit CV
+      </button>
+
+      <button id="generate"
+              class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+        Generate PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================
+       BOTTOM SHEET + OVERLAY
+  ============================= -->
+
+  <div id="sheetOverlay"
+       class="fixed inset-0 bg-black bg-opacity-40 z-[140] hidden"></div>
+
+  <div id="userInfoBottomSheet"
+       class="bottomSheet fixed bottom-0 left-0 w-full bg-white rounded-t-lg shadow-lg p-6 max-h-[80%] overflow-y-auto transform translate-y-full transition-transform duration-300 z-[150]">
+
+    <h2 class="text-xl font-bold mb-4">Edit CV</h2>
+
+    <label class="block mb-2 font-semibold">Full Name</label>
+    <input id="inputName" class="border p-2 w-full mb-4 rounded" />
+
+    <label class="block mb-2 font-semibold">Job Title</label>
+    <input id="inputTitle" class="border p-2 w-full mb-4 rounded" />
+
+    <label class="block mb-2 font-semibold">Email</label>
+    <input id="inputEmail" class="border p-2 w-full mb-4 rounded" />
+
+    <label class="block mb-2 font-semibold">Phone</label>
+    <input id="inputPhone" class="border p-2 w-full mb-4 rounded" />
+
+    <label class="block mb-2 font-semibold">LinkedIn / GitHub</label>
+    <input id="inputLinks" class="border p-2 w-full mb-4 rounded" />
+
+    <label class="block mb-2 font-semibold">Avatar URL</label>
+    <input id="inputAvatar" class="border p-2 w-full mb-4 rounded" />
+
+    <label class="block mb-2 font-semibold">Summary</label>
+    <textarea id="inputSummary" class="border p-2 w-full mb-4 rounded" rows="4"></textarea>
+
+    <label class="block mb-2 font-semibold">Experience (JSON Array)</label>
+    <textarea id="inputExperience" class="border p-2 w-full mb-4 rounded" rows="6"></textarea>
+
+    <label class="block mb-2 font-semibold">Education (JSON Array)</label>
+    <textarea id="inputEducation" class="border p-2 w-full mb-4 rounded" rows="4"></textarea>
+
+    <button id="updateContent"
+            class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 mt-2">
+      Update CV
+    </button>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="assets/js/script.js"></script>
+
+</body>
+</html>
