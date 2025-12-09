@@ -49,7 +49,7 @@
   box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
   transform: translateY(100%);
   transition: transform 0.3s ease-in-out;
-  z-index: 100;     /* Above overlay */
+  z-index: 100;  
 }
 
 .bottomSheet.open {
