@@ -24,6 +24,10 @@ const eduToEl = document.getElementById('eduTo');
 const eduSaveBtn = document.getElementById('eduSaveBtn');
 const eduCancelBtn = document.getElementById('eduCancelBtn');
 
+const skillInput = document.getElementById('skill');
+const skillSaveBtn = document.getElementById('skillSaveBtn');
+const skillCancelBtn = document.getElementById('skillCancelBtn');
+const skillListEl = document.getElementById('skillList');
 
 var cvInfo = {
     name: "",
@@ -327,11 +331,6 @@ eduCancelBtn.addEventListener('click', () => {
 // ============================
 // SKILLS
 // ============================
-const skillInput = document.getElementById('skill');
-const skillSaveBtn = document.getElementById('skillSaveBtn');
-const skillCancelBtn = document.getElementById('skillCancelBtn');
-const skillListEl = document.getElementById('skillList');
-const skillListDisplay = document.getElementById('skillListDisplay');
 
 // Render skill list in bottom sheet
 function renderSkillList() {
@@ -361,12 +360,12 @@ function renderSkillList() {
 
 // Render skills on CV display
 function renderSkillPreview() {
-    skillListDisplay.innerHTML = '';
+    skillListDisplay().innerHTML = '';
     const template = document.getElementById("skill-item-preview-template");
     cvInfo.skillArr.forEach(item => {
         const clone = template.content.cloneNode(true);
         clone.querySelector(".item").textContent = item.name;
-        skillListDisplay.appendChild(clone);
+        skillListDisplay().appendChild(clone);
     });
 }
 
@@ -406,7 +405,6 @@ const referenceInput = document.getElementById('reference');
 const referenceSaveBtn = document.getElementById('referenceSaveBtn');
 const referenceCancelBtn = document.getElementById('referenceCancelBtn');
 const referenceListEl = document.getElementById('referenceList');
-const referenceListDisplay = document.getElementById('referenceListDisplay');
 
 function renderReferenceList() {
     referenceListEl.innerHTML = '';
@@ -431,14 +429,29 @@ function renderReferenceList() {
     });
     renderReferencePreview();
 }
+function section(titleText, contentId) {
+    const container = document.createElement('div');
+    container.className = 'mb-6';
+    const title = document.createElement('h2');
+    title.className = 'text-xl font-semibold border-b border-gray-300 pb-1 mb-2';
+    title.textContent = titleText;
+
+    const content = document.createElement('div');
+    content.id = contentId;
+
+    container.appendChild(title);
+    container.appendChild(content);
+
+    return container;
+}
 
 function renderReferencePreview() {
-    referenceListDisplay.innerHTML = '';
+    referenceListDisplay().innerHTML = '';
     const template = document.getElementById("reference-item-preview-template");
     cvInfo.referenceArr.forEach(item => {
         const clone = template.content.cloneNode(true);
         clone.querySelector(".item").textContent = item.name;
-        referenceListDisplay.appendChild(clone);
+        referenceListDisplay().appendChild(clone);
     });
 }
 
@@ -709,7 +722,7 @@ function initInfo() {
         phone: "+1 234 567 8901",
         url: "linkedin.com/in/edward.nolan",
         avatar: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxEAAAsRAX9kX5EAAAGHaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49J++7vycgaWQ9J1c1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCc/Pg0KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyI+PHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj48cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0idXVpZDpmYWY1YmRkNS1iYTNkLTExZGEtYWQzMS1kMzNkNzUxODJmMWIiIHhtbG5zOnRpZmY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvIj48dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPjwvcmRmOkRlc2NyaXB0aW9uPjwvcmRmOlJERj48L3g6eG1wbWV0YT4NCjw/eHBhY2tldCBlbmQ9J3cnPz4slJgLAAAFmUlEQVR4Xu3VMQGAMBDAwFL/Fl8L7Ext5rsxBvLMzLsA4NL+BwA4YSAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQPIB0xsGts1rwxIAAAAASUVORK5CYII=",
-        introduction: "Highly motivated software engineer..."
+        introduction: "Passionate software engineer with experience in building scalable web and mobile applications.\n Skilled in JavaScript, Python, and modern frameworks like React and Flutter.\nStrong problem-solving abilities with a focus on clean, maintainable code.\nCommitted to continuous learning and delivering innovative software solutions."
 
     };
     document.getElementById("inputName").value = cvInfo.name;
@@ -742,9 +755,24 @@ function initInfo() {
     renderHobbyList();
 }
 
-
+function skillListDisplay(){
+  return document.getElementById('skillListDisplay');
+}
+function referenceListDisplay(){
+  return document.getElementById('referenceListDisplay');
+}
 
 document.addEventListener("DOMContentLoaded", () => {
+    var content=document.getElementById("content");
+    content.appendChild(section('Education', 'educationListDisplay'));
+    content.appendChild(section('Work Experience', 'experienceListDisplay'));
+    content.appendChild(section('Skills', 'skillListDisplay'));
+    content.appendChild(section('References', 'referenceListDisplay'));
+    content.appendChild(section('Awards', 'awardListDisplay'));
+    content.appendChild(section('Hobbies', 'hobbyListDisplay'));
+
+
+
     // ============================
     // HAMBURGER MENU TOGGLE
     // ============================
