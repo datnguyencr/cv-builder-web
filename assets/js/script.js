@@ -93,7 +93,7 @@ function showEmpty(container, text) {
 function renderWorkExpListPreview() {
   const experienceListDisplay = document.getElementById("experienceListDisplay");
   experienceListDisplay.innerHTML = "";
-  const template = document.getElementById('work-exp-item-list-preview-template');
+  const template = document.getElementById('work-exp-item-preview-template');
   cvInfo.workExpArr.forEach(item => {
     const clone = template.content.cloneNode(true);
     const dates = item.current ? `${formatMonth(item.from)} - Present` : `${formatMonth(item.from)} - ${formatMonth(item.to)}`;
@@ -114,7 +114,7 @@ function renderWorkExpList() {
     return;
   }
 
-  const template = document.getElementById('work-exp-item-list-template');
+  const template = document.getElementById('work-exp-item-template');
   cvInfo.workExpArr.forEach(item => {
     const clone = template.content.cloneNode(true);
     const left = clone.querySelector('.left');
@@ -219,7 +219,7 @@ workExpCancelBtn.addEventListener('click', () => {
 function renderEducationPreview() {
   const educationListDisplay = document.getElementById("educationListDisplay");
   educationListDisplay.innerHTML = '';
-  const template = document.getElementById("education-item-list-preview-template");
+  const template = document.getElementById("education-item-preview-template");
   cvInfo.educationArr.forEach(item => {
     const clone = template.content.cloneNode(true);
     clone.querySelector('.degree').textContent = escapeHtml(item.degree);
@@ -238,7 +238,7 @@ function renderEducationList() {
     return;
   }
 
-  const template = document.getElementById('education-item-list-template');
+  const template = document.getElementById('education-item-template');
   cvInfo.educationArr.forEach(item => {
     const clone = template.content.cloneNode(true);
 
@@ -343,22 +343,17 @@ function renderSkillList() {
     return;
   }
 
-  cvInfo.skillArr.forEach(skill => {
-    const div = document.createElement('div');
-    div.className = 'p-2 bg-gray-100 rounded flex justify-between items-center';
-    div.textContent = skill.name;
+  const template = document.getElementById('skill-item-template');
+  cvInfo.skillArr.forEach(item => {
+      const clone = template.content.cloneNode(true);
+      clone.querySelector('.item').textContent = item.name;
+      clone.querySelector('.delete').addEventListener('click', () => {
+        cvInfo.skillArr = cvInfo.skillArr.filter(s => s.id !== item.id);
+        renderSkillList();
+        renderSkillPreview();
+      });
 
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'ml-2 text-red-600 text-sm';
-    removeBtn.textContent = 'Remove';
-    removeBtn.addEventListener('click', () => {
-      cvInfo.skillArr = cvInfo.skillArr.filter(s => s.id !== skill.id);
-      renderSkillList();
-      renderSkillPreview();
-    });
-
-    div.appendChild(removeBtn);
-    skillListEl.appendChild(div);
+    skillListEl.appendChild(clone);
   });
 
   renderSkillPreview();
@@ -367,7 +362,7 @@ function renderSkillList() {
 // Render skills on CV display
 function renderSkillPreview() {
   skillListDisplay.innerHTML = '';
-  const template = document.getElementById("skill-item-template");
+  const template = document.getElementById("skill-item-preview-template");
   cvInfo.skillArr.forEach(item => {
     const clone = template.content.cloneNode(true);
     clone.querySelector(".item").textContent = item.name;
@@ -422,30 +417,24 @@ function renderReferenceList() {
     return;
   }
 
-  cvInfo.referenceArr.forEach(ref => {
-    const div = document.createElement('div');
-    div.className = 'p-2 bg-gray-100 rounded flex justify-between items-center';
-    div.textContent = ref.name;
+  const template = document.getElementById('reference-item-template');
+  cvInfo.referenceArr.forEach(item => {
+      const clone = template.content.cloneNode(true);
+      clone.querySelector('.item').textContent = item.name;
+      clone.querySelector('.delete').addEventListener('click', () => {
+        cvInfo.referenceArr = cvInfo.referenceArr.filter(s => s.id !== item.id);
+        renderReferenceList();
+        renderReferencePreview();
+      });
 
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'ml-2 text-red-600 text-sm';
-    removeBtn.textContent = 'Remove';
-    removeBtn.addEventListener('click', () => {
-      cvInfo.referenceArr = cvInfo.referenceArr.filter(r => r.id !== ref.id);
-      renderReferenceList();
-      renderReferencePreview();
-    });
-
-    div.appendChild(removeBtn);
-    referenceListEl.appendChild(div);
+    referenceListEl.appendChild(clone);
   });
-
   renderReferencePreview();
 }
 
 function renderReferencePreview() {
   referenceListDisplay.innerHTML = '';
-  const template = document.getElementById("reference-item-template");
+  const template = document.getElementById("reference-item-preview-template");
   cvInfo.referenceArr.forEach(item => {
     const clone = template.content.cloneNode(true);
     clone.querySelector(".item").textContent = item.name;
@@ -522,7 +511,7 @@ function renderAwardList() {
 
 function renderAwardPreview() {
   awardListDisplay.innerHTML = '';
-  const template = document.getElementById("award-item-template");
+  const template = document.getElementById("award-item-preview-template");
   cvInfo.awardArr.forEach(item => {
     const clone = template.content.cloneNode(true);
     clone.querySelector(".item").textContent = item.name;
@@ -600,7 +589,7 @@ function renderHobbyList() {
 
 function renderHobbyPreview() {
   hobbyListDisplay.innerHTML = '';
-  const template = document.getElementById("hobby-item-template");
+  const template = document.getElementById("hobby-item-preview-template");
   cvInfo.hobbyArr.forEach(item => {
     const clone = template.content.cloneNode(true);
     clone.querySelector(".item").textContent = item.name;
