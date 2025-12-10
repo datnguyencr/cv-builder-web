@@ -2,7 +2,6 @@
 #content {
   width: 210mm;               /* Exact A4 width */
   min-height: 297mm;          /* Exact A4 height so bottom text never cut */
-  padding: 15mm;
   background-color: white;
   color: #1f2937;
   box-sizing: border-box;

@@ -34,319 +34,298 @@
          MAIN CONTENT
       ============================= 
       -->
-    <div class="flex-1 p-6 md:ml-64 overflow-auto">
-        <!-- CV Content (A4 area) -->
-        <div id="content" class="shadow border border-gray-300 rounded mb-6 bg-white p-6">
-
-            <div class="text-center mb-6">
-                <img id="avatarImg" src="" class="w-32 h-32 rounded-full mx-auto mb-2" alt="Avatar" />
-                <h1 id="nameDisplay" class="text-3xl font-bold"></h1>
-                <p id="titleDisplay" class="text-gray-600"></p>
-
-                <p id="contactDisplay" class="text-gray-600"></p>
-                <p id="linksDisplay" class="text-gray-600"></p>
-            </div>
-            <div class="bg-teal-800 h-px mb-2"></div>
-            <div class="text-center mb-6">
-                <h2 class="text-xl font-semibold mb-2 text-teal-800">Introduction</h2>
-                <p id="introductionDisplay" class="text-gray-700 text-sm italic"></p>
-            </div>
+    <div class="flex-1 p-6 md:ml-64 overflow-auto pb-24">
+        <div id="content" class="bg-white shadow-md">
         </div>
-        <!-- Actions -->
-        <div class="bottom-action-bar flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-3">
-            <button id="openUserInfoBottomSheet" class="bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-600 min-w-60">
-                Edit CV
-            </button>
-            <button id="generate" class="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 min-w-60">
-                Generate PDF
-            </button>
-        </div>
-        <!-- 
+    </div>
+
+    <!-- Actions -->
+    <div class="bottom-action-bar flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-3">
+        <button id="openUserInfoBottomSheet" class="bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-600 min-w-60">
+            Edit CV
+        </button>
+        <button id="generate" class="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 min-w-60">
+            Donwload
+        </button>
+
+    </div>
+    <!-- 
       ============================
          BOTTOM SHEET + OVERLAY
       ============================= 
       -->
-        <div id="sheetOverlay" class="fixed inset-0 bg-black bg-opacity-40 z-[140] hidden"></div>
-        <div id="userInfoBottomSheet" class="bottomSheet fixed bottom-0 left-0 w-full bg-white rounded-t-lg shadow-lg p-6 max-h-[80%] overflow-y-auto transform translate-y-full transition-transform duration-300 z-[150]">
-            <h2 class="text-xl font-bold mb-4">Edit CV</h2>
-            <label class="block mb-2 font-semibold">Full Name</label>
-            <input id="inputName" class="border p-2 w-full mb-4 rounded" />
-            <label class="block mb-2 font-semibold">Job Title</label>
-            <input id="inputTitle" class="border p-2 w-full mb-4 rounded" />
-            <label class="block mb-2 font-semibold">Email</label>
-            <input id="inputEmail" class="border p-2 w-full mb-4 rounded" />
-            <label class="block mb-2 font-semibold">Phone</label>
-            <input id="inputPhone" class="border p-2 w-full mb-4 rounded" />
-            <label class="block mb-2 font-semibold">Personal Url</label>
-            <input id="inputLinks" class="border p-2 w-full mb-4 rounded" />
-            <label class="block mb-2 font-semibold">Avatar</label>
-            <input id="inputAvatar" class="border p-2 w-full mb-4 rounded" />
-            <label class="block mb-2 font-semibold">Introduction</label>
-            <textarea id="inputIntroduction" class="border p-2 w-full mb-4 rounded" rows="4"></textarea>
-            <!-- 
+    <div id="sheetOverlay" class="fixed inset-0 bg-black bg-opacity-40 z-[140] hidden"></div>
+    <div id="userInfoBottomSheet" class="bottomSheet fixed bottom-0 left-0 w-full bg-white rounded-t-lg shadow-lg p-6 max-h-[80%] overflow-y-auto transform translate-y-full transition-transform duration-300 z-[150]">
+        <h2 class="text-xl font-bold mb-4">Edit CV</h2>
+        <label class="block mb-2 font-semibold">Full Name</label>
+        <input id="inputName" class="border p-2 w-full mb-4 rounded" />
+        <label class="block mb-2 font-semibold">Job Title</label>
+        <input id="inputTitle" class="border p-2 w-full mb-4 rounded" />
+        <label class="block mb-2 font-semibold">Email</label>
+        <input id="inputEmail" class="border p-2 w-full mb-4 rounded" />
+        <label class="block mb-2 font-semibold">Phone</label>
+        <input id="inputPhone" class="border p-2 w-full mb-4 rounded" />
+        <label class="block mb-2 font-semibold">Personal Url</label>
+        <input id="inputLinks" class="border p-2 w-full mb-4 rounded" />
+        <label class="block mb-2 font-semibold">Avatar</label>
+        <input id="inputAvatar" class="border p-2 w-full mb-4 rounded" />
+        <label class="block mb-2 font-semibold">Introduction</label>
+        <textarea id="inputIntroduction" class="border p-2 w-full mb-4 rounded" rows="4"></textarea>
+        <!-- 
       ============================
          Work Experience
       ============================= 
       -->
-            <div class="mb-4">
-                <h3 class="font-semibold mb-2">Work Experience</h3>
-                <div id="experienceList" class="space-y-3 mb-3">
+        <div class="mb-4">
+            <h3 class="font-semibold mb-2">Work Experience</h3>
+            <div id="experienceList" class="space-y-3 mb-3">
+            </div>
+            <div id="experienceForm" class="space-y-2">
+                <input id="title" type="text" placeholder="Role (e.g. Software Developer)" class="border p-2 w-full rounded" />
+                <input id="company" type="text" placeholder="Company Name" class="border p-2 w-full rounded" />
+                <div class="flex gap-2">
+                    <input id="experienceFrom" type="month" class="border p-2 rounded w-full max-w-xs" />
+                    <input id="experienceTo" type="month" class="border p-2 rounded w-full max-w-xs" />
                 </div>
-                <div id="experienceForm" class="space-y-2">
-                    <input id="title" type="text" placeholder="Role (e.g. Software Developer)" class="border p-2 w-full rounded" />
-                    <input id="company" type="text" placeholder="Company Name" class="border p-2 w-full rounded" />
-                    <div class="flex gap-2">
-                        <input id="experienceFrom" type="month" class="border p-2 rounded w-full max-w-xs" />
-                        <input id="experienceTo" type="month" class="border p-2 rounded w-full max-w-xs" />
-                    </div>
-                    <label class="inline-flex items-center gap-2 text-sm">
-                        <input id="experienceCurrent" type="checkbox" class="form-checkbox h-4 w-4" />
-                        <span>Currently company (hide "To" date)</span>
-                    </label>
-                    <div class="flex gap-2">
-                        <button id="experienceSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
-                            Add
-                        </button>
-                        <button id="experienceCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
-                            Clear
-                        </button>
-                    </div>
+                <label class="inline-flex items-center gap-2 text-sm">
+                    <input id="experienceCurrent" type="checkbox" class="form-checkbox h-4 w-4" />
+                    <span>Currently company (hide "To" date)</span>
+                </label>
+                <div class="flex gap-2">
+                    <button id="experienceSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
+                        Add
+                    </button>
+                    <button id="experienceCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
+                        Clear
+                    </button>
                 </div>
             </div>
-            <!-- 
+        </div>
+        <!-- 
       ============================
          Education
       ============================= 
       -->
-            <div class="mb-4">
-                <h3 class="font-semibold mb-2">Education</h3>
-                <div id="eduList" class="space-y-3 mb-3">
+        <div class="mb-4">
+            <h3 class="font-semibold mb-2">Education</h3>
+            <div id="eduList" class="space-y-3 mb-3">
+            </div>
+            <div id="eduForm" class="space-y-2">
+                <input id="eduDegree" type="text" placeholder="Degree (e.g. BSc Computer Science)" class="border p-2 w-full rounded" />
+                <input id="eduSchool" type="text" placeholder="School / Institution" class="border p-2 w-full rounded" />
+                <div class="flex gap-2">
+                    <input id="eduFrom" type="month" class="border p-2 rounded w-full max-w-xs" />
+                    <input id="eduTo" type="month" class="border p-2 rounded w-full max-w-xs" />
                 </div>
-                <div id="eduForm" class="space-y-2">
-                    <input id="eduDegree" type="text" placeholder="Degree (e.g. BSc Computer Science)" class="border p-2 w-full rounded" />
-                    <input id="eduSchool" type="text" placeholder="School / Institution" class="border p-2 w-full rounded" />
-                    <div class="flex gap-2">
-                        <input id="eduFrom" type="month" class="border p-2 rounded w-full max-w-xs" />
-                        <input id="eduTo" type="month" class="border p-2 rounded w-full max-w-xs" />
-                    </div>
-                    <div class="flex gap-2">
-                        <button id="eduSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
-                            Add
-                        </button>
-                        <button id="eduCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
-                            Clear
-                        </button>
-                    </div>
+                <div class="flex gap-2">
+                    <button id="eduSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
+                        Add
+                    </button>
+                    <button id="eduCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
+                        Clear
+                    </button>
                 </div>
             </div>
-            <!-- 
+        </div>
+        <!-- 
       ============================
          Skills
       ============================= 
       -->
-            <div class="mb-4">
-                <h3 class="font-semibold mb-2">Skills</h3>
-                <div id="skillList" class="space-y-3 mb-3">
-                </div>
-                <div id="skillForm" class="space-y-2">
-                    <input id="skill" type="text" placeholder="HTML/CSS" class="border p-2 w-full rounded" />
-                    <div class="flex gap-2">
-                        <button id="skillSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
-                            Add
-                        </button>
-                        <button id="skillCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
-                            Clear
-                        </button>
-                    </div>
+        <div class="mb-4">
+            <h3 class="font-semibold mb-2">Skills</h3>
+            <div id="skillList" class="space-y-3 mb-3">
+            </div>
+            <div id="skillForm" class="space-y-2">
+                <input id="skill" type="text" placeholder="HTML/CSS" class="border p-2 w-full rounded" />
+                <div class="flex gap-2">
+                    <button id="skillSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
+                        Add
+                    </button>
+                    <button id="skillCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
+                        Clear
+                    </button>
                 </div>
             </div>
-            <!-- 
+        </div>
+        <!-- 
       ============================
          References
       ============================= 
       -->
-            <div class="mb-4">
-                <h3 class="font-semibold mb-2">References</h3>
-                <div id="referenceList" class="space-y-3 mb-3">
-                </div>
-                <div id="referenceForm" class="space-y-2">
-                    <input id="reference" type="text" placeholder="Dr.Pepper, chief of medicine, General Hospital" class="border p-2 w-full rounded" />
-                    <div class="flex gap-2">
-                        <button id="referenceSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
-                            Add
-                        </button>
-                        <button id="referenceCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
-                            Clear
-                        </button>
-                    </div>
+        <div class="mb-4">
+            <h3 class="font-semibold mb-2">References</h3>
+            <div id="referenceList" class="space-y-3 mb-3">
+            </div>
+            <div id="referenceForm" class="space-y-2">
+                <input id="reference" type="text" placeholder="Dr.Pepper, chief of medicine, General Hospital" class="border p-2 w-full rounded" />
+                <div class="flex gap-2">
+                    <button id="referenceSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
+                        Add
+                    </button>
+                    <button id="referenceCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
+                        Clear
+                    </button>
                 </div>
             </div>
-            <!-- 
+        </div>
+        <!-- 
       ============================
          Awards
       ============================= 
       -->
-            <div class="mb-4">
-                <h3 class="font-semibold mb-2">Awards</h3>
-                <div id="awardList" class="space-y-3 mb-3">
-                </div>
-                <div id="awardForm" class="space-y-2">
-                    <input id="award" type="text" placeholder="Top Employee of the Month" class="border p-2 w-full rounded" />
-                    <div class="flex gap-2">
-                        <button id="awardSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
-                            Add
-                        </button>
-                        <button id="awardCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
-                            Clear
-                        </button>
-                    </div>
+        <div class="mb-4">
+            <h3 class="font-semibold mb-2">Awards</h3>
+            <div id="awardList" class="space-y-3 mb-3">
+            </div>
+            <div id="awardForm" class="space-y-2">
+                <input id="award" type="text" placeholder="Top Employee of the Month" class="border p-2 w-full rounded" />
+                <div class="flex gap-2">
+                    <button id="awardSaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
+                        Add
+                    </button>
+                    <button id="awardCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
+                        Clear
+                    </button>
                 </div>
             </div>
-            <!-- 
+        </div>
+        <!-- 
       ============================
          Hobbies
       ============================= 
       -->
-            <div class="mb-4">
-                <h3 class="font-semibold mb-2">Hobbies</h3>
-                <div id="hobbyList" class="space-y-3 mb-3">
-                </div>
-                <div id="hobbyForm" class="space-y-2">
-                    <input id="hobby" type="text" placeholder="Football" class="border p-2 w-full rounded" />
-                    <div class="flex gap-2">
-                        <button id="hobbySaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
-                            Add
-                        </button>
-                        <button id="hobbyCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
-                            Clear
-                        </button>
-                    </div>
+        <div class="mb-4">
+            <h3 class="font-semibold mb-2">Hobbies</h3>
+            <div id="hobbyList" class="space-y-3 mb-3">
+            </div>
+            <div id="hobbyForm" class="space-y-2">
+                <input id="hobby" type="text" placeholder="Football" class="border p-2 w-full rounded" />
+                <div class="flex gap-2">
+                    <button id="hobbySaveBtn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40">
+                        Add
+                    </button>
+                    <button id="hobbyCancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40">
+                        Clear
+                    </button>
                 </div>
             </div>
-            <div class="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-3">
-                <button id="updateContent" class="bg-green-500 text-white py-2 rounded-full hover:bg-green-600 mt-2 min-w-60">
-                    Update CV
+        </div>
+        <div class="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-3">
+            <button id="updateContent" class="bg-green-500 text-white py-2 rounded-full hover:bg-green-600 mt-2 min-w-60">
+                Update CV
+            </button>
+        </div>
+    </div>
+    <template id="work-exp-item-template">
+        <div class="p-3 border rounded flex justify-between items-start bg-gray-50">
+            <div class="left">
+                <div class="company font-semibold"></div>
+                <div class="title text-sm text-gray-700"></div>
+                <div class="dates text-xs text-gray-500 mt-1"></div>
+            </div>
+            <div class="controls flex flex-col gap-2">
+                <button class="edit text-sm text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                    </svg>
+                </button>
+                <button class="delete text-sm text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
                 </button>
             </div>
         </div>
-        <template id="work-exp-item-template">
-            <div class="p-3 border rounded flex justify-between items-start bg-gray-50">
-                <div class="left">
-                    <div class="company font-semibold"></div>
-                    <div class="title text-sm text-gray-700"></div>
-                    <div class="dates text-xs text-gray-500 mt-1"></div>
-                </div>
-                <div class="controls flex flex-col gap-2">
-                    <button class="edit text-sm text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                        </svg>
-                    </button>
-                    <button class="delete text-sm text-red-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                        </svg>
-                    </button>
-                </div>
+    </template>
+    <template id="education-item-template">
+        <div class="p-3 border rounded flex justify-between items-start bg-gray-50">
+            <div class="left">
+                <div class="degree font-semibold"></div>
+                <div class="school text-sm text-gray-700"></div>
+                <div class="dates text-xs text-gray-500 mt-1"></div>
             </div>
-        </template>
-        <template id="education-item-template">
-            <div class="p-3 border rounded flex justify-between items-start bg-gray-50">
-                <div class="left">
-                    <div class="degree font-semibold"></div>
-                    <div class="school text-sm text-gray-700"></div>
-                    <div class="dates text-xs text-gray-500 mt-1"></div>
-                </div>
-                <div class="controls flex flex-col gap-2">
-                    <button class="edit text-sm text-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                        </svg>
-                    </button>
-                    <button class="delete text-sm text-red-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </template>
-        <template id="education-item-preview-template">
-            <div class="mb-4">
-                <h3 class="degree font-semibold"></h3>
-                <h3 class="school text-sm text-gray-700"></h3>
-                <p class="dates text-xs text-gray-500 mt-1"></p>
-            </div>
-        </template>
-        <template id="work-exp-item-preview-template">
-            <div class="mb-4">
-                <h3 class="company font-semibold"></h3>
-                <h3 class="title text-sm text-gray-700"></h3>
-                <p class="dates text-xs text-gray-500 mt-1"></p>
-                <ul class="skills list-disc list-inside text-gray-700 text-sm"></ul>
-            </div>
-        </template>
-        <template id="skill-item-preview-template">
-            <span class="item inline-block bg-blue-200 text-blue-800 px-4 py-1 rounded-full mr-2 mb-1 text-sm"></p>
-        </template>
-        <template id="skill-item-template">
-            <div class="p-2 bg-gray-100 rounded flex justify-between items-center">
-                <span class="item"></span>
-                <button class="delete ml-2 text-red-600 text-sm">
+            <div class="controls flex flex-col gap-2">
+                <button class="edit text-sm text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                    </svg>
+                </button>
+                <button class="delete text-sm text-red-600">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                     </svg>
                 </button>
             </div>
-        </template>
-        <template id="reference-item-template">
-            <div class="p-2 bg-gray-100 rounded flex justify-between items-center">
-                <span class="item"></span>
-                <button class="delete ml-2 text-red-600 text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                    </svg>
-                </button>
-            </div>
-        </template>
-        <template id="award-item-template">
-            <div class="p-2 bg-gray-100 rounded flex justify-between items-center">
-                <span class="item"></span>
-                <button class="delete ml-2 text-red-600 text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                    </svg>
-                </button>
-            </div>
-        </template>
-        <template id="hobby-item-template">
-            <div class="p-2 bg-gray-100 rounded flex justify-between items-center">
-                <span class="item"></span>
-                <button class="delete ml-2 text-red-600 text-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                    </svg>
-                </button>
-            </div>
-        </template>
-        <template id="education-item-preview-template">
-            <p class="item text-gray-700 text-sm mb-2"></p>
-        </template>
-        <template id="reference-item-preview-template">
-            <p class="item text-gray-700 text-sm mb-2"></p>
-        </template>
-        <template id="award-item-preview-template">
-            <p class="item text-gray-700 text-sm mb-2"></p>
-        </template>
-        <template id="hobby-item-preview-template">
-            <p class="item text-gray-700 text-sm mb-2"></p>
-        </template>
-        <template id="empty-state-template">
-            <p class="text-gray-500 text-sm empty-message"></p>
-        </template>
-        <!-- Scripts -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-        <script src="assets/js/script.js"></script>
+        </div>
+    </template>
+    <template id="skill-item-preview-template">
+        <span class="item inline-block text-gray-800 px-2 py-1 rounded-full mr-1 mb-1 text-sm font-bold border"></p>
+    </template>
+    <template id="skill-item-template">
+        <div class="p-2 bg-gray-100 rounded flex justify-between items-center">
+            <span class="item"></span>
+            <button class="delete ml-2 text-red-600 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+            </button>
+        </div>
+    </template>
+    <template id="reference-item-template">
+        <div class="p-2 bg-gray-100 rounded flex justify-between items-center">
+            <span class="item"></span>
+            <button class="delete ml-2 text-red-600 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+            </button>
+        </div>
+    </template>
+    <template id="award-item-template">
+        <div class="p-2 bg-gray-100 rounded flex justify-between items-center">
+            <span class="item"></span>
+            <button class="delete ml-2 text-red-600 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+            </button>
+        </div>
+    </template>
+    <template id="hobby-item-template">
+        <div class="p-2 bg-gray-100 rounded flex justify-between items-center">
+            <span class="item"></span>
+            <button class="delete ml-2 text-red-600 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+            </button>
+        </div>
+    </template>
+    <template id="reference-item-preview-template">
+        <ul>
+            <li class="item list-disc list-inside text-sm text-gray-700"></li>
+        </ul>
+    </template>
+    <template id="award-item-preview-template">
+        <ul>
+            <li class="item list-disc list-inside text-sm text-gray-700"></li>
+        </ul>
+    </template>
+    <template id="hobby-item-preview-template">
+        <ul>
+            <li class="item list-disc list-inside text-sm text-gray-700"></li>
+        </ul>
+    </template>
+    <template id="empty-state-template">
+        <p class="text-gray-500 text-sm empty-message"></p>
+    </template>
+    <!-- Scripts -->
+    <script src="assets/js/jspdf.umd.min.js"></script>
+    <script src="assets/js/fonts.js"></script>
+    <script src="assets/js/base_template.js"></script>
+    <script src="assets/js/template_1.js"></script>
+    <script src="assets/js/script.js"></script>
 </body>
 
 </html>

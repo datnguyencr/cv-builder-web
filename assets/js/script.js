@@ -81,8 +81,14 @@ function escapeHtml(s) {
         "'": '&#39;'
     } [c]));
 }
-
-function showEmpty(container, text) {
+/**
+ * @param {HTMLElement} container
+ * @param {string} text
+ */
+function showEmpty({
+    container,
+    text
+}) {
     const template = document.getElementById("empty-state-template");
     const clone = template.content.cloneNode(true);
     clone.querySelector(".empty-message").textContent = text;
@@ -94,27 +100,11 @@ function showEmpty(container, text) {
 // ============================
 // WORK EXPERIENCES
 // ============================
-function renderWorkExpListPreview() {
-    const experienceListDisplay = document.getElementById("experienceListDisplay");
-    experienceListDisplay.innerHTML = "";
-    const template = document.getElementById('work-exp-item-preview-template');
-    cvInfo.workExpArr.forEach(item => {
-        const clone = template.content.cloneNode(true);
-        const dates = item.current ? `${formatMonth(item.from)} - Present` : `${formatMonth(item.from)} - ${formatMonth(item.to)}`;
-        clone.querySelector('.title').textContent = escapeHtml(item.title);
-        clone.querySelector('.company').textContent = escapeHtml(item.company);
-        clone.querySelector('.dates').textContent = escapeHtml(dates);
-        experienceListDisplay.appendChild(clone);
-    });
-
-}
-
 function renderWorkExpList() {
     workExpListEl.innerHTML = '';
 
     if (cvInfo.workExpArr.length === 0) {
         showEmpty(workExpListEl, 'No work experience added yet.');
-        renderWorkExpListPreview();
         return;
     }
 
@@ -135,12 +125,10 @@ function renderWorkExpList() {
             if (!confirm('Delete this work experience item?')) return;
             cvInfo.workExpArr = cvInfo.workExpArr.filter(e => e.id !== item.id);
             renderWorkExpList();
-            renderWorkExpListPreview();
         });
 
         workExpListEl.appendChild(clone);
     });
-    renderWorkExpListPreview();
 }
 
 function startEditWorkExperience(id) {
@@ -220,25 +208,12 @@ workExpCancelBtn.addEventListener('click', () => {
 // ============================
 // EDUCATION
 // ============================
-function renderEducationPreview() {
-    const educationListDisplay = document.getElementById("educationListDisplay");
-    educationListDisplay.innerHTML = '';
-    const template = document.getElementById("education-item-preview-template");
-    cvInfo.educationArr.forEach(item => {
-        const clone = template.content.cloneNode(true);
-        clone.querySelector('.degree').textContent = escapeHtml(item.degree);
-        clone.querySelector('.school').textContent = escapeHtml(item.school);
-        clone.querySelector('.dates').textContent = `${formatMonth(item.from)} – ${formatMonth(item.to)}`;
-        educationListDisplay.appendChild(clone);
-    });
-}
 
 function renderEducationList() {
     eduListEl.innerHTML = '';
 
     if (cvInfo.educationArr.length === 0) {
         showEmpty(eduListEl, 'No education added.');
-        renderEducationPreview();
         return;
     }
 
@@ -258,12 +233,10 @@ function renderEducationList() {
             if (!confirm('Delete this education item?')) return;
             cvInfo.educationArr = cvInfo.educationArr.filter(e => e.id !== item.id);
             renderEducationList();
-            renderEducationPreview();
         });
 
         eduListEl.appendChild(clone);
     });
-    renderEducationPreview();
 }
 
 function startEditEducation(id) {
@@ -338,7 +311,6 @@ function renderSkillList() {
 
     if (!cvInfo.skillArr.length) {
         showEmpty(skillListEl, 'No skills added yet.');
-        renderSkillPreview();
         return;
     }
 
@@ -349,23 +321,9 @@ function renderSkillList() {
         clone.querySelector('.delete').addEventListener('click', () => {
             cvInfo.skillArr = cvInfo.skillArr.filter(s => s.id !== item.id);
             renderSkillList();
-            renderSkillPreview();
         });
 
         skillListEl.appendChild(clone);
-    });
-
-    renderSkillPreview();
-}
-
-// Render skills on CV display
-function renderSkillPreview() {
-    skillListDisplay().innerHTML = '';
-    const template = document.getElementById("skill-item-preview-template");
-    cvInfo.skillArr.forEach(item => {
-        const clone = template.content.cloneNode(true);
-        clone.querySelector(".item").textContent = item.name;
-        skillListDisplay().appendChild(clone);
     });
 }
 
@@ -411,7 +369,6 @@ function renderReferenceList() {
 
     if (!cvInfo.referenceArr.length) {
         showEmpty(referenceListEl, 'No references added yet.');
-        renderReferencePreview();
         return;
     }
 
@@ -422,37 +379,53 @@ function renderReferenceList() {
         clone.querySelector('.delete').addEventListener('click', () => {
             cvInfo.referenceArr = cvInfo.referenceArr.filter(s => s.id !== item.id);
             renderReferenceList();
-            renderReferencePreview();
         });
 
         referenceListEl.appendChild(clone);
     });
-    renderReferencePreview();
 }
-function section(titleText, contentId) {
+/**
+ * @param {Object} options - Options for the section.
+ * @param {string} options.titleText - The text to display as the section title.
+ * @param {string} options.id - The `id` to assign to the content container div.
+ * @param {boolean} [options.hasBottomLine=false] - Whether to add a bottom border under the title.
+ * @param {boolean} [options.uppercase=false] - Whether to render the title text in uppercase.
+ * @param {boolean} [options.fontBold=true] - Whether to make the title text bold.
+ * @returns {HTMLDivElement} The section container element.
+ */
+function section({
+    titleText,
+    id,
+    hasBottomLine,
+    uppercase,
+    fontBold = true
+}) {
     const container = document.createElement('div');
     container.className = 'mb-6';
     const title = document.createElement('h2');
-    title.className = 'text-xl font-semibold border-b border-gray-300 pb-1 mb-2';
+    title.className = 'text-xl text-teal-800 pb-1 mb-2';
+
+    if (hasBottomLine) {
+        title.classList.add('border-b-2', 'border-gray-300', 'border-teal-800');
+    }
+
+    if (uppercase) {
+        title.classList.add('uppercase');
+    }
+
+    if (fontBold) {
+        title.classList.add('font-bold');
+    }
+
     title.textContent = titleText;
 
     const content = document.createElement('div');
-    content.id = contentId;
+    content.id = id;
 
     container.appendChild(title);
     container.appendChild(content);
 
     return container;
-}
-
-function renderReferencePreview() {
-    referenceListDisplay().innerHTML = '';
-    const template = document.getElementById("reference-item-preview-template");
-    cvInfo.referenceArr.forEach(item => {
-        const clone = template.content.cloneNode(true);
-        clone.querySelector(".item").textContent = item.name;
-        referenceListDisplay().appendChild(clone);
-    });
 }
 
 function clearReferenceForm() {
@@ -489,7 +462,6 @@ const awardInput = document.getElementById('award');
 const awardSaveBtn = document.getElementById('awardSaveBtn');
 const awardCancelBtn = document.getElementById('awardCancelBtn');
 const awardListEl = document.getElementById('awardList');
-const awardListDisplay = document.getElementById('awardListDisplay');
 
 // Render awards in bottom sheet
 function renderAwardList() {
@@ -497,7 +469,6 @@ function renderAwardList() {
 
     if (!cvInfo.awardArr.length) {
         showEmpty(awardListEl, 'No awards added yet.');
-        renderAwardPreview();
         return;
     }
     const template = document.getElementById('award-item-template');
@@ -507,21 +478,9 @@ function renderAwardList() {
         clone.querySelector('.delete').addEventListener('click', () => {
             cvInfo.awardArr = cvInfo.awardArr.filter(s => s.id !== item.id);
             renderAwardList();
-            renderAwardPreview();
         });
 
         awardListEl.appendChild(clone);
-    });
-    renderAwardPreview();
-}
-
-function renderAwardPreview() {
-    awardListDisplay.innerHTML = '';
-    const template = document.getElementById("award-item-preview-template");
-    cvInfo.awardArr.forEach(item => {
-        const clone = template.content.cloneNode(true);
-        clone.querySelector(".item").textContent = item.name;
-        awardListDisplay.appendChild(clone);
     });
 }
 
@@ -561,14 +520,12 @@ const hobbyInput = document.getElementById('hobby');
 const hobbySaveBtn = document.getElementById('hobbySaveBtn');
 const hobbyCancelBtn = document.getElementById('hobbyCancelBtn');
 const hobbyListEl = document.getElementById('hobbyList');
-const hobbyListDisplay = document.getElementById('hobbyListDisplay');
 
 function renderHobbyList() {
     hobbyListEl.innerHTML = '';
 
     if (!cvInfo.hobbyArr.length) {
         showEmpty(awardListEl, 'No hobbies added yet.');
-        renderHobbyPreview();
         return;
     }
     const template = document.getElementById('hobby-item-template');
@@ -578,21 +535,9 @@ function renderHobbyList() {
         clone.querySelector('.delete').addEventListener('click', () => {
             cvInfo.hobbyArr = cvInfo.hobbyArr.filter(s => s.id !== item.id);
             renderHobbyList();
-            renderHobbyPreview();
         });
 
         hobbyListEl.appendChild(clone);
-    });
-    renderHobbyPreview();
-}
-
-function renderHobbyPreview() {
-    hobbyListDisplay.innerHTML = '';
-    const template = document.getElementById("hobby-item-preview-template");
-    cvInfo.hobbyArr.forEach(item => {
-        const clone = template.content.cloneNode(true);
-        clone.querySelector(".item").textContent = item.name;
-        hobbyListDisplay.appendChild(clone);
     });
 }
 
@@ -633,7 +578,19 @@ function initInfo() {
                 from: "2021-01",
                 to: "2023-06",
                 current: false,
-                skills: ["React", "Tailwind CSS", "JavaScript"]
+                details: ["Developed responsive web applications with React and Tailwind CSS.",
+                    "Collaborated with UX designers to improve user interfaces.",
+                    "Implemented client-side routing, state management, and API integrations.",
+                    "Participated in code reviews and mentoring junior developers."
+                ],
+                skillArr: ["React",
+                    "Tailwind CSS",
+                    "JavaScript",
+                    "HTML5",
+                    "CSS3",
+                    "REST APIs",
+                    "Git"
+                ]
             },
             {
                 id: 2,
@@ -642,7 +599,20 @@ function initInfo() {
                 from: "2023-07",
                 to: "",
                 current: true,
-                skills: ["Node.js", "Flutter", "MongoDB"]
+                details: ["Building fullstack applications using Node.js and Flutter.",
+                    "Designing and implementing database schemas in MongoDB.",
+                    "Integrating third-party APIs and cloud services.",
+                    "Leading small project teams and reviewing code for best practices."
+                ],
+                skillArr: ["Node.js",
+                    "Flutter",
+                    "MongoDB",
+                    "Express.js",
+                    "REST APIs",
+                    "Firebase",
+                    "Docker",
+                    "Git"
+                ]
             }
         ],
         educationArr: [{
@@ -650,14 +620,26 @@ function initInfo() {
                 degree: "BSc Computer Science",
                 school: "State University",
                 from: "2017-09",
-                to: "2021-06"
+                to: "2021-06",
+                details: [
+                    "Worked collaboratively on software development projects.",
+                    "Participated in an external research project with faculty.",
+                    "Member of the university programming club.",
+                    "Completed capstone project on web application development.",
+                    "GPA 4.0"
+                ]
             },
             {
                 id: 2,
                 degree: "MSc Software Engineering",
                 school: "Tech University",
                 from: "2021-09",
-                to: "2023-06"
+                to: "2023-06",
+                details: [
+                    "Focused on software architecture and cloud systems.",
+                    "Completed thesis on scalable microservices design.",
+                    "Led a team in an Agile software development project.", "Research Grant Recipient"
+                ],
             }
         ],
         skillArr: [{
@@ -726,79 +708,68 @@ function initInfo() {
 
     };
     document.getElementById("inputName").value = cvInfo.name;
-    document.getElementById("nameDisplay").innerText = cvInfo.name;
-
     document.getElementById("inputTitle").value = cvInfo.title;
-    document.getElementById("titleDisplay").innerText = cvInfo.title;
-
     document.getElementById("inputEmail").value = cvInfo.email;
     document.getElementById("inputPhone").value = cvInfo.phone;
-
-    document.getElementById("contactDisplay").innerText = cvInfo.email + " | " + cvInfo.phone;
-
     document.getElementById("inputLinks").value = cvInfo.url;
-    document.getElementById("linksDisplay").innerText = cvInfo.url;
-
-    document.getElementById("avatarImg").src = cvInfo.avatar;
     document.getElementById("inputAvatar").value = cvInfo.avatar;
-
-    document.getElementById("introductionDisplay").innerText = cvInfo.introduction;
     document.getElementById("inputIntroduction").value = cvInfo.introduction;
-
     renderWorkExpList();
-    renderWorkExpListPreview();
     renderEducationList();
-    renderEducationPreview();
     renderSkillList();
     renderReferenceList();
     renderAwardList();
     renderHobbyList();
 }
 
-function skillListDisplay(){
-  return document.getElementById('skillListDisplay');
+function generatePDF() {
+    let template = new Template1(cvInfo);
+    let doc = template.generate();
+    return doc;
 }
-function referenceListDisplay(){
-  return document.getElementById('referenceListDisplay');
+
+function previewPDF() {
+    const doc = generatePDF();
+    const pdfDataUri = doc.output('datauristring');
+    const contentEl = document.getElementById('content');
+    contentEl.innerHTML = '';
+
+    const embed = document.createElement('embed');
+    embed.src = pdfDataUri;
+    embed.type = 'application/pdf';
+    embed.style.width = '794px';
+    embed.style.height = '1123px';
+    embed.style.margin = 0;
+    embed.style.display = 'block';
+
+    contentEl.appendChild(embed);
+}
+
+function downloadPDF() {
+    const doc = generatePDF();
+    const timestamp = Date.now();
+    doc.save(`CV_${timestamp}.pdf`);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    var content=document.getElementById("content");
-    content.appendChild(section('Education', 'educationListDisplay'));
-    content.appendChild(section('Work Experience', 'experienceListDisplay'));
-    content.appendChild(section('Skills', 'skillListDisplay'));
-    content.appendChild(section('References', 'referenceListDisplay'));
-    content.appendChild(section('Awards', 'awardListDisplay'));
-    content.appendChild(section('Hobbies', 'hobbyListDisplay'));
-
-
-
-    // ============================
-    // HAMBURGER MENU TOGGLE
-    // ============================
     hamburger.addEventListener("click", () => {
         sideMenu.classList.toggle("-translate-x-full");
         menuOverlay.classList.toggle("hidden");
         hamburger.classList.add("hidden");
     });
 
-    // Close menu by clicking outside
     menuOverlay.addEventListener("click", () => {
         sideMenu.classList.add("-translate-x-full");
         menuOverlay.classList.add("hidden");
         hamburger.classList.remove("hidden");
     });
 
-    // ============================
-    // BOTTOM SHEET TOGGLE
-    // ============================
     openUserInfoBottomSheet.addEventListener("click", () => {
         userInfoBottomSheet.classList.add("open");
         sheetOverlay.classList.remove("hidden");
         hamburger.classList.add("hidden");
     });
 
-    // Close bottom sheet
     sheetOverlay.addEventListener("click", () => {
         userInfoBottomSheet.classList.remove("open");
         sheetOverlay.classList.add("hidden");
@@ -807,61 +778,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     userInfoBottomSheet.addEventListener("click", e => e.stopPropagation());
 
-    // ============================
-    // UPDATE CV CONTENT
-    // ============================
     document.getElementById("updateContent").addEventListener("click", () => {
-
-        document.getElementById("nameDisplay").innerText =
-            document.getElementById("inputName").value || "Edward Nolan";
-
-        document.getElementById("titleDisplay").innerText =
-            document.getElementById("inputTitle").value || "Software Engineer";
-
-        document.getElementById("contactDisplay").innerText =
-            (document.getElementById("inputEmail").value || "edward.nolan@example.com") + " | " +
-            (document.getElementById("inputPhone").value || "+1 234 567 8901");
-
-        document.getElementById("linksDisplay").innerText =
-            document.getElementById("inputLinks").value || "linkedin.com/in/edward.nolan";
-
-        document.getElementById("avatarImg").src =
-            document.getElementById("inputAvatar").value || "";
-
-        document.getElementById("introductionDisplay").innerText =
-            document.getElementById("inputIntroduction").value || "Highly motivated software engineer...";
-        renderWorkExpListPreview();
-        renderEducationPreview();
-
-        // Close sheet
         userInfoBottomSheet.classList.remove("open");
         sheetOverlay.classList.add("hidden");
         hamburger.classList.remove("hidden");
+
+        cvInfo.name = document.getElementById("inputName").value;
+        cvInfo.title = document.getElementById("inputTitle").value;
+        cvInfo.email = document.getElementById("inputEmail").value;
+        cvInfo.phone = document.getElementById("inputPhone").value;
+        cvInfo.url = document.getElementById("inputLinks").value;
+        cvInfo.avatar = document.getElementById("inputAvatar").value;
+        cvInfo.introduction = document.getElementById("inputIntroduction").value;
+
+        // then preview the PDF
+        previewPDF();
+
     });
 
     initInfo();
-    // ============================
-    // PDF GENERATION
-    // ============================
+    previewPDF();
 
     document.getElementById("generate").addEventListener("click", () => {
-        html2pdf().set({
-            margin: 0.2,
-            filename: "CV.pdf",
-            image: {
-                type: "jpeg",
-                quality: 0.98
-            },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                scrollY: 0
-            },
-            jsPDF: {
-                unit: "in",
-                format: "a4",
-                orientation: "portrait"
-            }
-        }).from(document.getElementById("content")).save();
+        downloadPDF();
     });
+
 });
