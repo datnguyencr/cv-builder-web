@@ -6,6 +6,8 @@ const userInfoBottomSheet = document.getElementById("userInfoBottomSheet");
 const sheetOverlay = document.getElementById("sheetOverlay");
 const openUserInfoBottomSheet = document.getElementById("openUserInfoBottomSheet");
 
+const templateBottomSheet = document.getElementById("templateBottomSheet");
+
 const workExpListEl = document.getElementById('experienceList');
 const workExpTitleEl = document.getElementById('title');
 const workExpCompanyEl = document.getElementById('company');
@@ -752,6 +754,24 @@ function downloadPDF() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const aboutUsMenu = document.querySelector("#sideMenu .about-us-menu");
+    const templateMenu = document.querySelector("#sideMenu .template-menu");
+
+    const aboutModal = document.getElementById("aboutModal");
+    const closeBtn = document.getElementById("closeAboutModal");
+
+    aboutUsMenu.addEventListener("click", () => {
+        aboutModal.classList.remove("hidden");
+    });
+
+    closeBtn.addEventListener("click", () => {
+        aboutModal.classList.add("hidden");
+    });
+
+    aboutModal.addEventListener("click", (e) => {
+        if (e.target === aboutModal) aboutModal.classList.add("hidden");
+    });
+
     hamburger.addEventListener("click", () => {
         sideMenu.classList.toggle("-translate-x-full");
         menuOverlay.classList.toggle("hidden");
@@ -764,6 +784,68 @@ document.addEventListener("DOMContentLoaded", () => {
         hamburger.classList.remove("hidden");
     });
 
+    templateMenu.addEventListener("click", () => {
+        const templates = [];
+        for (let i = 1; i <= 40; i++) {
+            templates.push({
+                id: i,
+                name: `Template ${i}`,
+                src: `templates/${i}.webp`
+            });
+        }
+
+
+        const templateGrid = document.getElementById("templateGrid");
+        // Generate template items dynamically
+        templates.forEach(t => {
+        const item = document.createElement("div");
+        item.className = "template-item border rounded cursor-pointer hover:shadow-lg p-2 flex flex-col items-center";
+        item.dataset.templateId = t.id;
+
+        const imgWrapper = document.createElement("div");
+        imgWrapper.className = "w-40 aspect-[616/800] overflow-hidden rounded mb-2";
+
+        const img = document.createElement("img");
+        img.src = t.src;
+        img.alt = t.name;
+        img.className = "w-full h-full object-cover"; // fills wrapper, crops if needed
+
+        imgWrapper.appendChild(img);
+
+        const label = document.createElement("span");
+        label.className = "text-sm font-semibold";
+        label.textContent = t.name;
+
+        item.appendChild(imgWrapper);
+        item.appendChild(label);
+        templateGrid.appendChild(item);
+        });
+
+        // Append to the bottom sheet
+        const templateBottomSheet = document.getElementById("templateBottomSheet");
+        templateBottomSheet.appendChild(templateGrid);
+
+        // Optional: handle selection
+        templateGrid.addEventListener("click", (e) => {
+        const item = e.target.closest(".template-item");
+        if (!item) return;
+
+        templateGrid.querySelectorAll(".template-item").forEach(i => i.classList.remove("border-blue-500"));
+        item.classList.add("border-blue-500");
+
+        console.log("Selected template:", item.dataset.templateId);
+        });
+
+        templateBottomSheet.classList.add("open");
+        sheetOverlay.classList.remove("hidden");
+        hamburger.classList.add("hidden");
+    });
+    closeTemplateSheet.addEventListener("click", () => {
+        templateBottomSheet.classList.remove("open");
+        sheetOverlay.classList.add("hidden");
+        hamburger.classList.remove("hidden");
+    });
+
     openUserInfoBottomSheet.addEventListener("click", () => {
         userInfoBottomSheet.classList.add("open");
         sheetOverlay.classList.remove("hidden");
@@ -772,6 +854,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sheetOverlay.addEventListener("click", () => {
         userInfoBottomSheet.classList.remove("open");
+        templateBottomSheet.classList.remove("open");
         sheetOverlay.classList.add("hidden");
         hamburger.classList.remove("hidden");
     });

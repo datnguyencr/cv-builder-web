@@ -19,10 +19,10 @@
     <div id="sideMenu" class="fixed top-0 left-0 w-64 h-full bg-white shadow-md border-r border-gray-300 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-[100]">
         <h2 class="text-xl font-bold p-4 border-b">Menu</h2>
         <nav class="flex flex-col p-4 space-y-2">
-            <button class="hover:bg-gray-200 p-2 rounded">CV Builder</button>
-            <button class="hover:bg-gray-200 p-2 rounded">Template</button>
-            <button class="hover:bg-gray-200 p-2 rounded">My PDF</button>
-            <button class="hover:bg-gray-200 p-2 rounded">About Us</button>
+            <button class="cv-builder-menu hover:bg-gray-200 p-2 rounded">CV Builder</button>
+            <button class="template-menu hover:bg-gray-200 p-2 rounded">Template</button>
+            <button class="my-pdf-menu hover:bg-gray-200 p-2 rounded">My PDF</button>
+            <button class="about-us-menu hover:bg-gray-200 p-2 rounded">About Us</button>
         </nav>
     </div>
     <!-- Hamburger Button (mobile only) -->
@@ -217,6 +217,16 @@
             </button>
         </div>
     </div>
+    <div id="templateBottomSheet" class="bottomSheet fixed bottom-0 left-0 w-full bg-white rounded-t-lg shadow-lg p-6 max-h-[80%] overflow-y-auto transform translate-y-full transition-transform duration-300 z-[150]">
+    <h2 class="text-xl font-bold mb-4">Select a Template</h2>
+    <div id="templateGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+    
+    </div>    
+    <div class="flex flex-col justify-center items-center">
+    <button id="closeTemplateSheet" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-60">
+        Close
+    </button></div>
+</div>
     <template id="work-exp-item-template">
         <div class="p-3 border rounded flex justify-between items-start bg-gray-50">
             <div class="left">
@@ -320,6 +330,20 @@
     <template id="empty-state-template">
         <p class="text-gray-500 text-sm empty-message"></p>
     </template>
+    <!-- About Us Modal -->
+<div id="aboutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[200]">
+    <div class="bg-white rounded-lg p-6 w-100 h-60 max-w-full shadow-lg relative">
+        <h2 class="text-xl font-bold mb-4 text-center">About the Developer</h2>
+        <p class="text-gray-700 mb-4">
+            Developed by John Doe. <br/>This CV Builder allows users to create professional CVs and download them as PDFs.
+        </p>
+        <button id="closeAboutModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+</svg>
+</button>
+    </div>
+</div>
+
     <!-- Scripts -->
     <script src="assets/js/jspdf.umd.min.js"></script>
     <script src="assets/js/fonts.js"></script>
