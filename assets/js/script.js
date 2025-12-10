@@ -796,28 +796,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const templateGrid = document.getElementById("templateGrid");
-        // Generate template items dynamically
+        templateGrid.className = "grid gap-4";
+        templateGrid.style.gridTemplateColumns = "repeat(auto-fill, minmax(192px, 1fr))";
         templates.forEach(t => {
         const item = document.createElement("div");
-        item.className = "template-item border rounded cursor-pointer hover:shadow-lg p-2 flex flex-col items-center";
+
         item.dataset.templateId = t.id;
 
-        const imgWrapper = document.createElement("div");
-        imgWrapper.className = "w-40 aspect-[616/800] overflow-hidden rounded mb-2";
+        item.className =
+            "w-48 aspect-[616/800] overflow-hidden rounded cursor-pointer " +
+            "border hover:border-blue-500 hover:border-2  transition-all";
 
         const img = document.createElement("img");
         img.src = t.src;
         img.alt = t.name;
         img.className = "w-full h-full object-cover"; // fills wrapper, crops if needed
-
-        imgWrapper.appendChild(img);
-
-        const label = document.createElement("span");
-        label.className = "text-sm font-semibold";
-        label.textContent = t.name;
-
-        item.appendChild(imgWrapper);
-        item.appendChild(label);
+        item.appendChild(img);
         templateGrid.appendChild(item);
         });
 
