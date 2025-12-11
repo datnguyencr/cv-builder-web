@@ -19,5 +19,27 @@ class Template1 extends PDFGenerator {
         this.section({ text: "Introduction", uppercase: true, center: true });
         this.introduction(this.cvInfo.introduction, { style: 'italic' ,center: true});
     }
+    showEducation(){
+        this.educationBlock({uppercase:true});
+    }
+
+    showWorkExp(){
+        this.workExpBlock({uppercase:true});
+    }
+
+    showSkills(){
+        this.skillsBlock({uppercase:true});
+    }
     
+    showAward(){
+        this.awardsBlock({uppercase:true});
+    }
+
+    showReference(){
+        this.referencesBlock({uppercase:true});
+    }
+
+    showHobby(){
+        this.hobbyBlock({uppercase:true});
+    }
 }
