@@ -53,6 +53,7 @@ let editingAwardId = null;
 let editingWorkExpId = null;
 let editingEducationId = null;
 let editingHobbyId = null;
+let selectedTemplateId = 1;
 
 // ============================
 // COMMON FUNCTIONS
@@ -724,10 +725,34 @@ function initInfo() {
     renderHobbyList();
 }
 
+function getTemplate(templateId) {    
+    switch (templateId) {
+        case 1:
+            return new Template1(cvInfo);
+        case 2:
+            return new Template2(cvInfo);
+        case 3:
+            return new Template3(cvInfo);
+        case 4:
+            return new Template4(cvInfo);
+        case 5:
+            return new Template5(cvInfo);
+        case 6:
+            return new Template6(cvInfo);
+        case 7:
+            return new Template7(cvInfo);
+        case 8:
+            return new Template8(cvInfo);
+        case 9:
+            return new Template9(cvInfo);
+        default:
+            return new Template1(cvInfo);
+    }
+}
+
 function generatePDF() {
-    let template = new Template1(cvInfo);
-    let doc = template.generate();
-    return doc;
+    let template=getTemplate(selectedTemplateId);
+    return template.generate();
 }
 
 function previewPDF() {
@@ -754,6 +779,11 @@ function downloadPDF() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+
+    const storedTemplateId = localStorage.getItem("selectedTemplateId");
+    if (storedTemplateId) {
+        selectedTemplateId = Number(storedTemplateId); // convert to number
+    }
     const aboutUsMenu = document.querySelector("#sideMenu .about-us-menu");
     const templateMenu = document.querySelector("#sideMenu .template-menu");
 
@@ -786,7 +816,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     templateMenu.addEventListener("click", () => {
         const templates = [];
-        for (let i = 1; i <= 40; i++) {
+        for (let i = 1; i <= 39; i++) {
             templates.push({
                 id: i,
                 name: `Template ${i}`,
@@ -796,38 +826,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         const templateGrid = document.getElementById("templateGrid");
-        templateGrid.className = "grid gap-4";
         templateGrid.style.gridTemplateColumns = "repeat(auto-fill, minmax(192px, 1fr))";
         templates.forEach(t => {
-        const item = document.createElement("div");
+            const item = document.createElement("div");
 
-        item.dataset.templateId = t.id;
+            item.dataset.templateId = t.id;
 
-        item.className =
-            "w-48 aspect-[616/800] overflow-hidden rounded cursor-pointer " +
-            "border hover:border-blue-500 hover:border-2  transition-all";
+            item.className =
+                "template-item w-48 aspect-[616/800] overflow-hidden rounded cursor-pointer " +
+                "border hover:border-blue-500 hover:border-2  transition-all";
+            if (selectedTemplateId == item.dataset.templateId) {
+                item.classList.add("border-blue-500","border-2");
+            }
+            const img = document.createElement("img");
+            img.src = t.src;
+            img.alt = t.name;
+            img.className = "w-full h-full object-cover";
+            item.appendChild(img);
+            templateGrid.appendChild(item);
 
-        const img = document.createElement("img");
-        img.src = t.src;
-        img.alt = t.name;
-        img.className = "w-full h-full object-cover"; // fills wrapper, crops if needed
-        item.appendChild(img);
-        templateGrid.appendChild(item);
-        });
-
-        // Append to the bottom sheet
-        const templateBottomSheet = document.getElementById("templateBottomSheet");
-        templateBottomSheet.appendChild(templateGrid);
-
-        // Optional: handle selection
-        templateGrid.addEventListener("click", (e) => {
-        const item = e.target.closest(".template-item");
-        if (!item) return;
-
-        templateGrid.querySelectorAll(".template-item").forEach(i => i.classList.remove("border-blue-500"));
-        item.classList.add("border-blue-500");
-
-        console.log("Selected template:", item.dataset.templateId);
+            item.addEventListener("click", (e) => {
+                templateGrid.querySelectorAll(".template-item").forEach(i => i.classList.remove("border-blue-500"));
+                item.classList.add("border-blue-500", "border-2");
+                selectedTemplateId = t.id;
+                localStorage.setItem("selectedTemplateId", selectedTemplateId);
+                previewPDF();
+            });
         });
 
         templateBottomSheet.classList.add("open");
@@ -868,7 +892,6 @@ document.addEventListener("DOMContentLoaded", () => {
         cvInfo.avatar = document.getElementById("inputAvatar").value;
         cvInfo.introduction = document.getElementById("inputIntroduction").value;
 
-        // then preview the PDF
         previewPDF();
 
     });
