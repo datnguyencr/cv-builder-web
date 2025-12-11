@@ -6,6 +6,7 @@ class Template9 extends PDFGenerator {
         this.rightY = this.margin;
         this.colHeight =  this.pageHeight -  this.margin * 2;
     }
+    
     async loadFonts() {
         await this.loadFont('assets/fonts/Lora-Regular.ttf', 'custom', 'normal');
         await this.loadFont('assets/fonts/Lora-Bold.ttf', 'custom', 'bold');
@@ -25,7 +26,7 @@ class Template9 extends PDFGenerator {
     showContactInfo(){
         let column="left";
         this.section({ text: "Contact"});
-        let textSize=this.textSize;
+        let textSize=10;
         let lineHeight=15;
         this.writePair({label :"Phone:", value:this.cvInfo.phone, column:column, textSize:textSize, lineHeight:lineHeight});
         this.writePair({label :"Email:", value:this.cvInfo.email, column:column, textSize:textSize, lineHeight:lineHeight});

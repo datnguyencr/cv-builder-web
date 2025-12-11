@@ -381,6 +381,7 @@ class PDFGenerator {
     }
 
     showContactInfo() {
+        let textSize=10;
         let column = "left";
         this.addYOffset(column, 20);
         var columnWidth = (this.pageWidth - this.margin * 2) / 3;
@@ -402,7 +403,7 @@ class PDFGenerator {
         ];
 
         columns.forEach(col => {
-            this.doc.setFontSize(this.textSize);
+            this.doc.setFontSize(textSize);
             this.doc.setTextColor(...this.mainColor);
             this.doc.setFont(this.font, 'bold');
             this.doc.text(col.title, col.x, this.leftY);
@@ -410,7 +411,7 @@ class PDFGenerator {
 
         this.addYOffset(column, this.lineHeight)
         columns.forEach(col => {
-            this.doc.setFontSize(this.textSize);
+            this.doc.setFontSize(textSize);
             this.doc.setTextColor(...this.textColor);
             this.doc.setFont(this.font, 'normal');
             this.doc.text(col.value, col.x, this.leftY);

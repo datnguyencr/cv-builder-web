@@ -1,3 +1,7 @@
+const {
+    jsPDF
+} = window.jspdf;
+
 const hamburger = document.getElementById("hamburger");
 const sideMenu = document.getElementById("sideMenu");
 const menuOverlay = document.getElementById("menuOverlay");

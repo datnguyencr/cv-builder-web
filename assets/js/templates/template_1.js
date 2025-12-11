@@ -3,6 +3,14 @@ class Template1 extends PDFGenerator {
     constructor(cvInfo, options = {}) {
         super(cvInfo, options);
     }
+
+    async loadFonts() {
+        await this.loadFont('assets/fonts/Adamina-Regular.ttf', 'custom', 'normal');
+        await this.loadFont('assets/fonts/OpenSans-Bold.ttf', 'custom', 'bold');
+        await this.loadFont('assets/fonts/OpenSans-Italic.ttf', 'custom', 'italic');
+        this.font = 'custom';
+    }
+
     showName(){
         this.name(this.cvInfo.name,{center:true});
     }
