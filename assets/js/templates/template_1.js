@@ -11,43 +11,66 @@ class Template1 extends PDFGenerator {
         this.font = 'custom';
     }
 
-    showName(){
-        this.name(this.cvInfo.name,{center:true});
+    async showName() {
+        this.name(this.cvInfo.name, {
+            center: true
+        });
     }
 
-    showTitle(){
-        this.title(this.cvInfo.title,{center:true});
+    async showTitle() {
+        this.title(this.cvInfo.title, {
+            center: true
+        });
     }
-    showIntroduction(){
+    async showIntroduction() {
         // Horizontal line
         this.doc.setLineWidth(2);
         this.doc.setDrawColor(...this.mainColor);
         this.doc.line(this.margin, this.leftY, this.pageWidth - this.margin, this.leftY);
         this.leftY += 20;
-        this.section({ text: "Introduction", uppercase: true, center: true });
-        this.introduction(this.cvInfo.introduction, { style: 'italic' ,center: true});
+        this.section({
+            text: "Introduction",
+            uppercase: true,
+            center: true
+        });
+        this.introduction(this.cvInfo.introduction, {
+            style: 'italic',
+            center: true
+        });
     }
-    showEducation(){
-        this.educationBlock({uppercase:true});
-    }
-
-    showWorkExp(){
-        this.workExpBlock({uppercase:true});
-    }
-
-    showSkills(){
-        this.skillsBlock({uppercase:true});
-    }
-    
-    showAward(){
-        this.awardsBlock({uppercase:true});
+    async showEducation() {
+        this.educationBlock({
+            uppercase: true
+        });
     }
 
-    showReference(){
-        this.referencesBlock({uppercase:true});
+    async showWorkExp() {
+        await this.workExpBlock({
+            uppercase: true
+        });
     }
 
-    showHobby(){
-        this.hobbyBlock({uppercase:true});
+    async showSkills() {
+        await this.skillsBlock({
+            uppercase: true
+        });
+    }
+
+    async showAward() {
+        await this.awardsBlock({
+            uppercase: true
+        });
+    }
+
+    async showReference() {
+        await this.referencesBlock({
+            uppercase: true
+        });
+    }
+
+    async showHobby() {
+        await this.hobbyBlock({
+            uppercase: true
+        });
     }
 }

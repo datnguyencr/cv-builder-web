@@ -776,8 +776,8 @@ async function previewPDF() {
     contentEl.appendChild(embed);
 }
 
-function downloadPDF() {
-    const doc = generatePDF();
+async function downloadPDF() {
+    const doc = await generatePDF();
     const timestamp = Date.now();
     doc.save(`CV_${timestamp}.pdf`);
 }
