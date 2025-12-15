@@ -869,6 +869,8 @@ function getTemplate(templateId) {
     switch (templateId) {
         case 1:
             return new Template1(cvInfo);
+        case 2:
+            return new Template2(cvInfo);
         case 3:
             return new Template3(cvInfo);
         case 9:

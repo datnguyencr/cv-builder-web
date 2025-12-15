@@ -782,18 +782,18 @@ avatar(imageBase64, {
             lineHeight: 15
         });
     }
-    async showAvatar() {
-        this.avatar(this.cvInfo.avatar, {
+    async showAvatar({column="left"}={}) {
+        this.avatar(this.cvInfo.avatar, {column:column,
             borderColor: this.mainColor
         });
     }
-    async showName() {
-        this.name(this.cvInfo.name, {
+    async showName({column="left"}={}) {
+        this.name(this.cvInfo.name, {column:column,
             textColor: this.textColor});
     }
 
-    async showTitle() {
-        this.title(this.cvInfo.title, {
+    async showTitle({column="left"}={}) {
+        this.title(this.cvInfo.title, {column:column,
             textColor: this.textColor
         });
     }
@@ -835,15 +835,14 @@ avatar(imageBase64, {
 
     }
 
-    async showContactInfo() {
-        let column = "left";
-        await this.contactInfo();
+    async showContactInfo({column="left"}={}) {
+        await this.contactInfo({column:column});
         this.addYOffset(column, 20)
     }
 
-    async showIntroduction() {
+    async showIntroduction({column="left"}={}) {
         this.section({
-            text: "Introduction",
+            text: "Introduction",column:column,
             uppercase: true,
             center: true,
             underline: false,
@@ -905,9 +904,9 @@ avatar(imageBase64, {
         }
     }
 
-    async showWorkExp() {
+    async showWorkExp({column="left"}={}) {
         this.workExpBlock({
-            column: "left",
+            column: column,
             uppercase: false
         });
     }
@@ -976,9 +975,9 @@ avatar(imageBase64, {
         }
     }
 
-    async showEducation() {
+    async showEducation({column="left"}={}) {
         this.educationBlock({
-            column: "left",
+            column: column,
             uppercase: true
         });
     }
@@ -1010,9 +1009,9 @@ avatar(imageBase64, {
         }
     }
 
-    async showSkills() {
+    async showSkills({column="left"}={}) {
         this.skillsBlock({
-            column: "left",
+            column: column,
             uppercase: false
         });
     }
@@ -1043,9 +1042,9 @@ avatar(imageBase64, {
         }
     }
 
-    async showReference() {
+    async showReference({column="left"}={}) {
         this.referencesBlock({
-            column: "left",
+            column: column,
             uppercase: false
         });
     }
@@ -1076,9 +1075,9 @@ avatar(imageBase64, {
         }
     }
 
-    async showAward() {
+    async showAward({column="left"}={}) {
         this.awardsBlock({
-            column: "left",
+            column: column,
             uppercase: false
         });
     }
@@ -1108,35 +1107,38 @@ avatar(imageBase64, {
             });
         }
     }
-    async showHobby() {
+    async showHobby({column="left"}={}) {
         await this.hobbyBlock({
-            column: "left",
+            column: column,
             uppercase: false
         });
     }
 
-    async showLeftColumn() {
-        await this.showAvatar();
-        await this.showName();
-        await this.showTitle();
-        await this.showIntroduction();
-        await this.showContactInfo();
-        await this.showWorkExp();
-        await this.showEducation();
-        await this.showSkills();
-        await this.showReference();
-        await this.showAward();
-        await this.showHobby();
+    async showLeftColumn({column="left"}={}) {
+        await this.showAvatar({column:column});
+        await this.showName({column:column});
+        await this.showTitle({column:column});
+        await this.showIntroduction({column:column});
+        await this.showContactInfo({column:column});
+        await this.showWorkExp({column:column});
+        await this.showEducation({column:column});
+        await this.showSkills({column:column});
+        await this.showReference({column:column});
+        await this.showAward({column:column});
+        await this.showHobby({column:column});
     }
 
-    async showRightColumn() {
+    async showRightColumn({column="right"}={}) {
 
     }
+    async showTopContent() {
 
+    }
     async generate() {
         await this.loadFonts();
         await this.loadImages();
         await this.drawBackground();
+        await this.showTopContent();
         await this.showLeftColumn();
         await this.showRightColumn();
         return this.doc;

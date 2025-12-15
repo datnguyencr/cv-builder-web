@@ -37,10 +37,10 @@ class Template13 extends PDFGenerator {
             color: this.textColor
         });
     }
-    async showAvatar() {
+    async showAvatar({column="left"}={}) {
         this.avatar(this.cvInfo.avatar, {
             borderColor: this.mainColor,
-            column:"right"
+            column:column
         });
     }
 
@@ -96,63 +96,62 @@ class Template13 extends PDFGenerator {
             );
             this.addYOffset(column,10);
     }
-    async showName() {
-        this.name(this.cvInfo.name, {column:"right",
+    async showName({column="left"}={}) {
+        this.name(this.cvInfo.name, {column:column,
             textSize: 32,
             textColor: this.mainColor,
         });
     }
 
-    async showTitle() {
-        this.title(this.cvInfo.title, {column:"right",
+    async showTitle({column="left"}={}) {
+        this.title(this.cvInfo.title, {column:column,
             textColor: this.textColor,uppercase:true
         });
         this.addYOffset("right", 10);
     }
 
-    async showIntroduction() {
+    async showIntroduction({column="left"}={}) {
         await this.introduction(this.cvInfo.introduction, {
             center: false,
-            column: "right"
+        column:column,
         });
     }
 
-    async showEducation() {
+    async showEducation({column="left"}={}) {
         await this.educationBlock({
-            column: "right",uppercase:true,
+          column:column,uppercase:true,
         });
     }
 
-    async showWorkExp() {
+    async showWorkExp({column="left"}={}) {
         await this.workExpBlock({
-            column: "right",uppercase:true,
+          column:column,uppercase:true,
         });
     }
-    async showSkills() {
-        await this.skillsBlock({
+    async showSkills({column="left"}={}) {
+        await this.skillsBlock({column:column,
             uppercase: true
         });
     }
 
-    async showAward() {
-        await this.awardsBlock({
+    async showAward({column="left"}={}) {
+        await this.awardsBlock({column:column,
             uppercase: true
         });
     }
 
-    async showReference() {
-        await this.referencesBlock({
+    async showReference({column="left"}={}) {
+        await this.referencesBlock({column:column,
             uppercase: true
         });
     }
 
-    async showHobby() {
-        await this.hobbyBlock({
+    async showHobby({column="left"}={}) {
+        await this.hobbyBlock({column:column,
             uppercase: true
         });
     }
-    async showContactInfo() {
-        let column = "left";
+    async showContactInfo({column="left"}={}) {
         this.section({
             text: "Contact",
             color: this.textColor,
@@ -182,26 +181,26 @@ class Template13 extends PDFGenerator {
             lineHeight: lineHeight
         });
     }
-    async showLeftColumn() {
-        await this.showContactInfo();
-        await this.showSkills();
-        await this.showReference();
+    async showLeftColumn({column="left"}={}) {
+        await this.showContactInfo({column:column});
+        await this.showSkills({column:column});
+        await this.showReference({column:column});
     }
 
-    async showRightColumn() {
-        this.addYOffset("right",10);
-        await this.showAvatar();
-        this.addYOffset("right",10);
-        await this.showName();
-        await this.showTitle();
-        await this.showIntroduction();
+    async showRightColumn({column="right"}={}) {
+        this.addYOffset(column,10);
+        await this.showAvatar({column:column});
+        this.addYOffset(column,10);
+        await this.showName({column:column});
+        await this.showTitle({column:column});
+        await this.showIntroduction({column:column});
         this.doc.setLineWidth(2);
         this.doc.setDrawColor(...this.mainColor);
         this.doc.line(this.margin+this.leftWidth, this.rightY, this.pageWidth - this.margin, this.rightY);
-        this.addYOffset("right",10);
-        await this.showAward();
-        await this.showHobby();
-        await this.showWorkExp();
-        await this.showEducation();
+        this.addYOffset(column,10);
+        await this.showAward({column:column});
+        await this.showHobby({column:column});
+        await this.showWorkExp({column:column});
+        await this.showEducation({column:column});
     }
 }

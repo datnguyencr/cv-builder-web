@@ -1,12 +1,9 @@
-class Template3 extends PDFGenerator {
+class Template2 extends PDFGenerator {
 
 
     constructor(cvInfo, options = {
         leftRatio: .4,
         rightRatio: .6,
-        leftBackgroundColor: [246, 246, 246],
-        mainColor: [95, 137, 191],
-        textColor: [100, 102, 101]
     }) {
         super(cvInfo, options);
         this.margin = 20;
@@ -94,7 +91,7 @@ class Template3 extends PDFGenerator {
             );
 
     }
-    async showName({column="left"}={}) {
+    async showName({column = "left",}) {
         this.name(this.cvInfo.name, {column:column,
             textSize: 32,
             textColor: this.mainColor,
@@ -111,6 +108,7 @@ class Template3 extends PDFGenerator {
     }
 
     async showContactInfo({column="left"}={}) {
+
         this.section({
             text: "Contact",
             color: this.textColor,
@@ -154,7 +152,7 @@ class Template3 extends PDFGenerator {
         });
         this.introduction(this.cvInfo.introduction, {
             center: false,
-            column: column
+            column:column
         });
     }
 
@@ -219,8 +217,6 @@ class Template3 extends PDFGenerator {
         });
     }
     async showLeftColumn({column="left"}={}) {
-        await this.showAvatar({column:column});
-        await this.showName({column:column});
         await this.showTitle({column:column});
         await this.showIntroduction({column:column});
         await this.showContactInfo({column:column});
@@ -234,5 +230,8 @@ class Template3 extends PDFGenerator {
         await this.showWorkExp({column:column});
         await this.showEducation({column:column});
     }
-
+    async showTopContent() {
+        this.showAvatar({column:"left"});
+        this.showName({column:"right"});
+    }
 }

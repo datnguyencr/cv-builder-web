@@ -66,22 +66,21 @@ class Template9 extends PDFGenerator {
         });
         this.addYOffset(column, 10);
     }
-    async showName() {
-        this.name(this.cvInfo.name, {
+    async showName({column="left"}={}) {
+        this.name(this.cvInfo.name, {column:column,
             textSize: 32,
             textColor: this.mainColor
         });
     }
 
-    async showTitle() {
-        this.title(this.cvInfo.title, {
+    async showTitle({column="left"}={}) {
+        this.title(this.cvInfo.title, {column:column,
             textColor: this.textColor
         });
-        this.addYOffset("left", 20);
+        this.addYOffset(column, 20);
     }
 
-    async showContactInfo() {
-        let column = "left";
+    async showContactInfo({column="left"}={}) {
         await this.section({
             text: "Contact"
         });
@@ -110,43 +109,43 @@ class Template9 extends PDFGenerator {
         });
     }
 
-    async showIntroduction() {
+    async showIntroduction({column="left"}={}) {
         await this.section({
             text: "Introduction",
-            column: "right"
+            column: column
         });
         await this.introduction(this.cvInfo.introduction, {
             center: false,
-            column: "right"
+            column: column
         });
     }
 
-    async showEducation() {
+    async showEducation({column="left"}={}) {
         await this.educationBlock({
-            column: "right"
+            column: column
         });
     }
 
-    async showWorkExp() {
+    async showWorkExp({column="left"}={}) {
         await this.workExpBlock({
-            column: "right"
+            column: column
         });
     }
 
-    async showLeftColumn() {
-        await this.showAvatar();
-        await this.showName();
-        await this.showTitle();
-        await this.showIntroduction();
-        await this.showContactInfo();
+    async showLeftColumn({column="left"}={}) {
+        await this.showAvatar({column:column});
+        await this.showName({column:column});
+        await this.showTitle({column:column});
+        await this.showIntroduction({column:column});
+        await this.showContactInfo({column:column});
     }
 
-    async showRightColumn() {
-        await this.showSkills();
-        await this.showReference();
-        await this.showAward();
-        await this.showHobby();
-        await this.showWorkExp();
-        await this.showEducation();
+    async showRightColumn({column="right"}={}) {
+        await this.showSkills({column:column});
+        await this.showReference({column:column});
+        await this.showAward({column:column});
+        await this.showHobby({column:column});
+        await this.showWorkExp({column:column});
+        await this.showEducation({column:column});
     }
 }
