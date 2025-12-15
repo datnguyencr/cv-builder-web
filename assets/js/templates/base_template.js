@@ -686,9 +686,10 @@ avatar(imageBase64, {
     size = 100,
     column = "left",
     center = true,
-    borderColor = this.borderColor,
+    borderColor = this.mainColor,
     borderSize=5,
-    padding = 20
+    padding=0,
+    marginBottom = 20
 } = {}) {
     if (!imageBase64) return 0;
 
@@ -710,7 +711,7 @@ avatar(imageBase64, {
     this.doc.circle(
         x + size / 2,
         y + size / 2,
-        size / 2 + 1
+        size / 2 + padding
     );
 
     this.doc.addImage(
@@ -721,7 +722,7 @@ avatar(imageBase64, {
         size,
         size
     );
-    y += size + padding;
+    y += size + marginBottom;
     this.addYOffset(column, y);
 
     return size;
@@ -913,7 +914,7 @@ avatar(imageBase64, {
 
     drawSectionLine({
         column = "left",
-        thickness = 1,
+        thickness = .5,
         offset = 5,
         color = this.textColor
     } = {}) {

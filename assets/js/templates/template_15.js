@@ -3,7 +3,7 @@ class Template15 extends PDFGenerator {
     constructor(cvInfo, options = {
         leftRatio: .4,
         rightRatio: .6,
-        leftBackgroundColor: [211, 204, 247],
+        leftBackgroundColor: [229, 229, 229],
         mainColor: [0, 0, 0]
     }) {
         super(cvInfo, options);
@@ -13,9 +13,9 @@ class Template15 extends PDFGenerator {
     }
 
     async loadFonts() {
-        await this.loadFont('assets/fonts/Afacad-Regular.ttf', 'custom', 'normal');
-        await this.loadFont('assets/fonts/Afacad-Bold.ttf', 'custom', 'bold');
-        await this.loadFont('assets/fonts/Afacad-Italic.ttf', 'custom', 'italic');
+        await this.loadFont('assets/fonts/Adamina-Regular.ttf', 'custom', 'normal');
+        await this.loadFont('assets/fonts/OpenSans-Bold.ttf', 'custom', 'bold');
+        await this.loadFont('assets/fonts/OpenSans-Italic.ttf', 'custom', 'italic');
         this.font = 'custom';
     }
     blockTitleStyle() {
@@ -39,8 +39,10 @@ class Template15 extends PDFGenerator {
     }
     async showAvatar() {
         this.avatar(this.cvInfo.avatar, {
-            borderColor: this.mainColor,
-            column:"right"
+            size:150,
+            borderSize:2,
+            borderColor:[255,255,255],
+            column:"left",padding:7
         });
     }
 
@@ -66,35 +68,16 @@ class Template15 extends PDFGenerator {
             marker: showTimeLine? marker : null
         });
 
-        const colW =  (this.colWidth(column) - this.margin * 2);
-        const textW = colW - 10 - 10;
-        var leftRatio=0.6;
-        const desciptionLines=this.doc.splitTextToSize(description.text, textW*leftRatio);
-        const datesLines=this.doc.splitTextToSize(dates.text, textW*(1-leftRatio));
-
-        const lines = Math.max(desciptionLines.length,datesLines.length);
-        this.row(
-                (opts) => this.writeTextWithMarker(description.text, {
-                    ...opts,
-                    style: description.style,
-                    column,
-                    marker: showTimeLine
-                        ? (x, y, w, ctx) => ctx.doc.line(x, y - w * 2, x, y + (w+20) *lines)
-                        : null
-                }),
-                (opts) => this.writeTextWithMarker(dates.text, {
-                    ...opts,
-                    style: dates.style,
-                    column,
-                    marker: null,
-                    align: "right"
-                }),
-                {
-                    column,
-                    leftRatio: leftRatio
-                }
-            );
-            this.addYOffset(column,10);
+        this.writeTextWithMarker(description.text, {
+            style: description.style,
+            column: column,
+            marker: showTimeLine? marker : null
+        });
+        this.writeTextWithMarker(dates.text, {
+            style: dates.style,
+            column: column,
+            marker: showTimeLine? marker : null
+        });
     }
     async showName() {
         this.name(this.cvInfo.name, {column:"right",
@@ -111,6 +94,10 @@ class Template15 extends PDFGenerator {
     }
 
     async showIntroduction() {
+        this.doc.setLineWidth(1);
+        this.doc.setDrawColor(...this.mainColor);
+        this.doc.line(this.margin+this.leftWidth, this.rightY, this.pageWidth - this.margin, this.rightY);
+        this.addYOffset("right",20);
         await this.introduction(this.cvInfo.introduction, {
             center: false,
             column: "right"
@@ -183,19 +170,18 @@ class Template15 extends PDFGenerator {
         });
     }
     async showLeftColumn() {
+        await this.showAvatar();
         await this.showContactInfo();
         await this.showSkills();
         await this.showReference();
     }
 
     async showRightColumn() {
-        this.addYOffset("right",10);
-        await this.showAvatar();
-        this.addYOffset("right",10);
+        this.addYOffset("right",30);
         await this.showName();
         await this.showTitle();
         await this.showIntroduction();
-        this.doc.setLineWidth(2);
+        this.doc.setLineWidth(1);
         this.doc.setDrawColor(...this.mainColor);
         this.doc.line(this.margin+this.leftWidth, this.rightY, this.pageWidth - this.margin, this.rightY);
         this.addYOffset("right",10);
