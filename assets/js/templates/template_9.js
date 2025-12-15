@@ -39,11 +39,19 @@ class Template9 extends PDFGenerator {
     }
 
     blockHeader({
-        title = new Text({ style: new TextStyle({ style: "bold" }) }),
-        description = new Text({ style: new TextStyle({ style: "bold" }) }),
+        title = new Text({
+            style: new TextStyle({
+                style: "bold"
+            })
+        }),
+        description = new Text({
+            style: new TextStyle({
+                style: "bold"
+            })
+        }),
         dates = new Text(),
         column = "left"
-    }){
+    }) {
         this.normalText(title.text, {
             style: title.style,
             column: column
@@ -56,7 +64,7 @@ class Template9 extends PDFGenerator {
             style: dates.style,
             column: column
         });
-        this.addYOffset(column,10);
+        this.addYOffset(column, 10);
     }
     async showName() {
         this.name(this.cvInfo.name, {
@@ -126,6 +134,7 @@ class Template9 extends PDFGenerator {
     }
 
     async showLeftColumn() {
+        await this.showAvatar();
         await this.showName();
         await this.showTitle();
         await this.showIntroduction();

@@ -1,12 +1,10 @@
-class Template3 extends PDFGenerator {
-
+class Template13 extends PDFGenerator {
 
     constructor(cvInfo, options = {
         leftRatio: .4,
         rightRatio: .6,
-        leftBackgroundColor: [246, 246, 246],
-        mainColor: [95, 137, 191],
-        textColor: [100, 102, 101]
+        leftBackgroundColor: [211, 204, 247],
+        mainColor: [0, 0, 0]
     }) {
         super(cvInfo, options);
         this.margin = 20;
@@ -15,38 +13,42 @@ class Template3 extends PDFGenerator {
     }
 
     async loadFonts() {
-        await this.loadFont('assets/fonts/Lora-Regular.ttf', 'custom', 'normal');
-        await this.loadFont('assets/fonts/Lora-Bold.ttf', 'custom', 'bold');
-        await this.loadFont('assets/fonts/Lora-Italic.ttf', 'custom', 'italic');
+        await this.loadFont('assets/fonts/Afacad-Regular.ttf', 'custom', 'normal');
+        await this.loadFont('assets/fonts/Afacad-Bold.ttf', 'custom', 'bold');
+        await this.loadFont('assets/fonts/Afacad-Italic.ttf', 'custom', 'italic');
         this.font = 'custom';
     }
-    
-     formatTime = (monthValue) => {
-        if (!monthValue) return '';
-            const y = monthValue.split('-')[0];
-            return y || '';
-        };
-
     blockTitleStyle() {
-        return new TextStyle({
-            color: this.textColor,
-            style: 'bold'
-        });
-    }
-    blockDescriptionStyle() {
         return new TextStyle({
             style: 'bold',
             color: this.textColor
         });
     }
-
-    blockDatesStyle() {
+    blockDescriptionStyle() {
         return new TextStyle({
             style: 'normal',
             color: this.textColor
         });
     }
 
+    blockDatesStyle() {
+        return new TextStyle({
+            style: 'italic',
+            color: this.textColor
+        });
+    }
+    async showAvatar() {
+        this.avatar(this.cvInfo.avatar, {
+            borderColor: this.mainColor,
+            column:"right"
+        });
+    }
+
+     formatTime = (monthValue) => {
+        if (!monthValue) return '';
+            const y = monthValue.split('-')[0];
+            return y || '';
+        };
     blockHeader({
         title = new Text(),
         description = new Text(),
@@ -61,7 +63,7 @@ class Template3 extends PDFGenerator {
         this.writeTextWithMarker(title.text, {
             style: title.style,
             column: column,
-         marker: showTimeLine?marker:null
+            marker: showTimeLine? marker : null
         });
 
         const colW =  (this.colWidth(column) - this.margin * 2);
@@ -92,32 +94,69 @@ class Template3 extends PDFGenerator {
                     leftRatio: leftRatio
                 }
             );
-
+            this.addYOffset(column,10);
     }
     async showName() {
-        this.name(this.cvInfo.name, {
+        this.name(this.cvInfo.name, {column:"right",
             textSize: 32,
             textColor: this.mainColor,
-            center: true
         });
     }
 
     async showTitle() {
-        this.title(this.cvInfo.title, {
-            textColor: this.textColor,
-            center: true
+        this.title(this.cvInfo.title, {column:"right",
+            textColor: this.textColor,uppercase:true
         });
-        this.addYOffset("left", 20);
+        this.addYOffset("right", 10);
     }
 
+    async showIntroduction() {
+        await this.introduction(this.cvInfo.introduction, {
+            center: false,
+            column: "right"
+        });
+    }
+
+    async showEducation() {
+        await this.educationBlock({
+            column: "right",uppercase:true,
+        });
+    }
+
+    async showWorkExp() {
+        await this.workExpBlock({
+            column: "right",uppercase:true,
+        });
+    }
+    async showSkills() {
+        await this.skillsBlock({
+            uppercase: true
+        });
+    }
+
+    async showAward() {
+        await this.awardsBlock({
+            uppercase: true
+        });
+    }
+
+    async showReference() {
+        await this.referencesBlock({
+            uppercase: true
+        });
+    }
+
+    async showHobby() {
+        await this.hobbyBlock({
+            uppercase: true
+        });
+    }
     async showContactInfo() {
         let column = "left";
         this.section({
             text: "Contact",
             color: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.contactImage
+            uppercase:true
         });
         let textSize = 10;
         let lineHeight = 15;
@@ -143,97 +182,26 @@ class Template3 extends PDFGenerator {
             lineHeight: lineHeight
         });
     }
-
-    async showIntroduction() {
-        this.section({
-            text: "Introduction",
-            column: "right",
-            color: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.introductionImage
-        });
-        this.introduction(this.cvInfo.introduction, {
-            center: false,
-            column: "right"
-        });
-    }
-
-    async showEducation() {
-        this.educationBlock({
-            column: "right",
-            sectionColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.educationImage,
-            showTimeLine: true
-        });
-    }
-
-    async showWorkExp() {
-        this.workExpBlock({
-            column: "right",
-            sectionColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.workExpImage,
-            showTimeLine: true
-        });
-    }
-
-    async showSkills() {
-        this.skillsBlock({
-            column: "left",
-            sectionColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.skillImage
-        });
-    }
-    async showReference() {
-        this.referencesBlock({
-            column: "left",
-            sectionColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.referenceImage
-        });
-    }
-
-    async showAward() {
-        this.awardsBlock({
-            column: "left",
-            sectionColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.awardImage
-        });
-    }
-
-    async showHobby() {
-        await this.hobbyBlock({
-            column: "left",
-            sectionColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.hobbyImage
-        });
-    }
     async showLeftColumn() {
-        await this.showAvatar();
-        await this.showName();
-        await this.showTitle();
-        await this.showIntroduction();
         await this.showContactInfo();
+        await this.showSkills();
+        await this.showReference();
     }
 
     async showRightColumn() {
-        await this.showSkills();
-        await this.showReference();
+        this.addYOffset("right",10);
+        await this.showAvatar();
+        this.addYOffset("right",10);
+        await this.showName();
+        await this.showTitle();
+        await this.showIntroduction();
+        this.doc.setLineWidth(2);
+        this.doc.setDrawColor(...this.mainColor);
+        this.doc.line(this.margin+this.leftWidth, this.rightY, this.pageWidth - this.margin, this.rightY);
+        this.addYOffset("right",10);
         await this.showAward();
         await this.showHobby();
         await this.showWorkExp();
         await this.showEducation();
     }
-
 }

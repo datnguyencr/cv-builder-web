@@ -1,6 +1,6 @@
 class Template1 extends PDFGenerator {
 
-    constructor(cvInfo, options = {}) {
+    constructor(cvInfo, options = {mainColor:[0, 95, 90]}) {
         super(cvInfo, options);
     }
 

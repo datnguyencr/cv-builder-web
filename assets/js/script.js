@@ -21,6 +21,8 @@ const workExpCurrentEl = document.getElementById('experienceCurrent');
 const workExpSaveBtn = document.getElementById('experienceSaveBtn');
 const workExpCancelBtn = document.getElementById('experienceCancelBtn');
 
+const avatarInput = document.getElementById("inputAvatar");
+const avatarPreview = document.getElementById("avatarPreview");
 
 const eduListEl = document.getElementById('eduList');
 const eduDegreeEl = document.getElementById('eduDegree');
@@ -34,6 +36,31 @@ const skillInput = document.getElementById('skill');
 const skillSaveBtn = document.getElementById('skillSaveBtn');
 const skillCancelBtn = document.getElementById('skillCancelBtn');
 const skillListEl = document.getElementById('skillList');
+
+avatarInput.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // basic validation
+    if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
+    }
+
+    // optional size guard (e.g. 1MB)
+    if (file.size > 1024 * 1024) {
+        alert("Image too large (max 1MB)");
+        return;
+    }
+
+    const img  = await fileToJsPdfImage(file,  128,  "circle");
+
+    cvInfo.avatar = img.base64;
+    avatarPreview.src = img.base64;
+    avatarPreview.classList.remove("hidden");
+
+    previewPDF();
+});
 
 var cvInfo = {
     name: "",
@@ -77,6 +104,101 @@ const formatMonth = (monthValue) => {
         return monthValue;
     }
 };
+function convertToPng(base64) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+
+            resolve(canvas.toDataURL("image/png"));
+        };
+        img.onerror = reject;
+        img.src = base64;
+    });
+}
+
+/**
+ * Convert any File into a jsPDF-compatible base64 image
+ * with optional pre-clipping to circle/square.
+ * @param {File} file - Image file
+ * @param {number} size - Output size in px
+ * @param {"circle"|"square"} shape - Shape to preclip
+ * @returns {Promise<{base64: string, type: "PNG"|"JPEG"}>}
+ */
+async function fileToJsPdfImage(file, size = 128, shape = "square") {
+    // Helper: convert to PNG using canvas
+    const convertToPng = (base64) =>
+        new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext("2d");
+
+                // Clip if circle
+                if (shape === "circle") {
+                    ctx.beginPath();
+                    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.clip();
+                }
+
+                // Scale and center
+                const scale = Math.max(size / img.width, size / img.height);
+                const w = img.width * scale;
+                const h = img.height * scale;
+                const dx = (size - w) / 2;
+                const dy = (size - h) / 2;
+
+                ctx.drawImage(img, dx, dy, w, h);
+                resolve(canvas.toDataURL("image/png"));
+            };
+            img.src = base64;
+        });
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = async () => {
+            try {
+                let base64 = reader.result;
+
+                // Convert non-PNG/JPEG → PNG
+                if (
+                    base64.startsWith("data:image/webp") ||
+                    base64.startsWith("data:image/avif") ||
+                    base64.startsWith("data:image/heic")
+                ) {
+                    base64 = await convertToPng(base64);
+                }
+
+                // If preclip circle/square
+                if (shape === "circle" || shape === "square") {
+                    base64 = await convertToPng(base64); // always PNG after preclip
+                }
+
+                resolve({
+                    base64,
+                    type: base64.includes("image/jpeg") ? "JPEG" : "PNG"
+                });
+            } catch (e) {
+                reject(e);
+            }
+        };
+
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+
 
 // simple HTML escaping to avoid injection
 function escapeHtml(s) {
@@ -633,11 +755,24 @@ function initInfo() {
                     "Participated in an external research project with faculty.",
                     "Member of the university programming club.",
                     "Completed capstone project on web application development.",
+                    "Completed capstone project on web application development.",
                     "GPA 4.0"
                 ]
             },
             {
                 id: 2,
+                degree: "MSc Software Engineering",
+                school: "Tech University",
+                from: "2021-09",
+                to: "2023-06",
+                details: [
+                    "Focused on software architecture and cloud systems.",
+                    "Completed thesis on scalable microservices design.",
+                    "Led a team in an Agile software development project.", "Research Grant Recipient"
+                ],
+            },
+            {
+                id: 3,
                 degree: "MSc Software Engineering",
                 school: "Tech University",
                 from: "2021-09",
@@ -710,7 +845,7 @@ function initInfo() {
         email: "edward.nolan@example.com",
         phone: "+1 234 567 8901",
         url: "linkedin.com/in/edward.nolan",
-        avatar: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxEAAAsRAX9kX5EAAAGHaVRYdFhNTDpjb20uYWRvYmUueG1wAAAAAAA8P3hwYWNrZXQgYmVnaW49J++7vycgaWQ9J1c1TTBNcENlaGlIenJlU3pOVGN6a2M5ZCc/Pg0KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyI+PHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj48cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0idXVpZDpmYWY1YmRkNS1iYTNkLTExZGEtYWQzMS1kMzNkNzUxODJmMWIiIHhtbG5zOnRpZmY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvIj48dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPjwvcmRmOkRlc2NyaXB0aW9uPjwvcmRmOlJERj48L3g6eG1wbWV0YT4NCjw/eHBhY2tldCBlbmQ9J3cnPz4slJgLAAAFmUlEQVR4Xu3VMQGAMBDAwFL/Fl8L7Ext5rsxBvLMzLsA4NL+BwA4YSAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQGIgACQGAkBiIAAkBgJAYiAAJAYCQPIB0xsGts1rwxIAAAAASUVORK5CYII=",
+        avatar: "",
         introduction: "Passionate software engineer with experience in building scalable web and mobile applications. Skilled in JavaScript, Python, and modern frameworks like React and Flutter.\nStrong problem-solving abilities with a focus on clean, maintainable code.Committed to continuous learning and delivering innovative software solutions."
 
     };
@@ -719,7 +854,6 @@ function initInfo() {
     document.getElementById("inputEmail").value = cvInfo.email;
     document.getElementById("inputPhone").value = cvInfo.phone;
     document.getElementById("inputLinks").value = cvInfo.url;
-    document.getElementById("inputAvatar").value = cvInfo.avatar;
     document.getElementById("inputIntroduction").value = cvInfo.introduction;
     renderWorkExpList();
     renderEducationList();
@@ -733,22 +867,16 @@ function getTemplate(templateId) {
     switch (templateId) {
         case 1:
             return new Template1(cvInfo);
-        case 2:
-            return new Template2(cvInfo);
         case 3:
             return new Template3(cvInfo);
-        case 4:
-            return new Template4(cvInfo);
-        case 5:
-            return new Template5(cvInfo);
-        case 6:
-            return new Template6(cvInfo);
-        case 7:
-            return new Template7(cvInfo);
-        case 8:
-            return new Template8(cvInfo);
         case 9:
             return new Template9(cvInfo);
+        case 13:
+            return new Template13(cvInfo);
+        case 14:
+            return new Template14(cvInfo);
+        case 15:
+            return new Template15(cvInfo); 
         default:
             return new Template1(cvInfo);
     }

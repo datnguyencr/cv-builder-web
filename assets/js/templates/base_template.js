@@ -18,6 +18,19 @@ class Text {
         this.style = style;
     }
 }
+const TIMELINE_MARKERS = {
+    circle: (x, y, w, ctx) => {
+        ctx.doc.circle(x, y - w / 2, w / 2, 'F');
+    },
+
+    line: (x, y, w, ctx) => {
+        ctx.doc.line(x, y - w * 2, x, y + w);
+    },
+
+    square: (x, y, w, ctx) => {
+        ctx.doc.rect(x - 3, y - 3, 6, 6, 'F');
+    }
+};
 
 class PDFGenerator {
     constructor(cvInfo, options = {}) {
@@ -26,6 +39,10 @@ class PDFGenerator {
             unit: 'pt',
             format: 'a4'
         });
+
+        this.timelineDotRadius = 4;
+        this.timelineLineWidth = 1;
+
         this.svgElement = document.getElementById("iconSVG");
         this.leftBackgroundColor = options.leftBackgroundColor || [255, 255, 255];
         this.rightBackgroundColor = options.rightBackgroundColor || [255, 255, 255];
@@ -49,7 +66,7 @@ class PDFGenerator {
         // Style
         this.font = options.font || "custom";
         this.textColor = options.textColor || [0, 0, 0];
-        this.mainColor = options.mainColor || [0, 95, 90];
+        this.mainColor = options.mainColor || [0, 0, 0];
         this.textSize = options.textSize || 12;
     }
 
@@ -59,7 +76,20 @@ class PDFGenerator {
         await this.loadFont('assets/fonts/OpenSans-Italic.ttf', 'custom', 'italic');
         this.font = 'custom';
     }
-
+    formatTime = (monthValue) => {
+        if (!monthValue) return '';
+        // monthValue like "2022-09" -> display "Sep 2022"
+        try {
+            const [y, m] = monthValue.split('-');
+            const d = new Date(Number(y), Number(m) - 1);
+            return d.toLocaleString(undefined, {
+                month: 'short',
+                year: 'numeric'
+            });
+        } catch {
+            return monthValue;
+        }
+    };
     blockTitleStyle() {
         return new TextStyle({
             style: 'bold',
@@ -80,21 +110,97 @@ class PDFGenerator {
         });
     }
 
+writeTextWithMarker(text, {
+    style = new TextStyle(),
+    markerWidth = 10,
+    gap = 10,
+    marker = null,
+    lineHeight = this.lineHeight,
+    column = "left",
+    padding = 0,
+    customWidth = null,
+    lockY = null,
+    align = "left"
+} = {}) {
+
+    this.doc.setFontSize(style.size);
+    this.doc.setFont(this.font, style.style);
+    this.doc.setTextColor(...style.color);
+
+    const baseX =
+        (column === "left"
+            ? this.margin
+            : this.leftWidth + this.margin) + padding;
+
+    const colW = customWidth ?? (this.colWidth(column) - this.margin * 2);
+
+    const markerX = baseX;
+    const textX = markerX + markerWidth + gap;
+    const textW = colW - markerWidth - gap;
+
+    const lines = this.doc.splitTextToSize(text, textW);
+
+    let y = lockY ?? this.getYOffset(column);
+    let height = 0;
+
+    for (let i = 0; i < lines.length; i++) {
+
+        if (y + lineHeight > this.pageHeight - this.margin) {
+            this.addPageFor(column);
+            y = this.getYOffset(column);
+        }
+
+        if (i === 0 && marker) {
+            marker(markerX, y, markerWidth, this);
+        }
+
+        this.doc.text(
+            lines[i],
+            align === "right" ? textX + textW : textX,
+            y,
+            align === "right" ? { align: "right" } : undefined
+        );
+
+        y += lineHeight;
+        height += lineHeight;
+    }
+
+    if (!lockY) {
+        this.setYOffset(column, y + 5);
+        height += 5;
+    }
+
+    return height;
+}
+
     blockHeader({
         title = new Text(),
         description = new Text(),
         dates = new Text(),
-        column = "left"
+        column = "left",
+        timelineColor = this.mainColor,
+        showTimeLine = false
     } = {}) {
-        this.normalText(`${title.text} | ${dates.text}`, {
+
+        const marker = TIMELINE_MARKERS["circle"];
+        this.doc.setFillColor(...timelineColor);
+        this.writeTextWithMarker(`${title.text} | ${dates.text}`, {
             style: title.style,
-            column: column
+            column: column,
+            marker: showTimeLine? marker : null
         });
-        this.normalText(description.text, {
+
+        
+        this.writeTextWithMarker(description.text, {
             style: description.style,
-            column: column
+            column: column,
+            marker: showTimeLine ? (x, y, w, ctx) => {
+                ctx.doc.line(x, y - w * 2, x, y + w +5);
+            } : null
         });
+
     }
+
     async svgToPngData(svgString) {
         return new Promise((resolve) => {
             const blob = new Blob([svgString], {
@@ -269,6 +375,35 @@ class PDFGenerator {
         );
     }
 
+    row(leftFn, rightFn, {
+        column = "left",
+        gap = 5,
+        leftRatio = .7
+    } = {}) {
+
+        const startY = this.getYOffset(column);
+
+        const totalWidth = this.colWidth(column) - this.margin * 2;
+        const leftWidth = totalWidth * leftRatio;
+        const rightWidth = totalWidth - leftWidth - gap;
+        // render left
+        const hLeft = leftFn({
+            lockY: startY,
+            customWidth: leftWidth,
+            padding: 0
+        }) || 0;
+
+        // render right
+        const hRight = rightFn({
+            lockY: startY,
+            customWidth: rightWidth,
+            padding: leftWidth + gap
+        }) || 0;
+
+        const rowHeight = Math.max(hLeft, hRight);
+
+        this.setYOffset(column, startY + rowHeight);
+    }
 
     writePair({
         label = "",
@@ -323,41 +458,68 @@ class PDFGenerator {
         indent = 0,
         center = false,
         lineHeight = this.lineHeight,
-        column = "left"
+        column = "left",
+        padding = 0,
     } = {}) {
-        const colX = column === "left" ? this.margin : this.leftWidth + this.margin;
+        const colX = (column === "left" ? this.margin : this.leftWidth + this.margin) + padding;
         const colW = this.colWidth(column) - this.margin * 2;
         const lines = this.doc.splitTextToSize(text, colW - indent);
 
         let y = this.getYOffset(column);
+        let totalHeight = 0;
+
         for (let i = 0; i < lines.length; i++) {
             if (y + lineHeight > this.pageHeight - this.margin) {
                 this.addPageFor(column);
                 y = this.getYOffset(column);
             }
-            this.doc.text(lines[i], center ? colX + colW / 2 : colX + indent, y, center ? {
-                align: 'center'
-            } : undefined);
+
+            this.doc.text(
+                lines[i],
+                center ? colX + colW / 2 : colX + indent,
+                y,
+                center ? {
+                    align: 'center'
+                } : undefined
+            );
+           
             y += lineHeight;
+            totalHeight += lineHeight;
+
         }
-        y += 5;
         this.setYOffset(column, y);
+
+        return totalHeight;
     }
 
     ul(items, {
         indent = 10,
+        markerWidth = 15,
+        gap = 5,
         column = "left",
-        lineHeight = this.lineHeight
+        lineHeight = this.lineHeight,
+        padding = 0,
+        showTimeLine = false,
+        timelineColor = this.mainColor,
     } = {}) {
         this.doc.setFontSize(this.textSize);
         this.doc.setFont(this.font, "normal");
         this.doc.setTextColor(...this.textColor);
+        this.addYOffset(column,10);
+        const colX =
+            (column === "left" ?
+                this.margin :
+                this.leftWidth + this.margin);
 
-        const colX = column === "left" ? this.margin : this.leftWidth + this.margin;
         const colW = this.colWidth(column) - this.margin * 2;
 
+        const markerX = colX;
+        const bulletX = markerX + markerWidth + gap;
+        const textX = bulletX + indent;
+        const textW = colW - markerWidth - gap - indent;
+
         items.forEach(item => {
-            const lines = this.doc.splitTextToSize(item, colW - indent);
+            const lines = this.doc.splitTextToSize(item, textW);
             let y = this.getYOffset(column);
 
             for (let i = 0; i < lines.length; i++) {
@@ -365,15 +527,22 @@ class PDFGenerator {
                     this.addPageFor(column);
                     y = this.getYOffset(column);
                 }
-                if (i === 0) this.doc.text("•", colX, y);
-                this.doc.text(lines[i], colX + indent, y);
+                if (showTimeLine) {
+                    this.doc.setFillColor(...timelineColor);
+                    this.doc.line(markerX, y - gap, markerX, y + lineHeight);
+                }
+
+                if (i === 0) {
+                    this.doc.text("•", bulletX, y);
+                }
+
+                this.doc.text(lines[i], textX, y);
                 y += lineHeight;
             }
-            y += 5;
-            this.setYOffset(column, y);
+
+            this.setYOffset(column, y + 5);
         });
     }
-
 
 
     join(items, {
@@ -396,14 +565,21 @@ class PDFGenerator {
         center = false,
         column = "left",
         underline = false,
+        upperline = false,
         color = this.mainColor,
-        underlineColor = this.mainColor,
+        lineColor: lineColor = this.mainColor,
         icon = null,
-        paddingTop = 10,
-        paddingBottom = 20
+        paddingTop = 15,
+        paddingBottom = 15
     }) {
-
         this.addYOffset(column, paddingTop);
+        if (upperline) {
+            this.drawSectionLine({
+                column,
+                color: lineColor,
+            });
+            this.addYOffset(column,20);
+        }
         let y = this.getYOffset(column);
 
         this.doc.setFontSize(14);
@@ -425,7 +601,6 @@ class PDFGenerator {
             this.rightWidth;
 
         if (center) {
-
             const textWidth = this.doc.getTextWidth(title);
             const groupWidth = (icon ? iconW + gap : 0) + textWidth;
             const startX = colX + (colWidth - groupWidth) / 2;
@@ -450,9 +625,9 @@ class PDFGenerator {
         }
 
         if (underline) {
-            this.drawUnderline({
+            this.drawSectionLine({
                 column,
-                color: underlineColor,
+                color: lineColor,
                 offset: 10
             });
         }
@@ -462,13 +637,15 @@ class PDFGenerator {
 
     normalText(text, {
         style = TextStyle(),
-        column = "left"
+        column = "left",
+        padding = 0,
     } = {}) {
         this.doc.setFontSize(style.size);
         this.doc.setFont(this.font, style.style);
         this.doc.setTextColor(...style.color);
-        this.writeText(text, {
-            column: column
+        return this.writeText(text, {
+            column: column,
+            padding: padding,
         });
     }
 
@@ -477,71 +654,115 @@ class PDFGenerator {
         description = new Text(),
         dates = new Text(),
         detailList = [],
-        column = "left"
+        column = "left",
+        indent = 10,
+        padding = 0,
+        showTimeLine = false,
+        timelineColor = this.mainColor,
+        lineGap = 10
     } = {}) {
         this.addYOffset(column, 10);
         this.blockHeader({
             title: title,
             description: description,
             dates: dates,
-            column: column
+            column: column,
+            padding: padding,
+            showTimeLine: showTimeLine,
+            timelineColor: timelineColor
         });
         if (detailList.length) {
             this.ul(detailList, {
                 column: column,
-                lineHeight: 15
+                lineHeight: 15,
+                indent: indent,
+                padding: padding,
+                showTimeLine: showTimeLine,
+                timelineColor: timelineColor
             });
         }
     }
+avatar(imageBase64, {
+    size = 100,
+    column = "left",
+    center = true,
+    borderColor = this.borderColor,
+    borderSize=5,
+    padding = 20
+} = {}) {
+    if (!imageBase64) return 0;
 
-    /**
-     * Render the name using writeText(), with wrapping support.
-     * @param {string} text - The name text.
-     * @param {Object} [options]
-     * @param {"left"|"right"} [options.column="left"]
-     * @param {boolean} [options.center=false]
-     */
+    const colX =
+        (column === "left"
+            ? this.margin
+            : this.leftWidth + this.margin) ;
+
+    const colW = this.colWidth(column) - this.margin * 2;
+
+    const x = center
+        ? colX + colW / 2 - size / 2
+        : colX;
+
+    let y = this.getYOffset(column);
+
+    this.doc.setDrawColor(...borderColor);
+    this.doc.setLineWidth(borderSize);
+    this.doc.circle(
+        x + size / 2,
+        y + size / 2,
+        size / 2 + 1
+    );
+
+    this.doc.addImage(
+        imageBase64, 
+        "PNG",
+        x,
+        y,
+        size,
+        size
+    );
+    y += size + padding;
+    this.addYOffset(column, y);
+
+    return size;
+}
+
     name(text, {
         textSize = 24,
         lineHeight = 0,
         column = "left",
         center = false,
-        textColor = this.textColor
+        textColor = this.textColor,
+        uppercase = false,
     } = {}) {
         this.doc.setFontSize(textSize);
         this.doc.setFont(this.font, "bold");
         this.doc.setTextColor(...textColor);
 
-        this.writeText(text, {
+        this.writeText(uppercase ? text.toUpperCase() : text, {
             indent: 0,
             center: center,
-            lineHeight: textSize + lineHeight,
+            lineHeight:  textSize+lineHeight,
             column: column
         });
     }
 
-    /**
-     * Render the title using writeText(), with wrapping support.
-     * @param {string} text - The title text.
-     * @param {Object} [options]
-     * @param {"left"|"right"} [options.column="left"]
-     * @param {boolean} [options.center=false]
-     */
     title(text, {
         textSize = 12,
         lineHeight = 0,
         column = "left",
         center = false,
-        textColor = this.textColor
+        textColor = this.textColor,
+        uppercase = false,
     } = {}) {
         this.doc.setFontSize(textSize);
         this.doc.setFont(this.font, "bold");
         this.doc.setTextColor(...textColor);
 
-        this.writeText(text, {
+        this.writeText(uppercase ? text.toUpperCase() : text, {
             indent: 0,
             center: center,
-            lineHeight: textSize + lineHeight,
+            lineHeight: textSize+lineHeight,
             column: column
         });
     }
@@ -560,11 +781,14 @@ class PDFGenerator {
             lineHeight: 15
         });
     }
-
+    async showAvatar() {
+        this.avatar(this.cvInfo.avatar, {
+            borderColor: this.mainColor
+        });
+    }
     async showName() {
         this.name(this.cvInfo.name, {
-            textColor: this.textColor
-        });
+            textColor: this.textColor});
     }
 
     async showTitle() {
@@ -572,10 +796,8 @@ class PDFGenerator {
             textColor: this.textColor
         });
     }
-
-    async showContactInfo() {
+    async contactInfo({column = "left"}={}) {
         let textSize = 10;
-        let column = "left";
         this.addYOffset(column, 20);
         var columnWidth = (this.pageWidth - this.margin * 2) / 3;
         const columns = [{
@@ -609,7 +831,13 @@ class PDFGenerator {
             this.doc.setFont(this.font, 'normal');
             this.doc.text(col.value, col.x, this.leftY);
         });
-        this.addYOffset(column, 30)
+
+    }
+
+    async showContactInfo() {
+        let column = "left";
+        await this.contactInfo();
+        this.addYOffset(column, 20)
     }
 
     async showIntroduction() {
@@ -619,7 +847,7 @@ class PDFGenerator {
             center: true,
             underline: false,
             color: this.mainColor,
-            underlineColor: this.mainColor
+            lineColor: this.mainColor
         });
         this.introduction(this.cvInfo.introduction, {
             style: 'italic'
@@ -631,9 +859,11 @@ class PDFGenerator {
         uppercase = false,
         center = false,
         underline = false,
+        upperline = false, 
         sectionColor = this.mainColor,
-        underlineColor = this.mainColor,
-        icon = null
+        lineColor: lineColor = this.mainColor,
+        icon = null,
+        showTimeLine = false
     }) {
         if (this.cvInfo.workExpArr.length) {
             this.section({
@@ -641,15 +871,15 @@ class PDFGenerator {
                 uppercase: uppercase,
                 center: center,
                 column: column,
-                underline: underline,
+                underline: underline,upperline:upperline,
                 color: sectionColor,
-                underlineColor: underlineColor,
+                lineColor: lineColor,
                 icon: icon
             });
 
             this.cvInfo.workExpArr.forEach(item => {
-                const dates = item.current ? `${formatMonth(item.from)} - Present` : `${formatMonth(item.from)} - ${formatMonth(item.to)}`;
-                this.block({
+                const dates = item.current ? `${this.formatTime(item.from)} - Present` : `${this.formatTime(item.from)} - ${this.formatTime(item.to)}`;
+                var options = {
                     title: new Text({
                         text: item.title,
                         style: this.blockTitleStyle()
@@ -663,9 +893,14 @@ class PDFGenerator {
                         style: this.blockDatesStyle()
                     }),
                     detailList: item.details,
-                    column: column
-                });
+                    column: column,
+                    showTimeLine: showTimeLine,
+                    padding: showTimeLine ? 10 : 0
+                };
+                this.block(options);
+
             });
+
         }
     }
 
@@ -676,7 +911,7 @@ class PDFGenerator {
         });
     }
 
-    drawUnderline({
+    drawSectionLine({
         column = "left",
         thickness = 1,
         offset = 5,
@@ -691,14 +926,16 @@ class PDFGenerator {
         this.doc.line(startX, y, endX, y);
         this.addYOffset(column, offset + 2);
     }
+
     async educationBlock({
         column = "left",
         uppercase = false,
         center = false,
-        underline = false,
+        underline = false,upperline=false,
         sectionColor = this.mainColor,
-        underlineColor = this.mainColor,
-        icon = null
+        lineColor = this.mainColor,
+        icon = null,
+        showTimeLine = false
     } = {}) {
         if (this.cvInfo.educationArr.length) {
             this.section({
@@ -707,13 +944,14 @@ class PDFGenerator {
                 center: center,
                 column: column,
                 underline: underline,
+                upperline:upperline,
                 color: sectionColor,
-                underlineColor: underlineColor,
+                lineColor: lineColor,
                 icon: icon
             });
             this.cvInfo.educationArr.forEach(item => {
-                const dates = `${formatMonth(item.from)} - ${formatMonth(item.to)}`;
-                this.block({
+                const dates = `${this.formatTime(item.from)} - ${this.formatTime(item.to)}`;
+                var options = {
                     title: new Text({
                         text: item.degree,
                         style: this.blockTitleStyle()
@@ -727,8 +965,12 @@ class PDFGenerator {
                         style: this.blockDatesStyle()
                     }),
                     detailList: item.details,
-                    column: column
-                });
+                    column: column,
+                    showTimeLine: showTimeLine,
+                    padding: showTimeLine ? 10 : 0
+                };
+                this.block(options);
+
             });
         }
     }
@@ -744,9 +986,9 @@ class PDFGenerator {
         column = "left",
         uppercase = false,
         center = false,
-        underline = false,
+        underline = false,upperline=false,
         sectionColor = this.mainColor,
-        underlineColor = this.mainColor,
+        lineColor = this.mainColor,
         icon = null
     } = {}) {
         if (this.cvInfo.skillArr.length) {
@@ -754,12 +996,13 @@ class PDFGenerator {
                 text: "Skills",
                 uppercase: uppercase,
                 center: center,
-                underline: underline,
+                underline: underline,upperline:upperline,
                 column: column,
                 color: sectionColor,
-                underlineColor: underlineColor,
+                lineColor: lineColor,
                 icon: icon
             });
+            this.addYOffset(column,10);
             this.join(this.cvInfo.skillArr.map(h => h.name), {
                 column: column
             });
@@ -777,9 +1020,9 @@ class PDFGenerator {
         column = "left",
         uppercase = false,
         center = false,
-        underline = false,
+        underline = false,upperline=false,
         sectionColor = this.mainColor,
-        underlineColor = this.mainColor,
+        lineColor = this.mainColor,
         icon = null
     } = {}) {
         if (this.cvInfo.referenceArr.length) {
@@ -787,10 +1030,10 @@ class PDFGenerator {
                 text: "References",
                 uppercase: uppercase,
                 center: center,
-                underline: underline,
+                underline: underline,upperline:upperline,
                 column: column,
                 color: sectionColor,
-                underlineColor: underlineColor,
+                lineColor: lineColor,
                 icon: icon
             });
             this.ul(this.cvInfo.referenceArr.map(h => h.name), {
@@ -810,9 +1053,9 @@ class PDFGenerator {
         column = "left",
         uppercase = false,
         center = false,
-        underline = false,
+        underline = false,upperline=false,
         sectionColor = this.mainColor,
-        underlineColor = this.mainColor,
+        lineColor = this.mainColor,
         icon = null
     } = {}) {
         if (this.cvInfo.awardArr.length) {
@@ -820,10 +1063,10 @@ class PDFGenerator {
                 text: "Awards",
                 uppercase: uppercase,
                 center: center,
-                underline: underline,
+                underline: underline,upperline:upperline,
                 column: column,
                 color: sectionColor,
-                underlineColor: underlineColor,
+                lineColor: lineColor,
                 icon: icon
             });
             this.ul(this.cvInfo.awardArr.map(h => h.name), {
@@ -843,9 +1086,9 @@ class PDFGenerator {
         column = "left",
         uppercase = false,
         center = false,
-        underline = false,
+        underline = false,upperline=false,
         sectionColor = this.mainColor,
-        underlineColor = this.mainColor,
+        lineColor = this.mainColor,
         icon = null
     } = {}) {
         if (this.cvInfo.hobbyArr.length) {
@@ -853,11 +1096,11 @@ class PDFGenerator {
                 text: "Hobbies",
                 uppercase: uppercase,
                 center: center,
-                underline: underline,
+                underline: underline,upperline:upperline,
                 column: column,
                 color: sectionColor,
-                underlineColor: underlineColor,
-                icon: icon 
+                lineColor: lineColor,
+                icon: icon
             });
             this.ul(this.cvInfo.hobbyArr.map(h => h.name), {
                 column: column
@@ -872,6 +1115,7 @@ class PDFGenerator {
     }
 
     async showLeftColumn() {
+        await this.showAvatar();
         await this.showName();
         await this.showTitle();
         await this.showIntroduction();
