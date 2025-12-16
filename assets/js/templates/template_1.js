@@ -12,96 +12,69 @@ class Template1 extends PDFGenerator {
         await this.loadFont('assets/fonts/OpenSans-Italic.ttf', 'custom', 'italic');
         this.font = 'custom';
     }
-
-    async showName({
-        column = "left"
-    } = {}) {
-        this.name(this.cvInfo.name, {
-            column: column,
-            center: true
-        });
-    }
-
-    async showTitle({
-        column = "left"
-    } = {}) {
-        this.title(this.cvInfo.title, {
-            column: column,
-            center: true
-        });
-    }
-
-    async showIntroduction({
-        column = "left"
-    } = {}) {
-        this.doc.setLineWidth(2);
-        this.doc.setDrawColor(...this.mainColor);
-        this.doc.line(this.margin, this.leftY, this.pageWidth - this.margin, this.leftY);
-        this.introductionBlock({
-            paddingTop : 15,
-            column: column,
-            uppercase:true,
-            center:true,
-        });
-    }
-
-    async showEducation({
-        column = "left"
-    } = {}) {
-        this.educationBlock({
-            column: column,
-            uppercase: true,
-            icon:this.educationImage,
-        });
-    }
-
-    async showWorkExp({
-        column = "left"
-    } = {}) {
-        await this.workExpBlock({
-            column: column,
-            uppercase: true,
-            icon:this.workExpImage,
-        });
-    }
-
-    async showSkills({
-        column = "left"
-    } = {}) {
-        await this.skillsBlock({
-            column: column,
-            uppercase: true,
-            icon:this.skillImage,
-        });
-    }
-
-    async showAward({
-        column = "left"
-    } = {}) {
-        await this.awardsBlock({
-            column: column,
-            uppercase: true,
-            icon:this.awardImage,
-        });
-    }
-
-    async showReference({
-        column = "left"
-    } = {}) {
-        await this.referencesBlock({
-            column: column,
-            uppercase: true,
-            icon:this.referenceImage,
-        });
-    }
-
-    async showHobby({
-        column = "left"
-    } = {}) {
-        await this.hobbyBlock({
-            column: column,
-            uppercase: true,
-            icon:this.hobbyImage,
-        });
+    formatTime(monthValue) {
+        if (!monthValue) return '';
+        const y = monthValue.split('-')[0];
+        return y || '';
+    };
+    
+     content() {
+        this.renderSection(new Section({
+            leftRatio: 1,
+            rightRatio: 0,
+            render: ({
+                left,
+                right,
+                pdf
+            }) => {
+                pdf.avatar(left, this.cvInfo.avatar, {
+                    size: 100,center:true
+                });
+                left.advance(40);
+                pdf.name(left, this.cvInfo.name, {
+                    textColor: this.mainColor,
+                    center:true,
+                });
+                pdf.title(left, this.cvInfo.title, {
+                    textColor: this.textColor,
+                    center:true,
+                });
+                pdf.drawLine(left, {color:this.mainColor
+                });
+                pdf.introductionBlock(left, {
+                    center: true,
+                    uppercase: true,
+                });
+                pdf.contactInfoBlock(left, {
+                    style: "column",
+                    huppercase: true,
+                    icon: this.contactImage,
+                });
+                pdf.workExpBlock(left, {
+                    uppercase: true,
+                    icon: this.workExpImage,        
+                });
+                pdf.educationBlock(left, {
+                    uppercase: true,
+                    icon: this.educationImage,
+                });
+                pdf.skillsBlock(left, {
+                    uppercase: true,
+                    icon: this.skillImage,
+                });
+                pdf.referencesBlock(left, {
+                    uppercase: true,
+                    icon: this.referenceImage,
+                });
+                pdf.awardsBlock(left, {
+                    uppercase: true,
+                    icon: this.awardImage,
+                });
+                pdf.hobbyBlock(left, {
+                    uppercase: true,
+                    icon: this.hobbyImage,
+                });
+            }
+        }));
     }
 }

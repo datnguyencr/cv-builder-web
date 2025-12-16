@@ -11,6 +11,7 @@ const TIMELINE_MARKERS = {
         ctx.doc.rect(x - 3, y - 3, 6, 6, 'F');
     }
 };
+
 class PdfText {
     constructor({
         text = '',
@@ -20,6 +21,7 @@ class PdfText {
         this.style = style;
     }
 }
+
 class TextStyle {
     constructor({
         size = 12,
@@ -31,6 +33,7 @@ class TextStyle {
         this.style = style; // 'normal', 'bold', 'italic'
     }
 }
+
 class LayoutContext {
     constructor({
         x,
@@ -130,6 +133,7 @@ class PDFGenerator {
             return monthValue;
         }
     }
+
     async loadFonts() {
         await this.loadFont('assets/fonts/Adamina-Regular.ttf', 'custom', 'normal');
         await this.loadFont('assets/fonts/OpenSans-Bold.ttf', 'custom', 'bold');
@@ -183,6 +187,7 @@ class PDFGenerator {
             color: this.textColor
         });
     }
+
     blockDescriptionStyle() {
         return new TextStyle({
             style: 'italic',
@@ -205,7 +210,6 @@ class PDFGenerator {
         lineHeight = this.lineHeight,
         padding = 0,
         customWidth = null,
-        lockY = false,
         align = "left"
     } = {}) {
 
@@ -249,15 +253,8 @@ class PDFGenerator {
                 } : undefined
             );
 
-            ctx.advance(lineHeight);
-            usedHeight += lineHeight;
-        }
 
-        if (!lockY) {
-            ctx.advance(5);
-            usedHeight += 5;
-        } else {
-            ctx.y = startY;
+            usedHeight += lineHeight;
         }
 
         return usedHeight;
@@ -284,7 +281,7 @@ class PDFGenerator {
                 marker: showTimeLine ? marker : null
             }
         ));
-
+        ctx.advance(5);
         ctx.advance(this.writeTextWithMarker(
             ctx,
             description.text, {
@@ -292,16 +289,16 @@ class PDFGenerator {
                 marker: showTimeLine ?
                     (x, y, w, pdf) => {
                         pdf.doc.line(
-                            x + w / 2,
+                            x,
                             y - w * 2,
-                            x + w / 2,
+                            x,
                             y + w + 5
                         );
                     } : null
             }
         ));
+        ctx.advance(10);
     }
-
 
     async loadImages() {
         this.educationImage = await svgToPngData(await educationSvgString(this.mainColor));
@@ -331,35 +328,6 @@ class PDFGenerator {
         this.doc.addFont(`${name}.ttf`, name, style);
     }
 
-    colWidth(column = "left") {
-        let width = column === "left" ? this.leftWidth : this.rightWidth;
-        return width - this.margin * 2;
-    }
-
-    getXOffset(column = "left") {
-        return column === "left" ? this.margin : this.leftWidth + this.margin;
-    }
-
-    getYOffset(column = "left") {
-        return column === "left" ? this.leftY : this.rightY;
-    }
-
-    setYOffset(column = "left", value) {
-        if (column === "left") {
-            this.leftY = value
-        } else {
-            this.rightY = value;
-        }
-    }
-
-    addYOffset(column = "left", value) {
-        if (column === "left") {
-            this.leftY += value
-        } else {
-            this.rightY += value;
-        }
-    }
-
     drawBackground() {
         // LEFT
         this.doc.setFillColor(...this.leftBackgroundColor);
@@ -381,44 +349,6 @@ class PDFGenerator {
             "F"
         );
     }
-    row(ctx, leftFn, rightFn, {
-        column = "all",
-        gap = 5,
-        leftRatio = 0.7,
-        padding = 20,
-    } = {}) {
-        const startY = this.getYOffset(column);
-
-        const totalWidth = column === "all" ? (this.pageWidth - this.margin * 2) : this.colWidth(column);
-        const leftWidth = totalWidth * leftRatio;
-        const rightWidth = totalWidth - leftWidth - gap;
-
-        // Render left column
-        const hLeft = leftFn({
-            ctx,
-            lockY: startY,
-            customWidth: leftWidth,
-            padding: 0
-        }) || 0;
-
-        // Render right column
-        const hRight = rightFn({
-            ctx,
-            lockY: startY,
-            customWidth: rightWidth,
-            padding: leftWidth + gap
-        }) || 0;
-
-        const rowHeight = Math.max(hLeft, hRight);
-
-        if (column === "all") {
-            this.addYOffset("left", rowHeight + padding);
-            this.addYOffset("right", rowHeight + padding);
-        } else {
-            this.addYOffset(column, rowHeight + padding);
-        }
-    }
-
 
     contactLabelTextStyle() {
         return new TextStyle({
@@ -469,7 +399,8 @@ class PDFGenerator {
 
         wrappedLines.forEach((line, i) => {
             if (y + lineHeight + this.margin > this.pageHeight - this.margin) {
-                this.addPageFor(ctx);
+                this.doc.addPage();
+                this.drawBackground();
                 y = ctx.y;
             }
 
@@ -481,17 +412,6 @@ class PDFGenerator {
         ctx.advance(usedHeight);
     }
 
-
-    addPageFor(column) {
-        this.doc.addPage();
-        this.drawBackground();
-
-        if (column === "left") {
-            this.leftY = this.margin;
-        } else {
-            this.rightY = this.margin;
-        }
-    }
     ul(ctx, items, {
         indent = 10,
         markerWidth = 0,
@@ -521,7 +441,7 @@ class PDFGenerator {
 
                 if (showTimeLine) {
                     this.doc.setFillColor(...timelineColor);
-                    this.doc.line(markerX, y - gap, markerX, y + lineHeight);
+                    this.doc.line(markerX, y - lineHeight*2, markerX, y + lineHeight);
                 }
 
                 if (i === 0) {
@@ -558,7 +478,7 @@ class PDFGenerator {
         ctx.advance(lines.length * this.lineHeight);
     }
 
-    async header(ctx, {
+    header(ctx, {
         text = "",
         uppercase = false,
         center = false,
@@ -576,7 +496,7 @@ class PDFGenerator {
 
         ctx.advance(paddingTop);
         if (upperline) {
-            this.drawHeaderLine(ctx, {
+            this.drawLine(ctx, {
                 color: lineColor,
                 dash
             });
@@ -636,7 +556,7 @@ class PDFGenerator {
 
         if (underline) {
             ctx.advance(linePadding);
-            this.drawHeaderLine(ctx, {
+            this.drawLine(ctx, {
                 color: lineColor,
                 dash
             });
@@ -644,7 +564,6 @@ class PDFGenerator {
 
         ctx.advance(paddingBottom);
     }
-
 
     normalText(ctx, text, style = new TextStyle()) {
         this.doc.setFontSize(style.size);
@@ -667,7 +586,6 @@ class PDFGenerator {
         ctx.advance(lines.length * style.size);
     }
 
-
     block(ctx, {
         title = new PdfText(),
         description = new PdfText(),
@@ -685,7 +603,6 @@ class PDFGenerator {
             showTimeLine,
             timelineColor
         });
-        ctx.advance(20);
         if (detailList.length) {
             this.ul(ctx, detailList, {
                 lineHeight: 15,
@@ -698,69 +615,49 @@ class PDFGenerator {
         ctx.advance(lineGap);
     }
 
-    avatarBlock(imageBase64, {
-        size = 100,
-        column = "left",
-        center = true,
-        borderColor = this.mainColor,
-        borderSize = 5,
-        padding = 0,
-        marginBottom = 20
-    } = {}) {
-        if (!imageBase64) return 0;
+avatar(ctx, imageBase64, {
+    size = 100,
+    borderColor = this.mainColor,
+    borderSize = 5,
+    padding = 0,
+    center = false,
+} = {}) {
+    if (!imageBase64) return 0;
 
-        const colX = this.getXOffset(column);
-        const colW = this.colWidth(column);
+    const totalSize = size + padding * 2;
 
-        const x = center ?
-            colX + colW / 2 - size / 2 :
-            colX;
+    // decide X
+    const x = center
+        ? ctx.x + (ctx.width - size) / 2
+        : ctx.x;
 
-        let y = this.getYOffset(column);
+    const y = ctx.y;
 
-        this.avatar(imageBase64, {
-            size: size,
-            x: x,
-            y: y,
-            borderColor: borderColor,
-            borderSize: borderSize,
-            padding: padding
-        });
-
-        y += size + marginBottom;
-        this.addYOffset(column, y);
-    }
-
-    avatar(imageBase64, {
-        size = 100,
-        x = 0,
-        y = 0,
-        borderColor = this.mainColor,
-        borderSize = 5,
-        padding = 0,
-    } = {}) {
-        if (!imageBase64) return 0;
-
+    // border
+    if (borderSize > 0) {
         this.doc.setDrawColor(...borderColor);
         this.doc.setLineWidth(borderSize);
-        this.doc.setLineWidth(1);
         this.doc.circle(
             x + size / 2,
             y + size / 2,
             size / 2 + padding
         );
-
-        this.doc.addImage(
-            imageBase64,
-            "PNG",
-            x,
-            y,
-            size,
-            size
-        );
-
-        return size + padding * 2;
     }
+
+    // image
+    this.doc.addImage(
+        imageBase64,
+        "PNG",
+        x,
+        y,
+        size,
+        size
+    );
+
+    ctx.advance(totalSize);
+    return totalSize;
+}
+
 
     name(ctx, text, {
         textSize = 24,
@@ -783,7 +680,6 @@ class PDFGenerator {
             lineHeight: textSize + lineHeight
         });
     }
-
 
     title(ctx, text, {
         textSize = 12,
@@ -833,16 +729,7 @@ class PDFGenerator {
         });
     }
 
-
-    async showAvatar({} = {}) {
-        this.avatarBlock(ctx, this.cvInfo.avatar, {
-            column: column,
-            borderColor: this.mainColor
-        });
-    }
-    async contactInfoRow(ctx, {
-        column = "left"
-    } = {}) {
+    contactInfoRow(ctx) {
         const lineHeight = 15;
         const items = [{
                 label: "Phone:",
@@ -860,10 +747,11 @@ class PDFGenerator {
 
         for (const item of items) {
             ctx.ensureSpace(lineHeight, () => {
-                this.addPageFor(column);
+                this.doc.addPage();
+                this.drawBackground();
             });
 
-            this.writePair({
+            this.writePair(ctx,{
                 label: new PdfText({
                     text: item.label,
                     style: this.contactLabelTextStyle()
@@ -872,14 +760,12 @@ class PDFGenerator {
                     text: item.value,
                     style: this.contactValueTextStyle()
                 }),
-                column,
                 lineHeight
             });
         }
     }
-    async contactInfoColumn(ctx, {
-        column = "left"
-    } = {}) {
+
+     contactInfoColumn(ctx) {
         const textSize = 10;
         const columnCount = 3;
         const columnWidth = (this.pageWidth - this.margin * 2) / columnCount;
@@ -901,76 +787,77 @@ class PDFGenerator {
             }
         ];
 
-        this.addYOffset(column, 20);
+        ctx.advance(20);
 
-        // Draw titles
         for (const col of columns) {
             const x = this.margin + columnWidth * col.index;
             ctx.ensureSpace(this.lineHeight, () => {
-                this.addPageFor(column);
+                this.doc.addPage();
+                this.drawBackground();
             });
 
             this.doc.setFontSize(textSize);
             this.doc.setFont(this.font, "bold");
             this.doc.setTextColor(...this.mainColor);
-            this.doc.text(col.title, x, this.getYOffset(column));
+            this.doc.text(col.title, x,ctx.y);
         }
-
-        this.addYOffset(column, this.lineHeight);
-
-        // Draw values
+        ctx.advance(this.lineHeight);
+        
         for (const col of columns) {
             const x = this.margin + columnWidth * col.index;
-            ctx.ensureSpace(this.lineHeight, () => {
-                this.addPageFor(column);
+             ctx.ensureSpace(this.lineHeight, () => {
+                this.doc.addPage();
+                this.drawBackground();
             });
 
             this.doc.setFontSize(textSize);
             this.doc.setFont(this.font, "normal");
             this.doc.setTextColor(...this.textColor);
-            this.doc.text(col.value, x, this.getYOffset(column));
+            this.doc.text(col.value,  x,ctx.y);
         }
-
-        this.addYOffset(column, this.lineHeight);
+        ctx.advance(this.lineHeight);
     }
-    async contactInfoBlock(ctx, {
-        column = "left",
-        style = "column",
+
+    contactInfoBlock(ctx, {
+        paddingTop = 20,
+        paddingBottom = 20,
         uppercase = false,
+        center = false,
+        underline = false,
+        upperline = false,
+        headerColor = this.mainColor,
+        lineColor = this.mainColor,
         icon = null,
+        dash = false,
+        style="row"
     } = {}) {
         switch (style) {
             case "row":
-                await this.header(ctx, {
+                this.header(ctx, {
                     text: "Contact",
-                    uppercase: uppercase,
-                    icon: icon
+                       uppercase: uppercase,
+                        center: center,
+                        underline: underline,
+                        upperline: upperline,
+                        color: headerColor,
+                        lineColor: lineColor,
+                        icon: icon,
+                        dash: dash,
+                        paddingTop: paddingTop,
+                        paddingBottom: paddingBottom
                 });
-                await this.contactInfoRow(ctx, {
-                    column
-                });
+                this.contactInfoRow(ctx);
                 break;
             case "column":
             default:
-                await this.contactInfoColumn(ctx, {
-                    column
-                });
+                this.contactInfoColumn(ctx);
                 break;
         }
 
-        this.addYOffset(column, 20);
+        ctx.advance(20);
     }
 
-    async showContactInfo(ctx, {
-        column = "left"
-    } = {}) {
-        await this.contactInfoBlock(ctx, {
-            column,
-            style: "column"
-        });
-    }
-    async introductionBlock(ctx, {
-        column = "left",
+    introductionBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -982,13 +869,10 @@ class PDFGenerator {
         icon = null,
         dash = false,
     } = {}) {
-        this.addYOffset(column, paddingTop);
-
-        await this.header(ctx, {
+        this.header(ctx, {
             text: "Introduction",
             uppercase: uppercase,
             center: center,
-            column: column,
             underline: underline,
             upperline: upperline,
             color: headerColor,
@@ -999,21 +883,13 @@ class PDFGenerator {
             paddingBottom: paddingBottom
         });
 
-        await this.introduction(ctx, this.cvInfo.introduction, {
+        this.introduction(ctx, this.cvInfo.introduction, {
             style: 'italic',
-            column: column
         });
     }
 
-    async showIntroduction({
-        column = "left"
-    } = {}) {
-        await this.introductionBlock({
-            column: column,
-        });
-    }
-    async workExpBlock(ctx, {
-        column = "left",
+
+    workExpBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1028,13 +904,12 @@ class PDFGenerator {
     } = {}) {
         if (!this.cvInfo.workExpArr.length) return;
 
-        await this.header(ctx, {
+        this.header(ctx, {
             text: "Work Experience",
             paddingTop: paddingTop,
             paddingBottom: paddingBottom,
             uppercase: uppercase,
             center: center,
-            column: column,
             underline: underline,
             upperline: upperline,
             color: headerColor,
@@ -1048,7 +923,7 @@ class PDFGenerator {
                 `${this.formatTime(item.from)} - Present` :
                 `${this.formatTime(item.from)} - ${this.formatTime(item.to)}`;
 
-            await this.block(ctx, {
+            this.block(ctx, {
                 title: new PdfText({
                     text: item.title,
                     style: this.blockTitleStyle()
@@ -1062,23 +937,13 @@ class PDFGenerator {
                     style: this.blockDatesStyle()
                 }),
                 detailList: item.details,
-                column: column,
                 showTimeLine: showTimeLine,
                 padding: showTimeLine ? 10 : 0
             });
         }
     }
 
-    async showWorkExp({
-        column = "left"
-    } = {}) {
-        this.workExpBlock({
-            column: column,
-            uppercase: false,
-        });
-    }
-
-    drawHeaderLine(ctx, {
+    drawLine(ctx, {
         thickness = 0.5,
         dash = false,
         color = this.textColor,
@@ -1107,8 +972,7 @@ class PDFGenerator {
         ctx.advance(spacing);
     }
 
-    async educationBlock(ctx, {
-        column = "left",
+    educationBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1123,13 +987,12 @@ class PDFGenerator {
     } = {}) {
         if (!this.cvInfo.educationArr.length) return;
 
-        await this.header(ctx, {
+        this.header(ctx, {
             text: "Education",
             paddingTop: paddingTop,
             paddingBottom: paddingBottom,
             uppercase: uppercase,
             center: center,
-            column: column,
             underline: underline,
             upperline: upperline,
             color: headerColor,
@@ -1141,7 +1004,7 @@ class PDFGenerator {
         for (const item of this.cvInfo.educationArr) {
             const dates = `${this.formatTime(item.from)} - ${this.formatTime(item.to)}`;
 
-            await this.block(ctx, {
+            this.block(ctx, {
                 title: new PdfText({
                     text: item.degree,
                     style: this.blockTitleStyle()
@@ -1155,23 +1018,14 @@ class PDFGenerator {
                     style: this.blockDatesStyle()
                 }),
                 detailList: item.details,
-                column: column,
+
                 showTimeLine: showTimeLine,
                 padding: showTimeLine ? 10 : 0
             });
         }
     }
 
-    async showEducation({
-        column = "left"
-    } = {}) {
-        this.educationBlock({
-            column: column,
-            uppercase: true,
-        });
-    }
-    async skillsBlock(ctx, {
-        column = "left",
+    skillsBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1185,7 +1039,7 @@ class PDFGenerator {
     } = {}) {
         if (!this.cvInfo.skillArr.length) return;
 
-        await this.header(ctx, {
+        this.header(ctx, {
             text: "Skills",
             paddingTop: paddingTop,
             paddingBottom: paddingBottom,
@@ -1193,30 +1047,18 @@ class PDFGenerator {
             center: center,
             underline: underline,
             upperline: upperline,
-            column: column,
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
             dash: dash
         });
 
-        this.addYOffset(column, 10);
+        ctx.advance(10);
 
-        this.join(ctx, this.cvInfo.skillArr.map(h => h.name), {
-            column: column
-        });
+       this.join(ctx, this.cvInfo.skillArr.map(h => h.name));
     }
 
-    async showSkills({
-        column = "left"
-    } = {}) {
-        this.skillsBlock({
-            column: column,
-            uppercase: false
-        });
-    }
-    async referencesBlock(ctx, {
-        column = "left",
+    referencesBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1230,7 +1072,7 @@ class PDFGenerator {
     } = {}) {
         if (!this.cvInfo.referenceArr.length) return;
 
-        await this.header(ctx, {
+        this.header(ctx, {
             text: "References",
             paddingTop: paddingTop,
             paddingBottom: paddingBottom,
@@ -1238,28 +1080,16 @@ class PDFGenerator {
             center: center,
             underline: underline,
             upperline: upperline,
-            column: column,
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
             dash: dash
         });
 
-        this.ul(ctx, this.cvInfo.referenceArr.map(h => h.name), {
-            column: column
-        });
+        this.ul(ctx, this.cvInfo.referenceArr.map(h => h.name));
     }
 
-    async showReference({
-        column = "left"
-    } = {}) {
-        this.referencesBlock({
-            column: column,
-            uppercase: false,
-        });
-    }
-    async awardsBlock(ctx, {
-        column = "left",
+    awardsBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1273,7 +1103,7 @@ class PDFGenerator {
     } = {}) {
         if (!this.cvInfo.awardArr.length) return;
 
-        await this.header(ctx, {
+        this.header(ctx, {
             text: "Awards",
             paddingTop: paddingTop,
             paddingBottom: paddingBottom,
@@ -1281,29 +1111,16 @@ class PDFGenerator {
             center: center,
             underline: underline,
             upperline: upperline,
-            column: column,
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
             dash: dash
         });
 
-        this.ul(ctx, this.cvInfo.awardArr.map(h => h.name), {
-            column: column
-        });
+        this.ul(ctx, this.cvInfo.awardArr.map(h => h.name));
     }
 
-
-    async showAward({
-        column = "left"
-    } = {}) {
-        this.awardsBlock({
-            column: column,
-            uppercase: false,
-        });
-    }
-    async hobbyBlock(ctx, {
-        column = "left",
+    hobbyBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1317,7 +1134,7 @@ class PDFGenerator {
     } = {}) {
         if (!this.cvInfo.hobbyArr.length) return;
 
-        await this.header(ctx, {
+        this.header(ctx, {
             text: "Hobbies",
             paddingTop: paddingTop,
             paddingBottom: paddingBottom,
@@ -1325,71 +1142,16 @@ class PDFGenerator {
             center: center,
             underline: underline,
             upperline: upperline,
-            column: column,
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
             dash: dash
         });
 
-        this.ul(ctx, this.cvInfo.hobbyArr.map(h => h.name), {
-            column: column
-        });
+        this.ul(ctx, this.cvInfo.hobbyArr.map(h => h.name));
     }
 
-    async showHobby({
-        column = "left"
-    } = {}) {
-        await this.hobbyBlock({
-            column: column,
-            uppercase: false
-        });
-    }
-
-    async showLeftColumn({
-        column = "left"
-    } = {}) {
-        await this.showAvatar({
-            column: column
-        });
-        await this.showName({
-            column: column
-        });
-        await this.showTitle({
-            column: column
-        });
-        await this.showIntroduction({
-            column: column
-        });
-        await this.showContactInfo({
-            column: column
-        });
-        await this.showWorkExp({
-            column: column
-        });
-        await this.showEducation({
-            column: column
-        });
-        await this.showSkills({
-            column: column
-        });
-        await this.showReference({
-            column: column
-        });
-        await this.showAward({
-            column: column
-        });
-        await this.showHobby({
-            column: column
-        });
-    }
-
-    async showRightColumn({
-        column = "right"
-    } = {}) {
-
-    }
-    async showTopContent() {
+    content() {
 
     }
 
@@ -1434,10 +1196,8 @@ class PDFGenerator {
     async generate() {
         await this.loadFonts();
         await this.loadImages();
-        await this.drawBackground();
-        await this.showTopContent();
-        // await this.showLeftColumn();
-        // await this.showRightColumn();
+        this.drawBackground();
+        this.content();
         return this.doc;
     }
 }
