@@ -1,23 +1,3 @@
-class TextStyle {
-    constructor({
-        size = 12,
-        color = [0, 0, 0],
-        style = 'normal'
-    } = {}) {
-        this.size = size; // font size
-        this.color = color; // font color
-        this.style = style; // 'normal', 'bold', 'italic'
-    }
-}
-class Text {
-    constructor({
-        text = '',
-        style = new TextStyle()
-    } = {}) {
-        this.text = text; // actual text (optional)
-        this.style = style;
-    }
-}
 const TIMELINE_MARKERS = {
     circle: (x, y, w, ctx) => {
         ctx.doc.circle(x, y - w / 2, w / 2, 'F');
@@ -31,6 +11,75 @@ const TIMELINE_MARKERS = {
         ctx.doc.rect(x - 3, y - 3, 6, 6, 'F');
     }
 };
+class PdfText {
+    constructor({
+        text = '',
+        style = new TextStyle()
+    } = {}) {
+        this.text = text;
+        this.style = style;
+    }
+}
+class TextStyle {
+    constructor({
+        size = 12,
+        color = [0, 0, 0],
+        style = 'normal'
+    } = {}) {
+        this.size = size;
+        this.color = color;
+        this.style = style; // 'normal', 'bold', 'italic'
+    }
+}
+class LayoutContext {
+    constructor({
+        x,
+        y,
+        width,
+        pageHeight,
+        margin,
+        doc
+    }) {
+        this.x = x;
+        this.y = y;
+        this.startY = y;
+        this.width = width;
+        this.pageHeight = pageHeight;
+        this.margin = margin;
+        this.doc = doc;
+    }
+
+    advance(h) {
+        this.y += h;
+    }
+
+    heightUsed() {
+        return this.y - this.startY;
+    }
+
+    ensureSpace(h, onNewPage) {
+        if (this.y + h > this.pageHeight - this.margin) {
+            onNewPage?.();
+            this.y = this.margin;
+        }
+    }
+}
+
+class Section {
+    constructor({
+        leftRatio = 1,
+        rightRatio = 0,
+        gap = 10,
+        paddingBottom = 20,
+        render
+    }) {
+        this.leftRatio = leftRatio;
+        this.rightRatio = rightRatio;
+        this.gap = gap;
+        this.paddingBottom = paddingBottom;
+        this.render = render;
+    }
+}
 
 class PDFGenerator {
     constructor(cvInfo, options = {}) {
@@ -40,9 +89,6 @@ class PDFGenerator {
             format: 'a4'
         });
 
-        this.timelineDotRadius = 4;
-        this.timelineLineWidth = 1;
-
         this.svgElement = document.getElementById("iconSVG");
         this.leftBackgroundColor = options.leftBackgroundColor || [255, 255, 255];
         this.rightBackgroundColor = options.rightBackgroundColor || [255, 255, 255];
@@ -51,7 +97,7 @@ class PDFGenerator {
         this.rightRatio = options.rightRatio || 0
 
         // Layout
-        this.margin = options.margin || 40;
+        this.margin = options.margin || 30;
         this.lineHeight = options.lineHeight || 15;
 
         this.pageWidth = this.doc.internal.pageSize.getWidth();
@@ -70,13 +116,7 @@ class PDFGenerator {
         this.textSize = options.textSize || 12;
     }
 
-    async loadFonts() {
-        await this.loadFont('assets/fonts/Adamina-Regular.ttf', 'custom', 'normal');
-        await this.loadFont('assets/fonts/OpenSans-Bold.ttf', 'custom', 'bold');
-        await this.loadFont('assets/fonts/OpenSans-Italic.ttf', 'custom', 'italic');
-        this.font = 'custom';
-    }
-    formatTime = (monthValue) => {
+    formatTime(monthValue) {
         if (!monthValue) return '';
         // monthValue like "2022-09" -> display "Sep 2022"
         try {
@@ -89,7 +129,54 @@ class PDFGenerator {
         } catch {
             return monthValue;
         }
-    };
+    }
+    async loadFonts() {
+        await this.loadFont('assets/fonts/Adamina-Regular.ttf', 'custom', 'normal');
+        await this.loadFont('assets/fonts/OpenSans-Bold.ttf', 'custom', 'bold');
+        await this.loadFont('assets/fonts/OpenSans-Italic.ttf', 'custom', 'italic');
+        this.font = 'custom';
+    }
+
+    renderSection(section) {
+        const totalWidth = this.pageWidth - this.margin * 2;
+        const leftW = totalWidth * section.leftRatio;
+        const rightW = totalWidth * section.rightRatio;
+
+        const startY = Math.max(this.leftY, this.rightY);
+
+        const leftCtx = new LayoutContext({
+            x: this.margin,
+            y: startY,
+            width: leftW,
+            pageHeight: this.pageHeight,
+            margin: this.margin,
+            doc: this.doc
+        });
+
+        const rightCtx = new LayoutContext({
+            x: this.margin + leftW + section.gap,
+            y: startY,
+            width: rightW,
+            pageHeight: this.pageHeight,
+            margin: this.margin,
+            doc: this.doc
+        });
+
+        section.render({
+            left: leftCtx,
+            right: rightCtx,
+            pdf: this
+        });
+
+        const used = Math.max(
+            leftCtx.heightUsed(),
+            rightCtx.heightUsed()
+        );
+
+        this.leftY = startY + used + section.paddingBottom;
+        this.rightY = this.leftY;
+    }
+
     blockTitleStyle() {
         return new TextStyle({
             style: 'bold',
@@ -110,190 +197,121 @@ class PDFGenerator {
         });
     }
 
-writeTextWithMarker(text, {
-    style = new TextStyle(),
-    markerWidth = 10,
-    gap = 10,
-    marker = null,
-    lineHeight = this.lineHeight,
-    column = "left",
-    padding = 0,
-    customWidth = null,
-    lockY = null,
-    align = "left"
-} = {}) {
+    writeTextWithMarker(ctx, text, {
+        style = new TextStyle(),
+        markerWidth = 10,
+        gap = 10,
+        marker = null,
+        lineHeight = this.lineHeight,
+        padding = 0,
+        customWidth = null,
+        lockY = false,
+        align = "left"
+    } = {}) {
 
-    this.doc.setFontSize(style.size);
-    this.doc.setFont(this.font, style.style);
-    this.doc.setTextColor(...style.color);
+        this.doc.setFont(this.font, style.style);
+        this.doc.setFontSize(style.size);
+        this.doc.setTextColor(...style.color);
 
-    const baseX =
-        (column === "left"
-            ? this.margin
-            : this.leftWidth + this.margin) + padding;
+        const baseX = ctx.x + padding;
+        const availableWidth = customWidth ?? ctx.width;
 
-    const colW = customWidth ?? (this.colWidth(column) - this.margin * 2);
+        const textX =
+            baseX + (marker ? markerWidth + gap : 0);
 
-    const markerX = baseX;
-    const textX = markerX + markerWidth + gap;
-    const textW = colW - markerWidth - gap;
+        const textW =
+            availableWidth - (marker ? markerWidth + gap : 0);
 
-    const lines = this.doc.splitTextToSize(text, textW);
+        const lines = this.doc.splitTextToSize(text, textW);
 
-    let y = lockY ?? this.getYOffset(column);
-    let height = 0;
+        const startY = ctx.y;
+        let usedHeight = 0;
 
-    for (let i = 0; i < lines.length; i++) {
+        for (let i = 0; i < lines.length; i++) {
 
-        if (y + lineHeight > this.pageHeight - this.margin) {
-            this.addPageFor(column);
-            y = this.getYOffset(column);
+            ctx.ensureSpace(lineHeight, () => {
+                this.doc.addPage();
+                this.drawBackground();
+            });
+
+            const y = ctx.y;
+
+            if (i === 0 && marker) {
+                marker(baseX, y, markerWidth, this);
+            }
+
+            this.doc.text(
+                lines[i],
+                align === "right" ? textX + textW : textX,
+                y,
+                align === "right" ? {
+                    align: "right"
+                } : undefined
+            );
+
+            ctx.advance(lineHeight);
+            usedHeight += lineHeight;
         }
 
-        if (i === 0 && marker) {
-            marker(markerX, y, markerWidth, this);
+        if (!lockY) {
+            ctx.advance(5);
+            usedHeight += 5;
+        } else {
+            ctx.y = startY;
         }
 
-        this.doc.text(
-            lines[i],
-            align === "right" ? textX + textW : textX,
-            y,
-            align === "right" ? { align: "right" } : undefined
-        );
-
-        y += lineHeight;
-        height += lineHeight;
+        return usedHeight;
     }
 
-    if (!lockY) {
-        this.setYOffset(column, y + 5);
-        height += 5;
-    }
 
-    return height;
-}
-
-    blockHeader({
+    blockHeader(ctx, {
         title = new Text(),
         description = new Text(),
         dates = new Text(),
-        column = "left",
         timelineColor = this.mainColor,
         showTimeLine = false
     } = {}) {
 
         const marker = TIMELINE_MARKERS["circle"];
+
         this.doc.setFillColor(...timelineColor);
-        this.writeTextWithMarker(`${title.text} | ${dates.text}`, {
-            style: title.style,
-            column: column,
-            marker: showTimeLine? marker : null
-        });
+        this.doc.setDrawColor(...timelineColor);
 
-        
-        this.writeTextWithMarker(description.text, {
-            style: description.style,
-            column: column,
-            marker: showTimeLine ? (x, y, w, ctx) => {
-                ctx.doc.line(x, y - w * 2, x, y + w +5);
-            } : null
-        });
+        ctx.advance(this.writeTextWithMarker(
+            ctx,
+            `${title.text} | ${dates.text}`, {
+                style: title.style,
+                marker: showTimeLine ? marker : null
+            }
+        ));
 
+        ctx.advance(this.writeTextWithMarker(
+            ctx,
+            description.text, {
+                style: description.style,
+                marker: showTimeLine ?
+                    (x, y, w, pdf) => {
+                        pdf.doc.line(
+                            x + w / 2,
+                            y - w * 2,
+                            x + w / 2,
+                            y + w + 5
+                        );
+                    } : null
+            }
+        ));
     }
 
-    async svgToPngData(svgString) {
-        return new Promise((resolve) => {
-            const blob = new Blob([svgString], {
-                type: 'image/svg+xml'
-            });
-            const url = URL.createObjectURL(blob);
-            const img = new Image();
-
-            img.onload = () => {
-                const size = 24;
-                const canvas = document.createElement('canvas');
-                canvas.width = size;
-                canvas.height = size;
-
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-
-                const pngData = canvas.toDataURL('image/png');
-                URL.revokeObjectURL(url);
-                resolve(pngData);
-            };
-
-            img.src = url;
-        });
-    }
-
-    rgbToCss(rgbArray) {
-        const [r, g, b] = rgbArray;
-        return `rgb(${r},${g},${b})`;
-    }
-
-    async contactSvgString(color = [0, 0, 0]) {
-        const cssColor = this.rgbToCss(color);
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
-            <path fill-rule="evenodd" d="M1 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V6Zm4 1.5a2 2 0 1 1 4 0 2 2 0 0 1-4 0Zm2 3a4 4 0 0 0-3.665 2.395.75.75 0 0 0 .416 1A8.98 8.98 0 0 0 7 14.5a8.98 8.98 0 0 0 3.249-.604.75.75 0 0 0 .416-1.001A4.001 4.001 0 0 0 7 10.5Zm5-3.75a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Zm0 6.5a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Zm.75-4a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5h-2.5Z" clip-rule="evenodd" />
-            </svg>`;
-    }
-
-    async educationSvgString(color = [0, 0, 0]) {
-        const cssColor = this.rgbToCss(color);
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
-            <path fill-rule="evenodd" d="M9.664 1.319a.75.75 0 0 1 .672 0 41.059 41.059 0 0 1 8.198 5.424.75.75 0 0 1-.254 1.285 31.372 31.372 0 0 0-7.86 3.83.75.75 0 0 1-.84 0 31.508 31.508 0 0 0-2.08-1.287V9.394c0-.244.116-.463.302-.592a35.504 35.504 0 0 1 3.305-2.033.75.75 0 0 0-.714-1.319 37 37 0 0 0-3.446 2.12A2.216 2.216 0 0 0 6 9.393v.38a31.293 31.293 0 0 0-4.28-1.746.75.75 0 0 1-.254-1.285 41.059 41.059 0 0 1 8.198-5.424ZM6 11.459a29.848 29.848 0 0 0-2.455-1.158 41.029 41.029 0 0 0-.39 3.114.75.75 0 0 0 .419.74c.528.256 1.046.53 1.554.82-.21.324-.455.63-.739.914a.75.75 0 1 0 1.06 1.06c.37-.369.69-.77.96-1.193a26.61 26.61 0 0 1 3.095 2.348.75.75 0 0 0 .992 0 26.547 26.547 0 0 1 5.93-3.95.75.75 0 0 0 .42-.739 41.053 41.053 0 0 0-.39-3.114 29.925 29.925 0 0 0-5.199 2.801 2.25 2.25 0 0 1-2.514 0c-.41-.275-.826-.541-1.25-.797a6.985 6.985 0 0 1-1.084 3.45 26.503 26.503 0 0 0-1.281-.78A5.487 5.487 0 0 0 6 12v-.54Z" clip-rule="evenodd"/>
-        </svg>`;
-    }
-    async workExpSvgString(color = [0, 0, 0]) {
-        const cssColor = this.rgbToCss(color);
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
-        <path fill-rule="evenodd" d="M6 3.75A2.75 2.75 0 0 1 8.75 1h2.5A2.75 2.75 0 0 1 14 3.75v.443c.572.055 1.14.122 1.706.2C17.053 4.582 18 5.75 18 7.07v3.469c0 1.126-.694 2.191-1.83 2.54-1.952.599-4.024.921-6.17.921s-4.219-.322-6.17-.921C2.694 12.73 2 11.665 2 10.539V7.07c0-1.321.947-2.489 2.294-2.676A41.047 41.047 0 0 1 6 4.193V3.75Zm6.5 0v.325a41.622 41.622 0 0 0-5 0V3.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25ZM10 10a1 1 0 0 0-1 1v.01a1 1 0 0 0 1 1h.01a1 1 0 0 0 1-1V11a1 1 0 0 0-1-1H10Z" clip-rule="evenodd" />
-        <path d="M3 15.055v-.684c.126.053.255.1.39.142 2.092.642 4.313.987 6.61.987 2.297 0 4.518-.345 6.61-.987.135-.041.264-.089.39-.142v.684c0 1.347-.985 2.53-2.363 2.686a41.454 41.454 0 0 1-9.274 0C3.985 17.585 3 16.402 3 15.055Z" />
-        </svg>`;
-    }
-    async skillSvgString(color = [0, 0, 0]) {
-        const cssColor = this.rgbToCss(color);
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
-            <path d="M15.5 2A1.5 1.5 0 0 0 14 3.5v13a1.5 1.5 0 0 0 1.5 1.5h1a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 16.5 2h-1ZM9.5 6A1.5 1.5 0 0 0 8 7.5v9A1.5 1.5 0 0 0 9.5 18h1a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 10.5 6h-1ZM3.5 10A1.5 1.5 0 0 0 2 11.5v5A1.5 1.5 0 0 0 3.5 18h1A1.5 1.5 0 0 0 6 16.5v-5A1.5 1.5 0 0 0 4.5 10h-1Z" />
-            </svg>`;
-    }
-    async referenceSvgString(color = [0, 0, 0]) {
-        const cssColor = this.rgbToCss(color);
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
-        <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
-        <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
-        </svg>`;
-    }
-
-    async awardSvgString(color = [0, 0, 0]) {
-        const cssColor = this.rgbToCss(color);
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
-        <path fill-rule="evenodd" d="M10 1c-1.828 0-3.623.149-5.371.435a.75.75 0 0 0-.629.74v.387c-.827.157-1.642.345-2.445.564a.75.75 0 0 0-.552.698 5 5 0 0 0 4.503 5.152 6 6 0 0 0 2.946 1.822A6.451 6.451 0 0 1 7.768 13H7.5A1.5 1.5 0 0 0 6 14.5V17h-.75C4.56 17 4 17.56 4 18.25c0 .414.336.75.75.75h10.5a.75.75 0 0 0 .75-.75c0-.69-.56-1.25-1.25-1.25H14v-2.5a1.5 1.5 0 0 0-1.5-1.5h-.268a6.453 6.453 0 0 1-.684-2.202 6 6 0 0 0 2.946-1.822 5 5 0 0 0 4.503-5.152.75.75 0 0 0-.552-.698A31.804 31.804 0 0 0 16 2.562v-.387a.75.75 0 0 0-.629-.74A33.227 33.227 0 0 0 10 1ZM2.525 4.422C3.012 4.3 3.504 4.19 4 4.09V5c0 .74.134 1.448.38 2.103a3.503 3.503 0 0 1-1.855-2.68Zm14.95 0a3.503 3.503 0 0 1-1.854 2.68C15.866 6.449 16 5.74 16 5v-.91c.496.099.988.21 1.475.332Z" clip-rule="evenodd" />
-        </svg>`;
-    }
-    async introductionSvgString(color = [0, 0, 0]) {
-        const cssColor = this.rgbToCss(color);
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
-        <path fill-rule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Zm0 5.25a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
-        </svg>`;
-    }
-    async hobbySvgString(color = [0, 0, 0]) {
-        const cssColor = this.rgbToCss(color);
-        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
-        <path d="M15.98 1.804a1 1 0 0 0-1.96 0l-.24 1.192a1 1 0 0 1-.784.785l-1.192.238a1 1 0 0 0 0 1.962l1.192.238a1 1 0 0 1 .785.785l.238 1.192a1 1 0 0 0 1.962 0l.238-1.192a1 1 0 0 1 .785-.785l1.192-.238a1 1 0 0 0 0-1.962l-1.192-.238a1 1 0 0 1-.785-.785l-.238-1.192ZM6.949 5.684a1 1 0 0 0-1.898 0l-.683 2.051a1 1 0 0 1-.633.633l-2.051.683a1 1 0 0 0 0 1.898l2.051.684a1 1 0 0 1 .633.632l.683 2.051a1 1 0 0 0 1.898 0l.683-2.051a1 1 0 0 1 .633-.633l2.051-.683a1 1 0 0 0 0-1.898l-2.051-.683a1 1 0 0 1-.633-.633L6.95 5.684ZM13.949 13.684a1 1 0 0 0-1.898 0l-.184.551a1 1 0 0 1-.632.633l-.551.183a1 1 0 0 0 0 1.898l.551.183a1 1 0 0 1 .633.633l.183.551a1 1 0 0 0 1.898 0l.184-.551a1 1 0 0 1 .632-.633l.551-.183a1 1 0 0 0 0-1.898l-.551-.184a1 1 0 0 1-.633-.632l-.183-.551Z" />
-        </svg>`;
-    }
 
     async loadImages() {
-        this.educationImage = await this.svgToPngData(await this.educationSvgString(this.textColor));
-        this.workExpImage = await this.svgToPngData(await this.workExpSvgString(this.textColor));
-        this.contactImage = await this.svgToPngData(await this.contactSvgString(this.textColor));
-        this.skillImage = await this.svgToPngData(await this.skillSvgString(this.textColor));
-        this.referenceImage = await this.svgToPngData(await this.referenceSvgString(this.textColor));
-        this.awardImage = await this.svgToPngData(await this.awardSvgString(this.textColor));
-        this.introductionImage = await this.svgToPngData(await this.introductionSvgString(this.textColor));
-        this.hobbyImage = await this.svgToPngData(await this.hobbySvgString(this.textColor));
+        this.educationImage = await svgToPngData(await educationSvgString(this.mainColor));
+        this.workExpImage = await svgToPngData(await workExpSvgString(this.mainColor));
+        this.contactImage = await svgToPngData(await contactSvgString(this.mainColor));
+        this.skillImage = await svgToPngData(await skillSvgString(this.mainColor));
+        this.referenceImage = await svgToPngData(await referenceSvgString(this.mainColor));
+        this.awardImage = await svgToPngData(await awardSvgString(this.mainColor));
+        this.introductionImage = await svgToPngData(await introductionSvgString(this.mainColor));
+        this.hobbyImage = await svgToPngData(await hobbySvgString(this.mainColor));
     }
 
     async loadFont(url, name, style) {
@@ -313,27 +331,19 @@ writeTextWithMarker(text, {
         this.doc.addFont(`${name}.ttf`, name, style);
     }
 
-    /**
-     * Get the width of a column.
-     * @param {"left"|"right"} [column="left"] - Which column to get width for.
-     * @returns {number} The width of the specified column.
-     */
     colWidth(column = "left") {
-        return column === "left" ? this.leftWidth : this.rightWidth;
+        let width = column === "left" ? this.leftWidth : this.rightWidth;
+        return width - this.margin * 2;
     }
-    /**
-     * Get the current Y offset of a column.
-     * @param {"left"|"right"} [column="left"] - Column to get Y offset for.
-     * @returns {number} The current Y position of the column.
-     */
+
+    getXOffset(column = "left") {
+        return column === "left" ? this.margin : this.leftWidth + this.margin;
+    }
+
     getYOffset(column = "left") {
         return column === "left" ? this.leftY : this.rightY;
     }
-    /**
-     * Set the Y offset of a column.
-     * @param {"left"|"right"} [column="left"] - Column to set Y offset for.
-     * @param {number} value - The Y position to set.
-     */
+
     setYOffset(column = "left", value) {
         if (column === "left") {
             this.leftY = value
@@ -341,11 +351,7 @@ writeTextWithMarker(text, {
             this.rightY = value;
         }
     }
-    /**
-     * Add a value to the current Y offset of a column.
-     * @param {"left"|"right"} [column="left"] - Column to add Y offset to.
-     * @param {number} value - The value to add.
-     */
+
     addYOffset(column = "left", value) {
         if (column === "left") {
             this.leftY += value
@@ -353,6 +359,7 @@ writeTextWithMarker(text, {
             this.rightY += value;
         }
     }
+
     drawBackground() {
         // LEFT
         this.doc.setFillColor(...this.leftBackgroundColor);
@@ -374,27 +381,29 @@ writeTextWithMarker(text, {
             "F"
         );
     }
-
-    row(leftFn, rightFn, {
-        column = "left",
+    row(ctx, leftFn, rightFn, {
+        column = "all",
         gap = 5,
-        leftRatio = .7
+        leftRatio = 0.7,
+        padding = 20,
     } = {}) {
-
         const startY = this.getYOffset(column);
 
-        const totalWidth = this.colWidth(column) - this.margin * 2;
+        const totalWidth = column === "all" ? (this.pageWidth - this.margin * 2) : this.colWidth(column);
         const leftWidth = totalWidth * leftRatio;
         const rightWidth = totalWidth - leftWidth - gap;
-        // render left
+
+        // Render left column
         const hLeft = leftFn({
+            ctx,
             lockY: startY,
             customWidth: leftWidth,
             padding: 0
         }) || 0;
 
-        // render right
+        // Render right column
         const hRight = rightFn({
+            ctx,
             lockY: startY,
             customWidth: rightWidth,
             padding: leftWidth + gap
@@ -402,46 +411,76 @@ writeTextWithMarker(text, {
 
         const rowHeight = Math.max(hLeft, hRight);
 
-        this.setYOffset(column, startY + rowHeight);
+        if (column === "all") {
+            this.addYOffset("left", rowHeight + padding);
+            this.addYOffset("right", rowHeight + padding);
+        } else {
+            this.addYOffset(column, rowHeight + padding);
+        }
     }
 
-    writePair({
-        label = "",
-        value = "",
-        column = "left",
+
+    contactLabelTextStyle() {
+        return new TextStyle({
+            color: this.mainColor,
+            style: "bold"
+        });
+    }
+    contactValueTextStyle() {
+        return new TextStyle({
+            color: this.textColor,
+            style: "normal"
+        });
+    }
+
+    writePair(ctx, {
+        label = new PdfText({
+            text: "",
+            style: this.contactLabelTextStyle()
+        }),
+        value = new PdfText({
+            text: "",
+            style: this.contactValueTextStyle()
+        }),
         padding = 4,
-        textSize = this.textSize,
         lineHeight = this.lineHeight
-    }) {
-        const y = this.getYOffset(column);
-        this.doc.setFontSize(textSize);
-        const baseX = column === "left" ?
-            this.margin :
-            this.leftWidth + this.margin;
+    } = {}) {
+        const x = ctx.x;
+        let y = ctx.y;
+        const colW = ctx.width;
 
-        const columnWidth = column === "left" ?
-            this.leftWidth :
-            this.rightWidth;
 
-        this.doc.setFont(this.font, "bold");
-        this.doc.setTextColor(...this.mainColor);
+        this.doc.setFont(this.font, label.style.style);
+        this.doc.setFontSize(label.style.size);
+        this.doc.setTextColor(...label.style.color);
 
-        const labelWidth = this.doc.getTextWidth(label);
-        const valueX = baseX + labelWidth + padding;
+        const labelWidth = this.doc.getTextWidth(label.text);
+        this.doc.text(label.text, x, y);
 
-        this.doc.text(label, baseX, y);
 
-        const maxValueWidth = columnWidth - (labelWidth + padding);
+        const valueX = x + labelWidth + padding;
+        const maxValueWidth = colW - labelWidth - padding;
 
-        this.doc.setFont(this.font, "normal");
-        this.doc.setTextColor(...this.textColor);
+        this.doc.setFont(this.font, value.style.style);
+        this.doc.setFontSize(value.style.size);
+        this.doc.setTextColor(...value.style.color);
 
-        const wrapped = this.doc.splitTextToSize(value, maxValueWidth);
+        const wrappedLines = this.doc.splitTextToSize(value.text || "", maxValueWidth);
 
-        this.doc.text(wrapped, valueX, y);
+        wrappedLines.forEach((line, i) => {
+            if (y + lineHeight + this.margin > this.pageHeight - this.margin) {
+                this.addPageFor(ctx);
+                y = ctx.y;
+            }
 
-        this.addYOffset(column, +lineHeight);
+            this.doc.text(line, valueX, y);
+            y += lineHeight;
+        });
+
+        const usedHeight = Math.max(lineHeight, wrappedLines.length * lineHeight);
+        ctx.advance(usedHeight);
     }
+
 
     addPageFor(column) {
         this.doc.addPage();
@@ -453,80 +492,33 @@ writeTextWithMarker(text, {
             this.rightY = this.margin;
         }
     }
-
-    writeText(text, {
-        indent = 0,
-        center = false,
-        lineHeight = this.lineHeight,
-        column = "left",
-        padding = 0,
-    } = {}) {
-        const colX = (column === "left" ? this.margin : this.leftWidth + this.margin) + padding;
-        const colW = this.colWidth(column) - this.margin * 2;
-        const lines = this.doc.splitTextToSize(text, colW - indent);
-
-        let y = this.getYOffset(column);
-        let totalHeight = 0;
-
-        for (let i = 0; i < lines.length; i++) {
-            if (y + lineHeight > this.pageHeight - this.margin) {
-                this.addPageFor(column);
-                y = this.getYOffset(column);
-            }
-
-            this.doc.text(
-                lines[i],
-                center ? colX + colW / 2 : colX + indent,
-                y,
-                center ? {
-                    align: 'center'
-                } : undefined
-            );
-           
-            y += lineHeight;
-            totalHeight += lineHeight;
-
-        }
-        this.setYOffset(column, y);
-
-        return totalHeight;
-    }
-
-    ul(items, {
+    ul(ctx, items, {
         indent = 10,
-        markerWidth = 15,
+        markerWidth = 0,
         gap = 5,
-        column = "left",
         lineHeight = this.lineHeight,
-        padding = 0,
         showTimeLine = false,
-        timelineColor = this.mainColor,
+        timelineColor = this.mainColor
     } = {}) {
         this.doc.setFontSize(this.textSize);
         this.doc.setFont(this.font, "normal");
         this.doc.setTextColor(...this.textColor);
-        this.addYOffset(column,10);
-        const colX =
-            (column === "left" ?
-                this.margin :
-                this.leftWidth + this.margin);
 
-        const colW = this.colWidth(column) - this.margin * 2;
-
-        const markerX = colX;
-        const bulletX = markerX + markerWidth + gap;
+        const markerX = ctx.x;
+        const bulletX = markerX + (showTimeLine ? markerWidth : 0) + gap;
         const textX = bulletX + indent;
-        const textW = colW - markerWidth - gap - indent;
+        const textW = ctx.width - (showTimeLine ? markerWidth : 0) - gap - indent;
 
         items.forEach(item => {
             const lines = this.doc.splitTextToSize(item, textW);
-            let y = this.getYOffset(column);
+            let y = ctx.y;
 
-            for (let i = 0; i < lines.length; i++) {
-                if (y + lineHeight > this.pageHeight - this.margin) {
-                    this.addPageFor(column);
-                    y = this.getYOffset(column);
-                }
+            lines.forEach((line, i) => {
+                ctx.ensureSpace(lineHeight, () => {
+                    this.doc.addPage();
+                    this.drawBackground();
+                });
+
                 if (showTimeLine) {
                     this.doc.setFillColor(...timelineColor);
                     this.doc.line(markerX, y - gap, markerX, y + lineHeight);
@@ -536,611 +528,916 @@ writeTextWithMarker(text, {
                     this.doc.text("•", bulletX, y);
                 }
 
-                this.doc.text(lines[i], textX, y);
+                this.doc.text(line, textX, y);
                 y += lineHeight;
-            }
+            });
 
-            this.setYOffset(column, y + 5);
+            ctx.advance(Math.max(lineHeight, lines.length * lineHeight) + 5);
         });
     }
 
-
-    join(items, {
-        x = this.margin,
-        column = "left"
-    } = {}) {
+    join(ctx, items) {
         this.doc.setFontSize(this.textSize);
         this.doc.setFont(this.font, 'normal');
         this.doc.setTextColor(...this.textColor);
-        this.writeText(`- ${items.join(", ")}.`, {
-            indent: x - this.margin,
-            lineHeight: this.lineHeight,
-            column: column
+
+        const text = `- ${items.join(", ")}.`;
+        const lines = this.doc.splitTextToSize(text, ctx.width);
+
+        let y = ctx.y;
+        lines.forEach(line => {
+            ctx.ensureSpace(this.lineHeight, () => {
+                this.doc.addPage();
+                this.drawBackground();
+            });
+
+            this.doc.text(line, ctx.x, y);
+            y += this.lineHeight;
         });
+
+        ctx.advance(lines.length * this.lineHeight);
     }
 
-    async section({
-        text = '',
+    async header(ctx, {
+        text = "",
         uppercase = false,
         center = false,
-        column = "left",
+        linePadding = 25,
         underline = false,
         upperline = false,
         color = this.mainColor,
-        lineColor: lineColor = this.mainColor,
+        lineColor = this.mainColor,
         icon = null,
-        paddingTop = 15,
-        paddingBottom = 15
-    }) {
-        this.addYOffset(column, paddingTop);
-        if (upperline) {
-            this.drawSectionLine({
-                column,
-                color: lineColor,
-            });
-            this.addYOffset(column,20);
-        }
-        let y = this.getYOffset(column);
+        paddingTop = 20,
+        paddingBottom = 20,
+        dash = false,
+        textSize = 14,
+    } = {}) {
 
-        this.doc.setFontSize(14);
-        this.doc.setFont(this.font, 'bold');
+        ctx.advance(paddingTop);
+        if (upperline) {
+            this.drawHeaderLine(ctx, {
+                color: lineColor,
+                dash
+            });
+            ctx.advance(linePadding);
+        }
+
+        ctx.ensureSpace(textSize, () => {
+            this.doc.addPage();
+            this.drawBackground();
+        });
+        this.doc.setFont(this.font, "bold");
+        this.doc.setFontSize(textSize);
         this.doc.setTextColor(...color);
 
         const title = uppercase ? text.toUpperCase() : text;
-
         const iconW = 14;
         const iconH = 14;
         const gap = icon ? 4 : 0;
 
-        const colX = (column === "left") ?
-            this.margin :
-            this.leftWidth + this.margin;
-
-        const colWidth = (column === "left") ?
-            this.leftWidth :
-            this.rightWidth;
+        const y = ctx.y;
+        const x = ctx.x;
+        const width = ctx.width;
 
         if (center) {
             const textWidth = this.doc.getTextWidth(title);
             const groupWidth = (icon ? iconW + gap : 0) + textWidth;
-            const startX = colX + (colWidth - groupWidth) / 2;
+            const startX = x + (width - groupWidth) / 2;
 
             if (icon) {
-                this.doc.addImage(icon, "PNG", startX, y - iconH + 12, iconW, iconH);
-                const textX = startX + iconW + gap;
-                this.doc.text(title, textX, y);
+                this.doc.addImage(
+                    icon,
+                    "PNG",
+                    startX,
+                    y - iconH * 0.8,
+                    iconW,
+                    iconH
+                );
+                this.doc.text(title, startX + iconW + gap, y);
             } else {
-                const centerX = colWidth / 2;
-                this.doc.text(title, centerX, y, {
+                this.doc.text(title, x + width / 2, y, {
                     align: "center"
                 });
             }
         } else {
-            const textX = icon ? colX + iconW + gap : colX;
-
             if (icon) {
-                this.doc.addImage(icon, "PNG", colX, y - iconH * .8, iconW, iconH);
+                this.doc.addImage(
+                    icon,
+                    "PNG",
+                    x,
+                    y - iconH * 0.8,
+                    iconW,
+                    iconH
+                );
             }
-            this.doc.text(title, textX, y);
+            this.doc.text(title, icon ? x + iconW + gap : x, y);
         }
 
         if (underline) {
-            this.drawSectionLine({
-                column,
+            ctx.advance(linePadding);
+            this.drawHeaderLine(ctx, {
                 color: lineColor,
-                offset: 10
+                dash
             });
         }
 
-        this.addYOffset(column, paddingBottom);
+        ctx.advance(paddingBottom);
     }
 
-    normalText(text, {
-        style = TextStyle(),
-        column = "left",
-        padding = 0,
-    } = {}) {
+
+    normalText(ctx, text, style = new TextStyle()) {
         this.doc.setFontSize(style.size);
         this.doc.setFont(this.font, style.style);
         this.doc.setTextColor(...style.color);
-        return this.writeText(text, {
-            column: column,
-            padding: padding,
+
+        const lines = this.doc.splitTextToSize(text, ctx.width);
+        let y = ctx.y;
+
+        lines.forEach(line => {
+            ctx.ensureSpace(style.size, () => {
+                this.doc.addPage();
+                this.drawBackground();
+            });
+
+            this.doc.text(line, ctx.x, y);
+            y += style.size;
         });
+
+        ctx.advance(lines.length * style.size);
     }
 
-    block({
-        title = new Text(),
-        description = new Text(),
-        dates = new Text(),
+
+    block(ctx, {
+        title = new PdfText(),
+        description = new PdfText(),
+        dates = new PdfText(),
         detailList = [],
-        column = "left",
         indent = 10,
-        padding = 0,
         showTimeLine = false,
         timelineColor = this.mainColor,
         lineGap = 10
     } = {}) {
-        this.addYOffset(column, 10);
-        this.blockHeader({
-            title: title,
-            description: description,
-            dates: dates,
-            column: column,
-            padding: padding,
-            showTimeLine: showTimeLine,
-            timelineColor: timelineColor
+        this.blockHeader(ctx, {
+            title,
+            description,
+            dates,
+            showTimeLine,
+            timelineColor
         });
+        ctx.advance(20);
         if (detailList.length) {
-            this.ul(detailList, {
-                column: column,
+            this.ul(ctx, detailList, {
                 lineHeight: 15,
-                indent: indent,
-                padding: padding,
-                showTimeLine: showTimeLine,
-                timelineColor: timelineColor
+                indent,
+                showTimeLine,
+                timelineColor
             });
         }
+
+        ctx.advance(lineGap);
     }
-avatar(imageBase64, {
-    size = 100,
-    column = "left",
-    center = true,
-    borderColor = this.mainColor,
-    borderSize=5,
-    padding=0,
-    marginBottom = 20
-} = {}) {
-    if (!imageBase64) return 0;
 
-    const colX =
-        (column === "left"
-            ? this.margin
-            : this.leftWidth + this.margin) ;
+    avatarBlock(imageBase64, {
+        size = 100,
+        column = "left",
+        center = true,
+        borderColor = this.mainColor,
+        borderSize = 5,
+        padding = 0,
+        marginBottom = 20
+    } = {}) {
+        if (!imageBase64) return 0;
 
-    const colW = this.colWidth(column) - this.margin * 2;
+        const colX = this.getXOffset(column);
+        const colW = this.colWidth(column);
 
-    const x = center
-        ? colX + colW / 2 - size / 2
-        : colX;
+        const x = center ?
+            colX + colW / 2 - size / 2 :
+            colX;
 
-    let y = this.getYOffset(column);
+        let y = this.getYOffset(column);
 
-    this.doc.setDrawColor(...borderColor);
-    this.doc.setLineWidth(borderSize);
-    this.doc.circle(
-        x + size / 2,
-        y + size / 2,
-        size / 2 + padding
-    );
+        this.avatar(imageBase64, {
+            size: size,
+            x: x,
+            y: y,
+            borderColor: borderColor,
+            borderSize: borderSize,
+            padding: padding
+        });
 
-    this.doc.addImage(
-        imageBase64, 
-        "PNG",
-        x,
-        y,
-        size,
-        size
-    );
-    y += size + marginBottom;
-    this.addYOffset(column, y);
+        y += size + marginBottom;
+        this.addYOffset(column, y);
+    }
 
-    return size;
-}
+    avatar(imageBase64, {
+        size = 100,
+        x = 0,
+        y = 0,
+        borderColor = this.mainColor,
+        borderSize = 5,
+        padding = 0,
+    } = {}) {
+        if (!imageBase64) return 0;
 
-    name(text, {
+        this.doc.setDrawColor(...borderColor);
+        this.doc.setLineWidth(borderSize);
+        this.doc.setLineWidth(1);
+        this.doc.circle(
+            x + size / 2,
+            y + size / 2,
+            size / 2 + padding
+        );
+
+        this.doc.addImage(
+            imageBase64,
+            "PNG",
+            x,
+            y,
+            size,
+            size
+        );
+
+        return size + padding * 2;
+    }
+
+    name(ctx, text, {
         textSize = 24,
         lineHeight = 0,
-        column = "left",
         center = false,
         textColor = this.textColor,
         uppercase = false,
+        padding = 0,
     } = {}) {
-        this.doc.setFontSize(textSize);
+
+        const content = uppercase ? text.toUpperCase() : text;
+
         this.doc.setFont(this.font, "bold");
+        this.doc.setFontSize(textSize);
         this.doc.setTextColor(...textColor);
 
-        this.writeText(uppercase ? text.toUpperCase() : text, {
-            indent: 0,
-            center: center,
-            lineHeight:  textSize+lineHeight,
-            column: column
+        return this.drawText(ctx, content, {
+            center,
+            padding,
+            lineHeight: textSize + lineHeight
         });
     }
 
-    title(text, {
+
+    title(ctx, text, {
         textSize = 12,
         lineHeight = 0,
-        column = "left",
         center = false,
         textColor = this.textColor,
         uppercase = false,
+        padding = 0,
     } = {}) {
-        this.doc.setFontSize(textSize);
+
+        const content = uppercase ? text.toUpperCase() : text;
+
         this.doc.setFont(this.font, "bold");
+        this.doc.setFontSize(textSize);
         this.doc.setTextColor(...textColor);
 
-        this.writeText(uppercase ? text.toUpperCase() : text, {
+        return this.drawText(ctx, content, {
             indent: 0,
-            center: center,
-            lineHeight: textSize+lineHeight,
-            column: column
+            center,
+            padding,
+            lineHeight: textSize + lineHeight
         });
     }
 
-    introduction(text, {
-        style = 'normal',
+    introduction(ctx, text, {
+        style = "normal",
         center = false,
-        column = "left"
+        lineHeight = 15,
+        textSize = this.textSize,
+        textColor = this.textColor,
+        padding = 0,
     } = {}) {
-        this.doc.setFontSize(this.textSize);
-        this.doc.setTextColor(...this.textColor);
+
         this.doc.setFont(this.font, style);
-        this.writeText(text, {
-            center: center,
-            column: column,
-            lineHeight: 15
+        this.doc.setFontSize(textSize);
+        this.doc.setTextColor(...textColor);
+
+        return this.drawText(ctx, text, {
+            style: {
+                style,
+                size: textSize,
+                color: textColor
+            },
+            center,
+            padding,
+            lineHeight
         });
     }
-    async showAvatar({column="left"}={}) {
-        this.avatar(this.cvInfo.avatar, {column:column,
+
+
+    async showAvatar({} = {}) {
+        this.avatarBlock(ctx, this.cvInfo.avatar, {
+            column: column,
             borderColor: this.mainColor
         });
     }
-    async showName({column="left"}={}) {
-        this.name(this.cvInfo.name, {column:column,
-            textColor: this.textColor});
-    }
+    async contactInfoRow(ctx, {
+        column = "left"
+    } = {}) {
+        const lineHeight = 15;
+        const items = [{
+                label: "Phone:",
+                value: this.cvInfo.phone
+            },
+            {
+                label: "Email:",
+                value: this.cvInfo.email
+            },
+            {
+                label: "Links:",
+                value: this.cvInfo.url
+            }
+        ];
 
-    async showTitle({column="left"}={}) {
-        this.title(this.cvInfo.title, {column:column,
-            textColor: this.textColor
-        });
+        for (const item of items) {
+            ctx.ensureSpace(lineHeight, () => {
+                this.addPageFor(column);
+            });
+
+            this.writePair({
+                label: new PdfText({
+                    text: item.label,
+                    style: this.contactLabelTextStyle()
+                }),
+                value: new PdfText({
+                    text: item.value,
+                    style: this.contactValueTextStyle()
+                }),
+                column,
+                lineHeight
+            });
+        }
     }
-    async contactInfo({column = "left"}={}) {
-        let textSize = 10;
-        this.addYOffset(column, 20);
-        var columnWidth = (this.pageWidth - this.margin * 2) / 3;
+    async contactInfoColumn(ctx, {
+        column = "left"
+    } = {}) {
+        const textSize = 10;
+        const columnCount = 3;
+        const columnWidth = (this.pageWidth - this.margin * 2) / columnCount;
+
         const columns = [{
                 title: "Phone:",
                 value: this.cvInfo.phone,
-                x: this.margin + columnWidth * 0
+                index: 0
             },
             {
                 title: "Email:",
                 value: this.cvInfo.email,
-                x: this.margin + columnWidth * 1
+                index: 1
             },
             {
                 title: "Links:",
                 value: this.cvInfo.url,
-                x: this.margin + columnWidth * 2
+                index: 2
             }
         ];
 
-        columns.forEach(col => {
+        this.addYOffset(column, 20);
+
+        // Draw titles
+        for (const col of columns) {
+            const x = this.margin + columnWidth * col.index;
+            ctx.ensureSpace(this.lineHeight, () => {
+                this.addPageFor(column);
+            });
+
             this.doc.setFontSize(textSize);
+            this.doc.setFont(this.font, "bold");
             this.doc.setTextColor(...this.mainColor);
-            this.doc.setFont(this.font, 'bold');
-            this.doc.text(col.title, col.x, this.leftY);
-        });
+            this.doc.text(col.title, x, this.getYOffset(column));
+        }
 
-        this.addYOffset(column, this.lineHeight)
-        columns.forEach(col => {
+        this.addYOffset(column, this.lineHeight);
+
+        // Draw values
+        for (const col of columns) {
+            const x = this.margin + columnWidth * col.index;
+            ctx.ensureSpace(this.lineHeight, () => {
+                this.addPageFor(column);
+            });
+
             this.doc.setFontSize(textSize);
+            this.doc.setFont(this.font, "normal");
             this.doc.setTextColor(...this.textColor);
-            this.doc.setFont(this.font, 'normal');
-            this.doc.text(col.value, col.x, this.leftY);
-        });
+            this.doc.text(col.value, x, this.getYOffset(column));
+        }
 
+        this.addYOffset(column, this.lineHeight);
     }
-
-    async showContactInfo({column="left"}={}) {
-        await this.contactInfo({column:column});
-        this.addYOffset(column, 20)
-    }
-
-    async showIntroduction({column="left"}={}) {
-        this.section({
-            text: "Introduction",column:column,
-            uppercase: true,
-            center: true,
-            underline: false,
-            color: this.mainColor,
-            lineColor: this.mainColor
-        });
-        this.introduction(this.cvInfo.introduction, {
-            style: 'italic'
-        });
-    }
-
-    async workExpBlock({
+    async contactInfoBlock(ctx, {
         column = "left",
+        style = "column",
+        uppercase = false,
+        icon = null,
+    } = {}) {
+        switch (style) {
+            case "row":
+                await this.header(ctx, {
+                    text: "Contact",
+                    uppercase: uppercase,
+                    icon: icon
+                });
+                await this.contactInfoRow(ctx, {
+                    column
+                });
+                break;
+            case "column":
+            default:
+                await this.contactInfoColumn(ctx, {
+                    column
+                });
+                break;
+        }
+
+        this.addYOffset(column, 20);
+    }
+
+    async showContactInfo(ctx, {
+        column = "left"
+    } = {}) {
+        await this.contactInfoBlock(ctx, {
+            column,
+            style: "column"
+        });
+    }
+    async introductionBlock(ctx, {
+        column = "left",
+        paddingTop = 20,
+        paddingBottom = 20,
         uppercase = false,
         center = false,
         underline = false,
-        upperline = false, 
-        sectionColor = this.mainColor,
-        lineColor: lineColor = this.mainColor,
+        upperline = false,
+        headerColor = this.mainColor,
+        lineColor = this.mainColor,
         icon = null,
-        showTimeLine = false
-    }) {
-        if (this.cvInfo.workExpArr.length) {
-            this.section({
-                text: "Work Experience",
-                uppercase: uppercase,
-                center: center,
-                column: column,
-                underline: underline,upperline:upperline,
-                color: sectionColor,
-                lineColor: lineColor,
-                icon: icon
-            });
+        dash = false,
+    } = {}) {
+        this.addYOffset(column, paddingTop);
 
-            this.cvInfo.workExpArr.forEach(item => {
-                const dates = item.current ? `${this.formatTime(item.from)} - Present` : `${this.formatTime(item.from)} - ${this.formatTime(item.to)}`;
-                var options = {
-                    title: new Text({
-                        text: item.title,
-                        style: this.blockTitleStyle()
-                    }),
-                    description: new Text({
-                        text: item.company,
-                        style: this.blockDescriptionStyle()
-                    }),
-                    dates: new Text({
-                        text: dates,
-                        style: this.blockDatesStyle()
-                    }),
-                    detailList: item.details,
-                    column: column,
-                    showTimeLine: showTimeLine,
-                    padding: showTimeLine ? 10 : 0
-                };
-                this.block(options);
-
-            });
-
-        }
-    }
-
-    async showWorkExp({column="left"}={}) {
-        this.workExpBlock({
+        await this.header(ctx, {
+            text: "Introduction",
+            uppercase: uppercase,
+            center: center,
             column: column,
-            uppercase: false
+            underline: underline,
+            upperline: upperline,
+            color: headerColor,
+            lineColor: lineColor,
+            icon: icon,
+            dash: dash,
+            paddingTop: paddingTop,
+            paddingBottom: paddingBottom
+        });
+
+        await this.introduction(ctx, this.cvInfo.introduction, {
+            style: 'italic',
+            column: column
         });
     }
 
-    drawSectionLine({
-        column = "left",
-        thickness = .5,
-        offset = 5,
-        color = this.textColor
+    async showIntroduction({
+        column = "left"
     } = {}) {
-        const y = this.getYOffset(column) + offset;
-        const startX = column === "left" ? this.margin : this.leftWidth + this.margin;
-        const endX = startX + this.colWidth(column) - this.margin * 2;
+        await this.introductionBlock({
+            column: column,
+        });
+    }
+    async workExpBlock(ctx, {
+        column = "left",
+        paddingTop = 20,
+        paddingBottom = 20,
+        uppercase = false,
+        center = false,
+        underline = false,
+        upperline = false,
+        headerColor = this.mainColor,
+        lineColor = this.mainColor,
+        icon = null,
+        showTimeLine = false,
+        dash = false,
+    } = {}) {
+        if (!this.cvInfo.workExpArr.length) return;
+
+        await this.header(ctx, {
+            text: "Work Experience",
+            paddingTop: paddingTop,
+            paddingBottom: paddingBottom,
+            uppercase: uppercase,
+            center: center,
+            column: column,
+            underline: underline,
+            upperline: upperline,
+            color: headerColor,
+            lineColor: lineColor,
+            icon: icon,
+            dash: dash
+        });
+
+        for (const item of this.cvInfo.workExpArr) {
+            const dates = item.current ?
+                `${this.formatTime(item.from)} - Present` :
+                `${this.formatTime(item.from)} - ${this.formatTime(item.to)}`;
+
+            await this.block(ctx, {
+                title: new PdfText({
+                    text: item.title,
+                    style: this.blockTitleStyle()
+                }),
+                description: new PdfText({
+                    text: item.company,
+                    style: this.blockDescriptionStyle()
+                }),
+                dates: new PdfText({
+                    text: dates,
+                    style: this.blockDatesStyle()
+                }),
+                detailList: item.details,
+                column: column,
+                showTimeLine: showTimeLine,
+                padding: showTimeLine ? 10 : 0
+            });
+        }
+    }
+
+    async showWorkExp({
+        column = "left"
+    } = {}) {
+        this.workExpBlock({
+            column: column,
+            uppercase: false,
+        });
+    }
+
+    drawHeaderLine(ctx, {
+        thickness = 0.5,
+        dash = false,
+        color = this.textColor,
+        spacing = 6,
+    } = {}) {
+
+        ctx.ensureSpace(spacing, () => {
+            this.doc.addPage();
+            this.drawBackground();
+        });
+
+        if (dash) {
+            this.doc.setLineDash([2]);
+        } else {
+            this.doc.setLineDash([]); // IMPORTANT: reset
+        }
 
         this.doc.setLineWidth(thickness);
         this.doc.setDrawColor(...color);
-        this.doc.line(startX, y, endX, y);
-        this.addYOffset(column, offset + 2);
+
+        const y = ctx.y;
+        const xStart = ctx.x;
+        const xEnd = ctx.x + ctx.width;
+
+        this.doc.line(xStart, y, xEnd, y);
+        ctx.advance(spacing);
     }
 
-    async educationBlock({
+    async educationBlock(ctx, {
         column = "left",
+        paddingTop = 20,
+        paddingBottom = 20,
         uppercase = false,
         center = false,
-        underline = false,upperline=false,
-        sectionColor = this.mainColor,
+        underline = false,
+        upperline = false,
+        headerColor = this.mainColor,
         lineColor = this.mainColor,
         icon = null,
-        showTimeLine = false
+        showTimeLine = false,
+        dash = false,
     } = {}) {
-        if (this.cvInfo.educationArr.length) {
-            this.section({
-                text: "Education",
-                uppercase: uppercase,
-                center: center,
-                column: column,
-                underline: underline,
-                upperline:upperline,
-                color: sectionColor,
-                lineColor: lineColor,
-                icon: icon
-            });
-            this.cvInfo.educationArr.forEach(item => {
-                const dates = `${this.formatTime(item.from)} - ${this.formatTime(item.to)}`;
-                var options = {
-                    title: new Text({
-                        text: item.degree,
-                        style: this.blockTitleStyle()
-                    }),
-                    description: new Text({
-                        text: item.school,
-                        style: this.blockDescriptionStyle()
-                    }),
-                    dates: new Text({
-                        text: dates,
-                        style: this.blockDatesStyle()
-                    }),
-                    detailList: item.details,
-                    column: column,
-                    showTimeLine: showTimeLine,
-                    padding: showTimeLine ? 10 : 0
-                };
-                this.block(options);
+        if (!this.cvInfo.educationArr.length) return;
 
+        await this.header(ctx, {
+            text: "Education",
+            paddingTop: paddingTop,
+            paddingBottom: paddingBottom,
+            uppercase: uppercase,
+            center: center,
+            column: column,
+            underline: underline,
+            upperline: upperline,
+            color: headerColor,
+            lineColor: lineColor,
+            icon: icon,
+            dash: dash
+        });
+
+        for (const item of this.cvInfo.educationArr) {
+            const dates = `${this.formatTime(item.from)} - ${this.formatTime(item.to)}`;
+
+            await this.block(ctx, {
+                title: new PdfText({
+                    text: item.degree,
+                    style: this.blockTitleStyle()
+                }),
+                description: new PdfText({
+                    text: item.school,
+                    style: this.blockDescriptionStyle()
+                }),
+                dates: new PdfText({
+                    text: dates,
+                    style: this.blockDatesStyle()
+                }),
+                detailList: item.details,
+                column: column,
+                showTimeLine: showTimeLine,
+                padding: showTimeLine ? 10 : 0
             });
         }
     }
 
-    async showEducation({column="left"}={}) {
+    async showEducation({
+        column = "left"
+    } = {}) {
         this.educationBlock({
             column: column,
-            uppercase: true
+            uppercase: true,
+        });
+    }
+    async skillsBlock(ctx, {
+        column = "left",
+        paddingTop = 20,
+        paddingBottom = 20,
+        uppercase = false,
+        center = false,
+        underline = false,
+        upperline = false,
+        headerColor = this.mainColor,
+        lineColor = this.mainColor,
+        icon = null,
+        dash = false,
+    } = {}) {
+        if (!this.cvInfo.skillArr.length) return;
+
+        await this.header(ctx, {
+            text: "Skills",
+            paddingTop: paddingTop,
+            paddingBottom: paddingBottom,
+            uppercase: uppercase,
+            center: center,
+            underline: underline,
+            upperline: upperline,
+            column: column,
+            color: headerColor,
+            lineColor: lineColor,
+            icon: icon,
+            dash: dash
+        });
+
+        this.addYOffset(column, 10);
+
+        this.join(ctx, this.cvInfo.skillArr.map(h => h.name), {
+            column: column
         });
     }
 
-    async skillsBlock({
-        column = "left",
-        uppercase = false,
-        center = false,
-        underline = false,upperline=false,
-        sectionColor = this.mainColor,
-        lineColor = this.mainColor,
-        icon = null
+    async showSkills({
+        column = "left"
     } = {}) {
-        if (this.cvInfo.skillArr.length) {
-            this.section({
-                text: "Skills",
-                uppercase: uppercase,
-                center: center,
-                underline: underline,upperline:upperline,
-                column: column,
-                color: sectionColor,
-                lineColor: lineColor,
-                icon: icon
-            });
-            this.addYOffset(column,10);
-            this.join(this.cvInfo.skillArr.map(h => h.name), {
-                column: column
-            });
-        }
-    }
-
-    async showSkills({column="left"}={}) {
         this.skillsBlock({
             column: column,
             uppercase: false
         });
     }
-
-    async referencesBlock({
+    async referencesBlock(ctx, {
         column = "left",
+        paddingTop = 20,
+        paddingBottom = 20,
         uppercase = false,
         center = false,
-        underline = false,upperline=false,
-        sectionColor = this.mainColor,
+        underline = false,
+        upperline = false,
+        headerColor = this.mainColor,
         lineColor = this.mainColor,
-        icon = null
+        icon = null,
+        dash = false,
     } = {}) {
-        if (this.cvInfo.referenceArr.length) {
-            this.section({
-                text: "References",
-                uppercase: uppercase,
-                center: center,
-                underline: underline,upperline:upperline,
-                column: column,
-                color: sectionColor,
-                lineColor: lineColor,
-                icon: icon
-            });
-            this.ul(this.cvInfo.referenceArr.map(h => h.name), {
-                column: column
-            });
-        }
+        if (!this.cvInfo.referenceArr.length) return;
+
+        await this.header(ctx, {
+            text: "References",
+            paddingTop: paddingTop,
+            paddingBottom: paddingBottom,
+            uppercase: uppercase,
+            center: center,
+            underline: underline,
+            upperline: upperline,
+            column: column,
+            color: headerColor,
+            lineColor: lineColor,
+            icon: icon,
+            dash: dash
+        });
+
+        this.ul(ctx, this.cvInfo.referenceArr.map(h => h.name), {
+            column: column
+        });
     }
 
-    async showReference({column="left"}={}) {
+    async showReference({
+        column = "left"
+    } = {}) {
         this.referencesBlock({
             column: column,
-            uppercase: false
+            uppercase: false,
+        });
+    }
+    async awardsBlock(ctx, {
+        column = "left",
+        paddingTop = 20,
+        paddingBottom = 20,
+        uppercase = false,
+        center = false,
+        underline = false,
+        upperline = false,
+        headerColor = this.mainColor,
+        lineColor = this.mainColor,
+        icon = null,
+        dash = false,
+    } = {}) {
+        if (!this.cvInfo.awardArr.length) return;
+
+        await this.header(ctx, {
+            text: "Awards",
+            paddingTop: paddingTop,
+            paddingBottom: paddingBottom,
+            uppercase: uppercase,
+            center: center,
+            underline: underline,
+            upperline: upperline,
+            column: column,
+            color: headerColor,
+            lineColor: lineColor,
+            icon: icon,
+            dash: dash
+        });
+
+        this.ul(ctx, this.cvInfo.awardArr.map(h => h.name), {
+            column: column
         });
     }
 
-    async awardsBlock({
-        column = "left",
-        uppercase = false,
-        center = false,
-        underline = false,upperline=false,
-        sectionColor = this.mainColor,
-        lineColor = this.mainColor,
-        icon = null
-    } = {}) {
-        if (this.cvInfo.awardArr.length) {
-            this.section({
-                text: "Awards",
-                uppercase: uppercase,
-                center: center,
-                underline: underline,upperline:upperline,
-                column: column,
-                color: sectionColor,
-                lineColor: lineColor,
-                icon: icon
-            });
-            this.ul(this.cvInfo.awardArr.map(h => h.name), {
-                column: column
-            });
-        }
-    }
 
-    async showAward({column="left"}={}) {
+    async showAward({
+        column = "left"
+    } = {}) {
         this.awardsBlock({
             column: column,
-            uppercase: false
+            uppercase: false,
+        });
+    }
+    async hobbyBlock(ctx, {
+        column = "left",
+        paddingTop = 20,
+        paddingBottom = 20,
+        uppercase = false,
+        center = false,
+        underline = false,
+        upperline = false,
+        headerColor = this.mainColor,
+        lineColor = this.mainColor,
+        icon = null,
+        dash = false,
+    } = {}) {
+        if (!this.cvInfo.hobbyArr.length) return;
+
+        await this.header(ctx, {
+            text: "Hobbies",
+            paddingTop: paddingTop,
+            paddingBottom: paddingBottom,
+            uppercase: uppercase,
+            center: center,
+            underline: underline,
+            upperline: upperline,
+            column: column,
+            color: headerColor,
+            lineColor: lineColor,
+            icon: icon,
+            dash: dash
+        });
+
+        this.ul(ctx, this.cvInfo.hobbyArr.map(h => h.name), {
+            column: column
         });
     }
 
-    async hobbyBlock({
-        column = "left",
-        uppercase = false,
-        center = false,
-        underline = false,upperline=false,
-        sectionColor = this.mainColor,
-        lineColor = this.mainColor,
-        icon = null
+    async showHobby({
+        column = "left"
     } = {}) {
-        if (this.cvInfo.hobbyArr.length) {
-            this.section({
-                text: "Hobbies",
-                uppercase: uppercase,
-                center: center,
-                underline: underline,upperline:upperline,
-                column: column,
-                color: sectionColor,
-                lineColor: lineColor,
-                icon: icon
-            });
-            this.ul(this.cvInfo.hobbyArr.map(h => h.name), {
-                column: column
-            });
-        }
-    }
-    async showHobby({column="left"}={}) {
         await this.hobbyBlock({
             column: column,
             uppercase: false
         });
     }
 
-    async showLeftColumn({column="left"}={}) {
-        await this.showAvatar({column:column});
-        await this.showName({column:column});
-        await this.showTitle({column:column});
-        await this.showIntroduction({column:column});
-        await this.showContactInfo({column:column});
-        await this.showWorkExp({column:column});
-        await this.showEducation({column:column});
-        await this.showSkills({column:column});
-        await this.showReference({column:column});
-        await this.showAward({column:column});
-        await this.showHobby({column:column});
+    async showLeftColumn({
+        column = "left"
+    } = {}) {
+        await this.showAvatar({
+            column: column
+        });
+        await this.showName({
+            column: column
+        });
+        await this.showTitle({
+            column: column
+        });
+        await this.showIntroduction({
+            column: column
+        });
+        await this.showContactInfo({
+            column: column
+        });
+        await this.showWorkExp({
+            column: column
+        });
+        await this.showEducation({
+            column: column
+        });
+        await this.showSkills({
+            column: column
+        });
+        await this.showReference({
+            column: column
+        });
+        await this.showAward({
+            column: column
+        });
+        await this.showHobby({
+            column: column
+        });
     }
 
-    async showRightColumn({column="right"}={}) {
+    async showRightColumn({
+        column = "right"
+    } = {}) {
 
     }
     async showTopContent() {
 
     }
+
+    drawText(ctx, text, {
+        indent = 0,
+        center = false,
+        lineHeight = this.lineHeight,
+        padding = 0,
+    } = {}) {
+        const availableWidth = ctx.width - indent - padding;
+        const lines = this.doc.splitTextToSize(text, availableWidth);
+
+        let usedHeight = 0;
+        for (let i = 0; i < lines.length; i++) {
+
+            ctx.ensureSpace(lineHeight, () => {
+                this.doc.addPage();
+                this.drawBackground();
+            });
+
+            const x = center ?
+                ctx.x + ctx.width / 2 :
+                ctx.x + indent + padding;
+
+            this.doc.text(
+                lines[i],
+                x,
+                ctx.y,
+                center ? {
+                    align: 'center'
+                } : undefined
+            );
+
+            ctx.advance(lineHeight);
+            usedHeight += lineHeight;
+        }
+
+        return usedHeight;
+    }
+
+
     async generate() {
         await this.loadFonts();
         await this.loadImages();
         await this.drawBackground();
         await this.showTopContent();
-        await this.showLeftColumn();
-        await this.showRightColumn();
+        // await this.showLeftColumn();
+        // await this.showRightColumn();
         return this.doc;
     }
 }

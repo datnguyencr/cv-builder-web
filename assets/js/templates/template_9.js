@@ -7,9 +7,6 @@ class Template9 extends PDFGenerator {
         mainColor: [117, 92, 189]
     }) {
         super(cvInfo, options);
-        this.margin = 20;
-        this.rightY = this.margin;
-        this.colHeight = this.pageHeight - this.margin * 2;
     }
 
     async loadFonts() {
@@ -66,86 +63,138 @@ class Template9 extends PDFGenerator {
         });
         this.addYOffset(column, 10);
     }
-    async showName({column="left"}={}) {
-        this.name(this.cvInfo.name, {column:column,
+    async showName({
+        column = "left"
+    } = {}) {
+        this.name(this.cvInfo.name, {
+            column: column,
             textSize: 32,
             textColor: this.mainColor
         });
     }
 
-    async showTitle({column="left"}={}) {
-        this.title(this.cvInfo.title, {column:column,
+    async showTitle({
+        column = "left"
+    } = {}) {
+        this.title(this.cvInfo.title, {
+            column: column,
             textColor: this.textColor
         });
         this.addYOffset(column, 20);
     }
 
-    async showContactInfo({column="left"}={}) {
-        await this.section({
-            text: "Contact"
-        });
-        let textSize = 10;
-        let lineHeight = 15;
-        this.writePair({
-            label: "Phone:",
-            value: this.cvInfo.phone,
+    async showContactInfo({
+        column = "left"
+    } = {}) {
+        await this.contactInfoBlock({
+            column:column,
+            style:"row",
+            icon:this.contactImage});
+    }
+
+    async showIntroduction({
+        column = "left"
+    } = {}) {
+        this.introductionBlock({
+            paddingTop : 15,
             column: column,
-            textSize: textSize,
-            lineHeight: lineHeight
-        });
-        this.writePair({
-            label: "Email:",
-            value: this.cvInfo.email,
-            column: column,
-            textSize: textSize,
-            lineHeight: lineHeight
-        });
-        this.writePair({
-            label: "Links:",
-            value: this.cvInfo.url,
-            column: column,
-            textSize: textSize,
-            lineHeight: lineHeight
+            icon:this.introductionImage,
         });
     }
 
-    async showIntroduction({column="left"}={}) {
-        await this.section({
-            text: "Introduction",
-            column: column
-        });
-        await this.introduction(this.cvInfo.introduction, {
-            center: false,
-            column: column
-        });
-    }
-
-    async showEducation({column="left"}={}) {
+    async showEducation({
+        column = "left"
+    } = {}) {
         await this.educationBlock({
-            column: column
+            column: column,
+            icon: this.educationImage,
         });
     }
 
-    async showWorkExp({column="left"}={}) {
+    async showWorkExp({
+        column = "left"
+    } = {}) {
         await this.workExpBlock({
+            column: column,
+            icon: this.workExpImage
+        });
+    }
+
+    async showSkills({
+        column = "left"
+    } = {}) {
+        await this.skillsBlock({
+            column: column,
+            icon:this.skillImage,
+        });
+    }
+
+    async showAward({
+        column = "left"
+    } = {}) {
+        await this.awardsBlock({
+            column: column,
+            icon:this.awardImage,
+        });
+    }
+    
+    async showReference({
+        column = "left"
+    } = {}) {
+        await this.referencesBlock({
+            column: column,
+            icon:this.referenceImage,
+        });
+    }
+
+    async showHobby({
+        column = "left"
+    } = {}) {
+        await this.hobbyBlock({
+            column: column,
+            icon:this.hobbyImage,
+        });
+    }
+    async showLeftColumn({
+        column = "left"
+    } = {}) {
+        await this.showAvatar({
+            column: column,
+        });
+        await this.showName({
+            column: column
+        });
+        await this.showTitle({
+            column: column
+        });
+        await this.showIntroduction({
+            column: column
+        });
+        await this.showContactInfo({
             column: column
         });
     }
 
-    async showLeftColumn({column="left"}={}) {
-        await this.showAvatar({column:column});
-        await this.showName({column:column});
-        await this.showTitle({column:column});
-        await this.showIntroduction({column:column});
-        await this.showContactInfo({column:column});
-    }
-
-    async showRightColumn({column="right"}={}) {
-        await this.showSkills({column:column});
-        await this.showReference({column:column});
-        await this.showAward({column:column});
-        await this.showHobby({column:column});
-        await this.showWorkExp({column:column});
-        await this.showEducation({column:column});
+    async showRightColumn({
+        column = "right"
+    } = {}) {
+        await this.showSkills({
+            column: column
+        });
+        await this.showReference({
+            column: column
+        });
+        await this.showAward({
+            column: column
+        });
+        await this.showHobby({
+            column: column
+        });
+        await this.showWorkExp({
+            column: column
+        });
+        await this.showEducation({
+            column: column
+        });
     }
 }

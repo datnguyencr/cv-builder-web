@@ -1,6 +1,7 @@
-class Template14 extends PDFGenerator {
+class Template4 extends PDFGenerator {
 
-    constructor(cvInfo, options = {}) {
+    constructor(cvInfo, options = {
+    }) {
         super(cvInfo, options);
     }
 
@@ -18,9 +19,9 @@ class Template14 extends PDFGenerator {
     }
     blockDescriptionStyle() {
         return new TextStyle({
-            style: 'bold',
-            size: 10,
-            color: this.textColor
+            style: 'normal',
+            size: 12,
+            color: this.mainColor
         });
     }
 
@@ -28,8 +29,22 @@ class Template14 extends PDFGenerator {
         return new TextStyle({
             style: 'normal',
             size: 10,
-            color: this.textColor
+            color: this.mainColor
         });
+    }
+    contactLabelTextStyle(){
+        return new TextStyle({color:this.textColor,style:"bold"});
+    }
+    contactValueTextStyle(){
+        return new TextStyle({color:this.textColor,style:"normal"});
+    }
+    async showContactInfo({
+        column = "left"
+    } = {}) {
+        await this.contactInfoBlock({
+            column:column,
+            style:"row",
+            icon:this.contactImage});
     }
 
     blockHeader({
@@ -78,111 +93,72 @@ class Template14 extends PDFGenerator {
         );
         this.addYOffset(column, 10);
     }
-    async showName({
-        column = "left"
-    } = {}) {
-        this.name(this.cvInfo.name, {
-            column: column,
-            center: true
-        });
+
+    async showName() {
+        this.name(this.cvInfo.name, {});
     }
 
-    async showTitle({
-        column = "left"
-    } = {}) {
-        this.title(this.cvInfo.title, {
-            column: column,
-            center: true
-        });
-    }
-    async showContactInfo({
-        column = "left"
-    } = {}) {
-        await this.contactInfoBlock({column:column,style:"column"});
+    async showTitle() {
+        this.title(this.cvInfo.title, {});
     }
 
     async showIntroduction({
         column = "left"
     } = {}) {
-        this.header({
-            text: "Introduction",
+        this.introductionBlock({
             column: column,
-            uppercase: true,
-            center: true
+            headerColor:this.textColor,
         });
-        this.introduction(this.cvInfo.introduction, {
-            style: 'italic',
-            center: true
-        });
-        this.addYOffset(column, 20);
     }
-    async showEducation({
-        column = "left"
-    } = {}) {
+    
+    async showEducation() {
         this.educationBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
+            upperline: true,
+            headerColor: this.textColor,
+            dash: true,icon: this.educationImage
         });
     }
 
-    async showWorkExp({
-        column = "left"
-    } = {}) {
+    async showWorkExp() {
         await this.workExpBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
+            upperline: true,
+            headerColor: this.textColor,
+            dash: true,icon: this.workExpImage
         });
     }
 
-    async showSkills({
-        column = "left"
-    } = {}) {
+    async showSkills() {
         await this.skillsBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
+            upperline: true,
+            headerColor: this.textColor,
+            dash: true,icon: this.skillImage
         });
     }
 
-    async showAward({
-        column = "left"
-    } = {}) {
+    async showAward() {
         await this.awardsBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
+            upperline: true,
+            headerColor: this.textColor,
+            dash: true,icon: this.awardImage
         });
     }
 
-    async showReference({
-        column = "left"
-    } = {}) {
+    async showReference() {
         await this.referencesBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
+            upperline: true,
+            headerColor: this.textColor,
+            dash: true,icon: this.referenceImage
         });
     }
 
-    async showHobby({
-        column = "left"
-    } = {}) {
+    async showHobby() {
         await this.hobbyBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
+            upperline: true,
+            headerColor: this.textColor,
+            dash: true,icon: this.hobbyImage
         });
     }
-
-    async showLeftColumn({
+async showLeftColumn({
         column = "left"
     } = {}) {
         await this.showAvatar({
@@ -194,16 +170,10 @@ class Template14 extends PDFGenerator {
         await this.showTitle({
             column: column
         });
-        await this.showContactInfo({
-            column: column
-        });
         await this.showIntroduction({
             column: column
         });
-        await this.showWorkExp({
-            column: column
-        });
-        await this.showEducation({
+        await this.showContactInfo({
             column: column
         });
         await this.showSkills({
@@ -214,9 +184,18 @@ class Template14 extends PDFGenerator {
         });
         await this.showAward({
             column: column
-        })
+        });
         await this.showHobby({
             column: column
         });
+        await this.showWorkExp({
+            column: column
+        });
+        await this.showEducation({
+            column: column
+        });
+    }
+    async showTopContent() {
+
     }
 }

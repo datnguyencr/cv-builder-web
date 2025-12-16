@@ -7,9 +7,6 @@ class Template13 extends PDFGenerator {
         mainColor: [0, 0, 0]
     }) {
         super(cvInfo, options);
-        this.margin = 20;
-        this.rightY = this.margin;
-        this.colHeight = this.pageHeight - this.margin * 2;
     }
 
     async loadFonts() {
@@ -26,25 +23,25 @@ class Template13 extends PDFGenerator {
     }
     blockDescriptionStyle() {
         return new TextStyle({
-            style: 'normal',
+            style: 'normal',size:10,
             color: this.textColor
         });
     }
 
     blockDatesStyle() {
         return new TextStyle({
-            style: 'italic',
+            style: 'italic',size:10,
             color: this.textColor
         });
     }
     async showAvatar({column="left"}={}) {
-        this.avatar(this.cvInfo.avatar, {
+        this.avatarBlock(this.cvInfo.avatar, {
             borderColor: this.mainColor,
             column:column
         });
     }
 
-     formatTime = (monthValue) => {
+     formatTime (monthValue){
         if (!monthValue) return '';
             const y = monthValue.split('-')[0];
             return y || '';
@@ -66,7 +63,7 @@ class Template13 extends PDFGenerator {
             marker: showTimeLine? marker : null
         });
 
-        const colW =  (this.colWidth(column) - this.margin * 2);
+        const colW =  this.colWidth(column);
         const textW = colW - 10 - 10;
         var leftRatio=0.6;
         const desciptionLines=this.doc.splitTextToSize(description.text, textW*leftRatio);
@@ -111,76 +108,70 @@ class Template13 extends PDFGenerator {
     }
 
     async showIntroduction({column="left"}={}) {
-        await this.introduction(this.cvInfo.introduction, {
-            center: false,
-        column:column,
+        await this.introductionBlock({
+            column:column,
+            icon:this.introductionImage
+        });
+    }
+
+    async showContactInfo({
+        column = "left"
+    } = {}) {
+        await this.contactInfoBlock({
+            column:column,
+            style:"row",uppercase:true,
+            icon:this.contactImage,
         });
     }
 
     async showEducation({column="left"}={}) {
         await this.educationBlock({
-          column:column,uppercase:true,
+          column:column,
+          uppercase:true,
+          icon:this.educationImage,
         });
     }
 
     async showWorkExp({column="left"}={}) {
         await this.workExpBlock({
-          column:column,uppercase:true,
+          column:column,
+          uppercase:true,
+          icon:this.workExpImage,
         });
     }
+
     async showSkills({column="left"}={}) {
-        await this.skillsBlock({column:column,
-            uppercase: true
+        await this.skillsBlock({
+            column:column,
+            uppercase: true,
+            icon:this.skillImage,
         });
     }
 
     async showAward({column="left"}={}) {
-        await this.awardsBlock({column:column,
-            uppercase: true
+        await this.awardsBlock({
+            column:column,
+            uppercase: true,
+            icon:this.awardImage,
         });
     }
 
     async showReference({column="left"}={}) {
-        await this.referencesBlock({column:column,
-            uppercase: true
+        await this.referencesBlock({
+            column:column,
+            uppercase: true,
+            icon:this.referenceImage,
         });
     }
 
     async showHobby({column="left"}={}) {
-        await this.hobbyBlock({column:column,
-            uppercase: true
+        await this.hobbyBlock({
+            column:column,
+            uppercase: true,
+            icon:this.hobbyImage,
         });
     }
-    async showContactInfo({column="left"}={}) {
-        this.section({
-            text: "Contact",
-            color: this.textColor,
-            uppercase:true
-        });
-        let textSize = 10;
-        let lineHeight = 15;
-        this.writePair({
-            label: "Phone:",
-            value: this.cvInfo.phone,
-            column: column,
-            textSize: textSize,
-            lineHeight: lineHeight
-        });
-        this.writePair({
-            label: "Email:",
-            value: this.cvInfo.email,
-            column: column,
-            textSize: textSize,
-            lineHeight: lineHeight
-        });
-        this.writePair({
-            label: "Links:",
-            value: this.cvInfo.url,
-            column: column,
-            textSize: textSize,
-            lineHeight: lineHeight
-        });
-    }
+
     async showLeftColumn({column="left"}={}) {
         await this.showContactInfo({column:column});
         await this.showSkills({column:column});
