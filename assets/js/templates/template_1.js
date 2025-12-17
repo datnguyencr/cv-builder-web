@@ -17,8 +17,8 @@ class Template1 extends PDFGenerator {
         const y = monthValue.split('-')[0];
         return y || '';
     };
-    
-     content() {
+
+    content() {
         this.renderSection(new Section({
             leftRatio: 1,
             rightRatio: 0,
@@ -28,18 +28,20 @@ class Template1 extends PDFGenerator {
                 pdf
             }) => {
                 pdf.avatar(left, this.cvInfo.avatar, {
-                    size: 100,center:true
+                    size: 100,
+                    center: true
                 });
                 left.advance(40);
                 pdf.name(left, this.cvInfo.name, {
                     textColor: this.mainColor,
-                    center:true,
+                    center: true,
                 });
                 pdf.title(left, this.cvInfo.title, {
                     textColor: this.textColor,
-                    center:true,
+                    center: true,
                 });
-                pdf.drawLine(left, {color:this.mainColor
+                pdf.drawLineBlock(left, {
+                    color: this.mainColor
                 });
                 pdf.introductionBlock(left, {
                     center: true,
@@ -47,12 +49,12 @@ class Template1 extends PDFGenerator {
                 });
                 pdf.contactInfoBlock(left, {
                     style: "column",
-                    huppercase: true,
+                    uppercase: true,
                     icon: this.contactImage,
                 });
                 pdf.workExpBlock(left, {
                     uppercase: true,
-                    icon: this.workExpImage,        
+                    icon: this.workExpImage,
                 });
                 pdf.educationBlock(left, {
                     uppercase: true,

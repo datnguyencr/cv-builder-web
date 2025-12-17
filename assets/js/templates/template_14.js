@@ -18,7 +18,7 @@ class Template14 extends PDFGenerator {
     }
     blockDescriptionStyle() {
         return new TextStyle({
-            style: 'bold',
+            style: 'normal',
             size: 10,
             color: this.textColor
         });
@@ -32,191 +32,122 @@ class Template14 extends PDFGenerator {
         });
     }
 
-    blockHeader({
+    blockHeader(ctx, {
         title = new Text(),
         description = new Text(),
         dates = new Text(),
-        column = "left",
         timelineColor = this.mainColor,
         showTimeLine = false
     } = {}) {
 
         const marker = TIMELINE_MARKERS["circle"];
+
         this.doc.setFillColor(...timelineColor);
-        this.writeTextWithMarker(title.text, {
-            style: title.style,
-            column: column,
-            marker: showTimeLine ? marker : null
-        });
+        this.doc.setDrawColor(...timelineColor);
 
-        const colW = this.colWidth(column);
-        const textW = colW - 10 - 10;
-        var leftRatio = 0.6;
-        const desciptionLines = this.doc.splitTextToSize(description.text, textW * leftRatio);
-        const datesLines = this.doc.splitTextToSize(dates.text, textW * (1 - leftRatio));
-
-        const lines = Math.max(desciptionLines.length, datesLines.length);
-        this.row(
-            (opts) => this.writeTextWithMarker(description.text, {
-                ...opts,
-                style: description.style,
-                column,
-                marker: showTimeLine ?
-                    (x, y, w, ctx) => ctx.doc.line(x, y - w * 2, x, y + (w + 20) * lines) :
-                    null
-            }),
-            (opts) => this.writeTextWithMarker(dates.text, {
-                ...opts,
-                style: dates.style,
-                column,
-                marker: null,
-                align: "right"
-            }), {
-                column,
-                leftRatio: leftRatio
+        ctx.advance(this.writeTextWithMarker(
+            ctx, title.text, {
+                style: title.style,
+                lineHeight: 0,
+                marker: showTimeLine ? marker : null
             }
-        );
-        this.addYOffset(column, 10);
-    }
-    async showName({
-        column = "left"
-    } = {}) {
-        this.name(this.cvInfo.name, {
-            column: column,
-            center: true
-        });
-    }
-
-    async showTitle({
-        column = "left"
-    } = {}) {
-        this.title(this.cvInfo.title, {
-            column: column,
-            center: true
-        });
-    }
-    async showContactInfo({
-        column = "left"
-    } = {}) {
-        await this.contactInfoBlock({column:column,style:"column"});
+        ));
+        ctx.advance(20);
+        ctx.advance(this.writeTextPair(
+            ctx, description.text, dates.text, {
+                leftStyle: description.style,
+                rightStyle: dates.style,
+                lineHeight: 0,
+                marker: showTimeLine ?
+                    (x, y, w, pdf) => {
+                        this.doc.setLineWidth(1);
+                        pdf.drawLine(
+                            x,
+                            y - w * 2,
+                            x,
+                            y + w + 5
+                        );
+                    } : null
+            }
+        ));
+        ctx.advance(20);
     }
 
-    async showIntroduction({
-        column = "left"
-    } = {}) {
-        this.header({
-            text: "Introduction",
-            column: column,
-            uppercase: true,
-            center: true
-        });
-        this.introduction(this.cvInfo.introduction, {
-            style: 'italic',
-            center: true
-        });
-        this.addYOffset(column, 20);
-    }
-    async showEducation({
-        column = "left"
-    } = {}) {
-        this.educationBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
-        });
-    }
-
-    async showWorkExp({
-        column = "left"
-    } = {}) {
-        await this.workExpBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
-        });
-    }
-
-    async showSkills({
-        column = "left"
-    } = {}) {
-        await this.skillsBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
-        });
-    }
-
-    async showAward({
-        column = "left"
-    } = {}) {
-        await this.awardsBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
-        });
-    }
-
-    async showReference({
-        column = "left"
-    } = {}) {
-        await this.referencesBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
-        });
-    }
-
-    async showHobby({
-        column = "left"
-    } = {}) {
-        await this.hobbyBlock({
-            uppercase: true,
-            column: column,
-            center: true,
-            upperline: true
-        });
-    }
-
-    async showLeftColumn({
-        column = "left"
-    } = {}) {
-        await this.showAvatar({
-            column: column
-        });
-        await this.showName({
-            column: column
-        });
-        await this.showTitle({
-            column: column
-        });
-        await this.showContactInfo({
-            column: column
-        });
-        await this.showIntroduction({
-            column: column
-        });
-        await this.showWorkExp({
-            column: column
-        });
-        await this.showEducation({
-            column: column
-        });
-        await this.showSkills({
-            column: column
-        });
-        await this.showReference({
-            column: column
-        });
-        await this.showAward({
-            column: column
-        })
-        await this.showHobby({
-            column: column
-        });
+    content() {
+        this.renderSection(new Section({
+            leftRatio: 1,
+            rightRatio: 0,
+            render: ({
+                left,
+                right,
+                pdf
+            }) => {
+                pdf.avatar(left, this.cvInfo.avatar, {
+                    size: 100,
+                    center: true
+                });
+                left.advance(40);
+                pdf.name(left, this.cvInfo.name, {
+                    textColor: this.mainColor,
+                    center: true,
+                });
+                pdf.title(left, this.cvInfo.title.toUpperCase(), {
+                    textColor: this.textColor,
+                    center: true,
+                });
+                pdf.drawLineBlock(left, {
+                    color: this.mainColor
+                });
+                pdf.contactInfoBlock(left, {
+                    style: "column",
+                    uppercase: true,
+                    center: true,
+                    icon: this.contactImage,
+                });
+                pdf.drawLineBlock(left, {
+                    color: this.mainColor
+                });
+                pdf.introductionBlock(left, {
+                    center: true,
+                    uppercase: true,
+                });
+                pdf.workExpBlock(left, {
+                    uppercase: true,
+                    center: true,
+                    upperline: true,
+                    icon: this.workExpImage,
+                });
+                pdf.educationBlock(left, {
+                    uppercase: true,
+                    center: true,
+                    upperline: true,
+                    icon: this.educationImage,
+                });
+                pdf.skillsBlock(left, {
+                    uppercase: true,
+                    center: true,
+                    upperline: true,
+                    icon: this.skillImage,
+                });
+                pdf.referencesBlock(left, {
+                    uppercase: true,
+                    center: true,
+                    upperline: true,
+                    icon: this.referenceImage,
+                });
+                pdf.awardsBlock(left, {
+                    uppercase: true,
+                    center: true,
+                    upperline: true,
+                    icon: this.awardImage,
+                });
+                pdf.hobbyBlock(left, {
+                    uppercase: true,
+                    center: true,
+                    upperline: true,
+                    icon: this.hobbyImage,
+                });
+            }
+        }));
     }
 }

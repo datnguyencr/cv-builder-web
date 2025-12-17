@@ -52,7 +52,8 @@ class Template2 extends PDFGenerator {
         ctx.advance(this.writeTextWithMarker(
             ctx,
             `${title.text} | ${description.text}`, {
-                style: title.style,lineHeight:0,
+                style: title.style,
+                lineHeight: 0,
                 marker: showTimeLine ? marker : null
             }
         ));
@@ -60,10 +61,12 @@ class Template2 extends PDFGenerator {
         ctx.advance(this.writeTextWithMarker(
             ctx,
             dates.text, {
-                style: dates.style,lineHeight:0,
+                style: dates.style,
+                lineHeight: 0,
                 marker: showTimeLine ?
                     (x, y, w, pdf) => {
-                        pdf.doc.line(
+                        this.doc.setLineWidth(1);
+                        pdf.drawLine(
                             x,
                             y - w * 2,
                             x,
@@ -84,7 +87,7 @@ class Template2 extends PDFGenerator {
                 right,
                 pdf
             }) => {
-                pdf.avatar(left,this.cvInfo.avatar, {
+                pdf.avatar(left, this.cvInfo.avatar, {
                     size: 90
                 });
                 right.advance(40);

@@ -1,6 +1,5 @@
 class Template3 extends PDFGenerator {
 
-
     constructor(cvInfo, options = {
         leftRatio: .4,
         rightRatio: .6,
@@ -18,7 +17,7 @@ class Template3 extends PDFGenerator {
         this.font = 'custom';
     }
 
-    formatTime(monthValue)  {
+    formatTime(monthValue) {
         if (!monthValue) return '';
         const y = monthValue.split('-')[0];
         return y || '';
@@ -32,221 +31,126 @@ class Template3 extends PDFGenerator {
     }
     blockDescriptionStyle() {
         return new TextStyle({
-            style: 'bold',size:10,
+            style: 'bold',
+            size: 10,
             color: this.textColor
         });
     }
 
     blockDatesStyle() {
         return new TextStyle({
-            style: 'normal',size:10,
+            style: 'normal',
+            size: 10,
             color: this.textColor
         });
     }
 
-    blockHeader({
+    blockHeader(ctx, {
         title = new Text(),
         description = new Text(),
         dates = new Text(),
-        column = "left",
         timelineColor = this.mainColor,
         showTimeLine = false
     } = {}) {
 
         const marker = TIMELINE_MARKERS["circle"];
+
         this.doc.setFillColor(...timelineColor);
-        this.writeTextWithMarker(title.text, {
-            style: title.style,
-            column: column,
-            marker: showTimeLine ? marker : null
-        });
+        this.doc.setDrawColor(...timelineColor);
 
-        const colW = this.colWidth(column);
-        const textW = colW - 10 - 10;
-        var leftRatio = 0.6;
-        const desciptionLines = this.doc.splitTextToSize(description.text, textW * leftRatio);
-        const datesLines = this.doc.splitTextToSize(dates.text, textW * (1 - leftRatio));
-
-        const lines = Math.max(desciptionLines.length, datesLines.length);
-        this.row(
-            (opts) => this.writeTextWithMarker(description.text, {
-                ...opts,
-                style: description.style,
-                column,
-                marker: showTimeLine ?
-                    (x, y, w, ctx) => ctx.doc.line(x, y - w * 2, x, y + (w + 20) * lines) :
-                    null
-            }),
-            (opts) => this.writeTextWithMarker(dates.text, {
-                ...opts,
-                style: dates.style,
-                column,
-                marker: null,
-                align: "right"
-            }), {
-                column,
-                leftRatio: leftRatio
+        ctx.advance(this.writeTextWithMarker(
+            ctx, title.text, {
+                style: title.style,
+                lineHeight: 0,
+                marker: showTimeLine ? marker : null
             }
-        );
-
-    }
-    async showName({
-        column = "left"
-    } = {}) {
-        this.name(this.cvInfo.name, {
-            column: column,
-            textSize: 32,
-            textColor: this.mainColor,
-            center: true
-        });
-    }
-
-    async showTitle({
-        column = "left"
-    } = {}) {
-        this.title(this.cvInfo.title, {
-            column: column,
-            textColor: this.textColor,
-            center: true
-        });
-        this.addYOffset(column, 20);
+        ));
+        ctx.advance(20);
+        ctx.advance(this.writeTextPair(
+            ctx, description.text, dates.text, {
+                leftStyle: description.style,
+                rightStyle: dates.style,
+                lineHeight: 0,
+                marker: showTimeLine ?
+                    (x, y, w, pdf) => {
+                        this.doc.setLineWidth(1);
+                        pdf.drawLine(
+                            x,
+                            y - w * 2,
+                            x,
+                            y + w + 5
+                        );
+                    } : null
+            }
+        ));
+        ctx.advance(20);
     }
 
-    async showContactInfo({
-        column = "left"
-    } = {}) {
-        await this.contactInfoBlock({
-            column:column,
-            style:"row",
-            icon:this.contactImage});
+    content() {
+        this.renderSection(new Section({
+            leftRatio: .4,
+            rightRatio: .6,
+            render: ({
+                left,
+                right,
+                pdf
+            }) => {
+                pdf.avatar(left, this.cvInfo.avatar, {
+                    center: true,
+                    size: 90,
+                    borderSize: 10,
+                    borderColor: this.rightBackgroundColor,
+                });
+                left.advance(40);
+                pdf.name(left, this.cvInfo.name, {
+                    textColor: this.mainColor
+                });
+                pdf.title(left, this.cvInfo.title, {
+                    textColor: this.textColor
+                });
+                pdf.introductionBlock(left, {
+                    headerColor: this.textColor,
+                    icon: this.introductionImage,
+                    underline: true,
+                });
+                pdf.contactInfoBlock(left, {
+                    headerColor: this.textColor,
+                    icon: this.contactImage,
+                    underline: true,
+                });
+                pdf.skillsBlock(left, {
+                    headerColor: this.textColor,
+                    icon: this.skillImage,
+                    underline: true,
+                });
+                pdf.referencesBlock(left, {
+                    headerColor: this.textColor,
+                    icon: this.referenceImage,
+                    underline: true,
+                });
+                pdf.awardsBlock(left, {
+                    headerColor: this.textColor,
+                    icon: this.awardImage,
+                    underline: true,
+                });
+                pdf.hobbyBlock(left, {
+                    headerColor: this.textColor,
+                    icon: this.hobbyImage,
+                    underline: true,
+                });
+                pdf.workExpBlock(right, {
+                    headerColor: this.textColor,
+                    icon: this.workExpImage,
+                    underline: true,
+                    showTimeLine: true,
+                });
+                pdf.educationBlock(right, {
+                    headerColor: this.textColor,
+                    icon: this.educationImage,
+                    underline: true,
+                    showTimeLine: true
+                });
+            }
+        }));
     }
-    
-    async introductionBlock({column = "left"}){
-        this.header({
-            text: "Introduction",
-            column: column,
-            color: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.introductionImage
-        });
-        this.addYOffset(column,10);
-        this.introduction(this.cvInfo.introduction, {style: 'italic'});
-    }
-
-    async showEducation({
-        column = "left"
-    } = {}) {
-        this.educationBlock({
-            column: column,
-            headerColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.educationImage,
-            showTimeLine: true
-        });
-    }
-
-    async showWorkExp({
-        column = "left"
-    } = {}) {
-        this.workExpBlock({
-            column: column,
-            headerColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.workExpImage,
-            showTimeLine: true
-        });
-    }
-
-    async showSkills({
-        column = "left"
-    } = {}) {
-        this.skillsBlock({
-            column: column,
-            headerColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.skillImage
-        });
-    }
-    async showReference({
-        column = "left"
-    } = {}) {
-        this.referencesBlock({
-            column: column,
-            headerColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.referenceImage
-        });
-    }
-
-    async showAward({
-        column = "left"
-    } = {}) {
-        this.awardsBlock({
-            column: column,
-            headerColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.awardImage
-        });
-    }
-
-    async showHobby({
-        column = "left"
-    } = {}) {
-        await this.hobbyBlock({
-            column: column,
-            headerColor: this.textColor,
-            underline: true,
-            lineColor: this.mainColor,
-            icon: this.hobbyImage
-        });
-    }
-    async showLeftColumn({
-        column = "left"
-    } = {}) {
-        await this.showAvatar({
-            column: column
-        });
-        await this.showName({
-            column: column
-        });
-        await this.showTitle({
-            column: column
-        });
-        await this.showIntroduction({
-            column: column
-        });
-        await this.showContactInfo({
-            column: column
-        });
-    }
-
-    async showRightColumn({
-        column = "right"
-    } = {}) {
-        await this.showSkills({
-            column: column
-        });
-        await this.showReference({
-            column: column
-        });
-        await this.showAward({
-            column: column
-        });
-        await this.showHobby({
-            column: column
-        });
-        await this.showWorkExp({
-            column: column
-        });
-        await this.showEducation({
-            column: column
-        });
-    }
-
 }

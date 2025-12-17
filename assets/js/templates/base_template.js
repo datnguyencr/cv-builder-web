@@ -4,7 +4,7 @@ const TIMELINE_MARKERS = {
     },
 
     line: (x, y, w, ctx) => {
-        ctx.doc.line(x, y - w * 2, x, y + w);
+        ctx.drawLine(x, y - w * 2, x, y + w);
     },
 
     square: (x, y, w, ctx) => {
@@ -41,7 +41,9 @@ class LayoutContext {
         width,
         pageHeight,
         margin,
-        doc
+        doc,
+        column,
+
     }) {
         this.x = x;
         this.y = y;
@@ -50,6 +52,8 @@ class LayoutContext {
         this.pageHeight = pageHeight;
         this.margin = margin;
         this.doc = doc;
+        this.column = column;
+        this.currentPage = 1;
     }
 
     advance(h) {
@@ -62,8 +66,15 @@ class LayoutContext {
 
     ensureSpace(h, onNewPage) {
         if (this.y + h > this.pageHeight - this.margin) {
-            onNewPage?.();
+            onNewPage?.(this.column);
+            this.currentPage++;
             this.y = this.margin;
+        }
+    }
+
+    goToCurrentPage() {
+        if (this.doc.internal.getCurrentPageInfo().pageNumber !== this.currentPage) {
+            this.doc.setPage(this.currentPage);
         }
     }
 }
@@ -151,20 +162,25 @@ class PDFGenerator {
         const leftCtx = new LayoutContext({
             x: this.margin,
             y: startY,
-            width: leftW,
+            width: leftW - this.margin,
             pageHeight: this.pageHeight,
             margin: this.margin,
-            doc: this.doc
+            doc: this.doc,
+            column: 'left'
         });
 
         const rightCtx = new LayoutContext({
             x: this.margin + leftW + section.gap,
             y: startY,
-            width: rightW,
+            width: rightW - this.margin,
             pageHeight: this.pageHeight,
             margin: this.margin,
-            doc: this.doc
+            doc: this.doc,
+            column: 'right'
         });
+
+        leftCtx.goToCurrentPage();
+        rightCtx.goToCurrentPage();
 
         section.render({
             left: leftCtx,
@@ -172,13 +188,8 @@ class PDFGenerator {
             pdf: this
         });
 
-        const used = Math.max(
-            leftCtx.heightUsed(),
-            rightCtx.heightUsed()
-        );
-
-        this.leftY = startY + used + section.paddingBottom;
-        this.rightY = this.leftY;
+        this.leftY = leftCtx.y + (section.paddingBottom || 0);
+        this.rightY = rightCtx.y + (section.paddingBottom || 0);
     }
 
     blockTitleStyle() {
@@ -202,13 +213,48 @@ class PDFGenerator {
         });
     }
 
+writeTextPair(ctx, leftText, rightText, {
+    leftStyle = new TextStyle(),
+    rightStyle = new TextStyle(),
+    lineHeight = this.lineHeight,
+    padding = 5,
+    marker = null,
+    markerWidth = 0,
+    gap = 10
+} = {}) {
+    const totalWidth = ctx.width - padding * 2;
+
+    const leftW = totalWidth * 0.5;
+    const rightW = totalWidth - leftW;
+    const leftHeight = this.writeTextWithMarker(ctx, leftText, {
+        style: leftStyle,
+        lineHeight,
+        padding:padding,
+        customWidth: leftW,
+        marker,
+        markerWidth,
+        gap,
+        align: "left"
+    });
+
+    const rightHeight = this.writeTextWithMarker(ctx, rightText, {
+        style: rightStyle,
+        lineHeight,
+        padding:padding+leftW,
+        customWidth: rightW - gap,
+        align: "right"
+    });
+
+    return Math.max(leftHeight, rightHeight);
+}
+
     writeTextWithMarker(ctx, text, {
         style = new TextStyle(),
         markerWidth = 10,
         gap = 10,
         marker = null,
         lineHeight = this.lineHeight,
-        padding = 0,
+        padding = 5,
         customWidth = null,
         align = "left"
     } = {}) {
@@ -227,17 +273,13 @@ class PDFGenerator {
             availableWidth - (marker ? markerWidth + gap : 0);
 
         const lines = this.doc.splitTextToSize(text, textW);
-
-        const startY = ctx.y;
         let usedHeight = 0;
 
         for (let i = 0; i < lines.length; i++) {
 
-            ctx.ensureSpace(lineHeight, () => {
-                this.doc.addPage();
-                this.drawBackground();
+            ctx.ensureSpace(lineHeight, (column) => {
+                this.addPageFor(ctx, column);
             });
-
             const y = ctx.y;
 
             if (i === 0 && marker) {
@@ -265,14 +307,14 @@ class PDFGenerator {
         title = new Text(),
         description = new Text(),
         dates = new Text(),
-        timelineColor = this.mainColor,
+        timeLineColor = this.mainColor,
         showTimeLine = false
     } = {}) {
 
         const marker = TIMELINE_MARKERS["circle"];
 
-        this.doc.setFillColor(...timelineColor);
-        this.doc.setDrawColor(...timelineColor);
+        this.doc.setFillColor(...timeLineColor);
+        this.doc.setDrawColor(...timeLineColor);
 
         ctx.advance(this.writeTextWithMarker(
             ctx,
@@ -288,11 +330,13 @@ class PDFGenerator {
                 style: description.style,
                 marker: showTimeLine ?
                     (x, y, w, pdf) => {
-                        pdf.doc.line(
+                        pdf.drawLine(
                             x,
                             y - w * 2,
                             x,
-                            y + w + 5
+                            y + w + 5, {
+                                color: timeLineColor
+                            }
                         );
                     } : null
             }
@@ -327,6 +371,23 @@ class PDFGenerator {
         this.doc.addFileToVFS(`${name}.ttf`, base64);
         this.doc.addFont(`${name}.ttf`, name, style);
     }
+
+    addPageFor(ctx, column) {
+        if (ctx.currentPage < this.doc.getNumberOfPages()) {
+            ctx.currentPage++;
+            this.doc.setPage(ctx.currentPage);
+        } else {
+            this.doc.addPage();
+            ctx.currentPage = this.doc.getNumberOfPages();
+            this.drawBackground();
+        }
+
+        ctx.y = this.margin;
+
+        if (column === 'left') this.leftY = ctx.y;
+        else this.rightY = ctx.y;
+    }
+
 
     drawBackground() {
         // LEFT
@@ -415,46 +476,43 @@ class PDFGenerator {
     ul(ctx, items, {
         indent = 10,
         markerWidth = 0,
-        gap = 5,
+        gap = 10,
         lineHeight = this.lineHeight,
         showTimeLine = false,
-        timelineColor = this.mainColor
+        timeLineColor = this.mainColor,
+        padding = 5
     } = {}) {
         this.doc.setFontSize(this.textSize);
         this.doc.setFont(this.font, "normal");
         this.doc.setTextColor(...this.textColor);
 
-        const markerX = ctx.x;
-        const bulletX = markerX + (showTimeLine ? markerWidth : 0) + gap;
-        const textX = bulletX + indent;
-        const textW = ctx.width - (showTimeLine ? markerWidth : 0) - gap - indent;
+        const markerX = ctx.x + padding;
+        const bulletX = markerX + (showTimeLine ? (markerWidth + gap) : 0);
+        const textXOffset = bulletX + indent;
 
         items.forEach(item => {
-            const lines = this.doc.splitTextToSize(item, textW);
-            let y = ctx.y;
+            const lines = this.doc.splitTextToSize(item, ctx.width - (showTimeLine ? (markerWidth + gap) : 0) - indent);
+            const blockHeight = lines.length * lineHeight;
+
+            ctx.ensureSpace(blockHeight, column => this.addPageFor(ctx, column));
+
+            if (showTimeLine) {
+                this.doc.setFillColor(...timeLineColor);
+                this.doc.setLineWidth(1);
+                this.drawLine(markerX, ctx.y - lineHeight * 2, markerX, ctx.y + blockHeight, {
+                    color: timeLineColor
+                });
+            }
+
+            this.doc.text("•", bulletX, ctx.y);
 
             lines.forEach((line, i) => {
-                ctx.ensureSpace(lineHeight, () => {
-                    this.doc.addPage();
-                    this.drawBackground();
-                });
-
-                if (showTimeLine) {
-                    this.doc.setFillColor(...timelineColor);
-                    this.doc.line(markerX, y - lineHeight*2, markerX, y + lineHeight);
-                }
-
-                if (i === 0) {
-                    this.doc.text("•", bulletX, y);
-                }
-
-                this.doc.text(line, textX, y);
-                y += lineHeight;
+                this.doc.text(line, textXOffset, ctx.y);
+                ctx.advance(lineHeight);
             });
-
-            ctx.advance(Math.max(lineHeight, lines.length * lineHeight) + 5);
         });
     }
+
 
     join(ctx, items) {
         this.doc.setFontSize(this.textSize);
@@ -466,9 +524,8 @@ class PDFGenerator {
 
         let y = ctx.y;
         lines.forEach(line => {
-            ctx.ensureSpace(this.lineHeight, () => {
-                this.doc.addPage();
-                this.drawBackground();
+            ctx.ensureSpace(this.lineHeight, (column) => {
+                this.addPageFor(ctx, column);
             });
 
             this.doc.text(line, ctx.x, y);
@@ -493,19 +550,18 @@ class PDFGenerator {
         dash = false,
         textSize = 14,
     } = {}) {
-
+        ctx.goToCurrentPage();
         ctx.advance(paddingTop);
         if (upperline) {
-            this.drawLine(ctx, {
+            this.drawLineBlock(ctx, {
                 color: lineColor,
                 dash
             });
             ctx.advance(linePadding);
         }
 
-        ctx.ensureSpace(textSize, () => {
-            this.doc.addPage();
-            this.drawBackground();
+        ctx.ensureSpace(textSize, (column) => {
+            this.addPageFor(ctx, column);
         });
         this.doc.setFont(this.font, "bold");
         this.doc.setFontSize(textSize);
@@ -556,7 +612,7 @@ class PDFGenerator {
 
         if (underline) {
             ctx.advance(linePadding);
-            this.drawLine(ctx, {
+            this.drawLineBlock(ctx, {
                 color: lineColor,
                 dash
             });
@@ -574,9 +630,8 @@ class PDFGenerator {
         let y = ctx.y;
 
         lines.forEach(line => {
-            ctx.ensureSpace(style.size, () => {
-                this.doc.addPage();
-                this.drawBackground();
+            ctx.ensureSpace(style.size, (column) => {
+                this.addPageFor(ctx, column);
             });
 
             this.doc.text(line, ctx.x, y);
@@ -593,7 +648,7 @@ class PDFGenerator {
         detailList = [],
         indent = 10,
         showTimeLine = false,
-        timelineColor = this.mainColor,
+        timeLineColor = this.mainColor,
         lineGap = 10
     } = {}) {
         this.blockHeader(ctx, {
@@ -601,62 +656,60 @@ class PDFGenerator {
             description,
             dates,
             showTimeLine,
-            timelineColor
+            timeLineColor
         });
         if (detailList.length) {
             this.ul(ctx, detailList, {
                 lineHeight: 15,
                 indent,
                 showTimeLine,
-                timelineColor
+                timeLineColor
             });
         }
 
         ctx.advance(lineGap);
     }
 
-avatar(ctx, imageBase64, {
-    size = 100,
-    borderColor = this.mainColor,
-    borderSize = 5,
-    padding = 0,
-    center = false,
-} = {}) {
-    if (!imageBase64) return 0;
+    avatar(ctx, imageBase64, {
+        size = 100,
+        borderColor = this.mainColor,
+        borderSize = 5,
+        padding = 0,
+        center = false,
+    } = {}) {
+        if (!imageBase64) return 0;
 
-    const totalSize = size + padding * 2;
+        const totalSize = size + padding * 2;
+        const x = center ?
+            ctx.x + (ctx.width - size) / 2 :
+            ctx.x;
 
-    // decide X
-    const x = center
-        ? ctx.x + (ctx.width - size) / 2
-        : ctx.x;
+        const y = ctx.y;
 
-    const y = ctx.y;
+        // border
+        if (borderSize > 0) {
+            this.doc.setDrawColor(...borderColor);
+            this.doc.setLineWidth(borderSize);
+            this.doc.circle(
+                x + size / 2,
+                y + size / 2,
+                size / 2 + padding
+            );
+        }
 
-    // border
-    if (borderSize > 0) {
-        this.doc.setDrawColor(...borderColor);
-        this.doc.setLineWidth(borderSize);
-        this.doc.circle(
-            x + size / 2,
-            y + size / 2,
-            size / 2 + padding
+        // image
+        this.doc.addImage(
+            imageBase64,
+            "PNG",
+            x,
+            y,
+            size,
+            size
         );
+
+        ctx.advance(totalSize);
+        return totalSize;
     }
-
-    // image
-    this.doc.addImage(
-        imageBase64,
-        "PNG",
-        x,
-        y,
-        size,
-        size
-    );
-
-    ctx.advance(totalSize);
-    return totalSize;
-}
 
 
     name(ctx, text, {
@@ -746,12 +799,11 @@ avatar(ctx, imageBase64, {
         ];
 
         for (const item of items) {
-            ctx.ensureSpace(lineHeight, () => {
-                this.doc.addPage();
-                this.drawBackground();
+            ctx.ensureSpace(lineHeight, (column) => {
+                this.addPageFor(ctx, column);
             });
 
-            this.writePair(ctx,{
+            this.writePair(ctx, {
                 label: new PdfText({
                     text: item.label,
                     style: this.contactLabelTextStyle()
@@ -765,7 +817,7 @@ avatar(ctx, imageBase64, {
         }
     }
 
-     contactInfoColumn(ctx) {
+    contactInfoColumn(ctx) {
         const textSize = 10;
         const columnCount = 3;
         const columnWidth = (this.pageWidth - this.margin * 2) / columnCount;
@@ -787,35 +839,30 @@ avatar(ctx, imageBase64, {
             }
         ];
 
-        ctx.advance(20);
-
         for (const col of columns) {
             const x = this.margin + columnWidth * col.index;
-            ctx.ensureSpace(this.lineHeight, () => {
-                this.doc.addPage();
-                this.drawBackground();
+            ctx.ensureSpace(this.lineHeight, (column) => {
+                this.addPageFor(ctx, column);
             });
 
             this.doc.setFontSize(textSize);
             this.doc.setFont(this.font, "bold");
             this.doc.setTextColor(...this.mainColor);
-            this.doc.text(col.title, x,ctx.y);
+            this.doc.text(col.title, x, ctx.y);
         }
         ctx.advance(this.lineHeight);
-        
+
         for (const col of columns) {
             const x = this.margin + columnWidth * col.index;
-             ctx.ensureSpace(this.lineHeight, () => {
-                this.doc.addPage();
-                this.drawBackground();
+            ctx.ensureSpace(this.lineHeight, (column) => {
+                this.addPageFor(ctx, column);
             });
 
             this.doc.setFontSize(textSize);
             this.doc.setFont(this.font, "normal");
             this.doc.setTextColor(...this.textColor);
-            this.doc.text(col.value,  x,ctx.y);
+            this.doc.text(col.value, x, ctx.y);
         }
-        ctx.advance(this.lineHeight);
     }
 
     contactInfoBlock(ctx, {
@@ -829,22 +876,23 @@ avatar(ctx, imageBase64, {
         lineColor = this.mainColor,
         icon = null,
         dash = false,
-        style="row"
+        style = "row"
     } = {}) {
+        ctx.advance(10);
         switch (style) {
             case "row":
                 this.header(ctx, {
                     text: "Contact",
-                       uppercase: uppercase,
-                        center: center,
-                        underline: underline,
-                        upperline: upperline,
-                        color: headerColor,
-                        lineColor: lineColor,
-                        icon: icon,
-                        dash: dash,
-                        paddingTop: paddingTop,
-                        paddingBottom: paddingBottom
+                    uppercase: uppercase,
+                    center: center,
+                    underline: underline,
+                    upperline: upperline,
+                    color: headerColor,
+                    lineColor: lineColor,
+                    icon: icon,
+                    dash: dash,
+                    paddingTop: paddingTop,
+                    paddingBottom: paddingBottom
                 });
                 this.contactInfoRow(ctx);
                 break;
@@ -853,8 +901,7 @@ avatar(ctx, imageBase64, {
                 this.contactInfoColumn(ctx);
                 break;
         }
-
-        ctx.advance(20);
+        ctx.advance(10);
     }
 
     introductionBlock(ctx, {
@@ -901,6 +948,7 @@ avatar(ctx, imageBase64, {
         icon = null,
         showTimeLine = false,
         dash = false,
+        timeLineColor = this.mainColor,
     } = {}) {
         if (!this.cvInfo.workExpArr.length) return;
 
@@ -936,6 +984,8 @@ avatar(ctx, imageBase64, {
                     text: dates,
                     style: this.blockDatesStyle()
                 }),
+                indent: 15,
+                timeLineColor: timeLineColor,
                 detailList: item.details,
                 showTimeLine: showTimeLine,
                 padding: showTimeLine ? 10 : 0
@@ -943,33 +993,47 @@ avatar(ctx, imageBase64, {
         }
     }
 
-    drawLine(ctx, {
-        thickness = 0.5,
+    drawLineBlock(ctx, {
+        thickness = 1,
         dash = false,
         color = this.textColor,
         spacing = 6,
     } = {}) {
-
-        ctx.ensureSpace(spacing, () => {
-            this.doc.addPage();
-            this.drawBackground();
+        ctx.ensureSpace(spacing, (column) => {
+            this.addPageFor(ctx, column);
         });
+        const y = ctx.y;
+        const xStart = ctx.x;
+        const xEnd = ctx.x + ctx.width;
+        this.drawLine(xStart,
+            y,
+            xEnd,
+            y, {
+                dash: dash,
+                color: color,
+                thickness: thickness
+            });
+        ctx.advance(spacing);
+    }
 
+    drawLine(x1 = 0,
+        y1 = 0,
+        x2 = 0,
+        y2 = 0, {
+            thickness = 1,
+            dash = false,
+            color = this.textColor,
+        } = {}) {
         if (dash) {
             this.doc.setLineDash([2]);
         } else {
             this.doc.setLineDash([]); // IMPORTANT: reset
         }
-
         this.doc.setLineWidth(thickness);
         this.doc.setDrawColor(...color);
 
-        const y = ctx.y;
-        const xStart = ctx.x;
-        const xEnd = ctx.x + ctx.width;
-
-        this.doc.line(xStart, y, xEnd, y);
-        ctx.advance(spacing);
+        this.doc.line(x1, y1, x2, y2);
+        this.doc.setLineWidth(1);
     }
 
     educationBlock(ctx, {
@@ -1018,7 +1082,7 @@ avatar(ctx, imageBase64, {
                     style: this.blockDatesStyle()
                 }),
                 detailList: item.details,
-
+                indent: 15,
                 showTimeLine: showTimeLine,
                 padding: showTimeLine ? 10 : 0
             });
@@ -1038,7 +1102,6 @@ avatar(ctx, imageBase64, {
         dash = false,
     } = {}) {
         if (!this.cvInfo.skillArr.length) return;
-
         this.header(ctx, {
             text: "Skills",
             paddingTop: paddingTop,
@@ -1055,7 +1118,7 @@ avatar(ctx, imageBase64, {
 
         ctx.advance(10);
 
-       this.join(ctx, this.cvInfo.skillArr.map(h => h.name));
+        this.join(ctx, this.cvInfo.skillArr.map(h => h.name));
     }
 
     referencesBlock(ctx, {
@@ -1167,9 +1230,8 @@ avatar(ctx, imageBase64, {
         let usedHeight = 0;
         for (let i = 0; i < lines.length; i++) {
 
-            ctx.ensureSpace(lineHeight, () => {
-                this.doc.addPage();
-                this.drawBackground();
+            ctx.ensureSpace(lineHeight, (column) => {
+                this.addPageFor(ctx, column);
             });
 
             const x = center ?
@@ -1184,7 +1246,6 @@ avatar(ctx, imageBase64, {
                     align: 'center'
                 } : undefined
             );
-
             ctx.advance(lineHeight);
             usedHeight += lineHeight;
         }
