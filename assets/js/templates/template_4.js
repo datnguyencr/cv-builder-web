@@ -92,16 +92,10 @@ class Template4 extends PDFGenerator {
                 right,
                 pdf
             }) => {
-                pdf.avatar(left, this.cvInfo.avatar, {
-                    size: 90
-                });
+                pdf.avatar(left, this.cvInfo.avatar, {});
                 right.advance(40);
-                pdf.name(right, this.cvInfo.name, {
-                    textColor: this.textColor
-                });
-                pdf.title(right, this.cvInfo.title, {
-                    textColor: this.textColor
-                });
+                pdf.name(right, this.cvInfo.name, {});
+                pdf.title(right, this.cvInfo.title, {});
             }
         }));
         this.renderSection(new Section({

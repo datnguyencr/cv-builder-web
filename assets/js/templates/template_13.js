@@ -89,7 +89,6 @@ class Template13 extends PDFGenerator {
             }) => {
                 pdf.avatar(left, this.cvInfo.avatar, {
                     center: true,
-                    size: 90,
                     borderSize: 10,
                     borderColor: this.rightBackgroundColor,
                 });
@@ -118,22 +117,23 @@ class Template13 extends PDFGenerator {
                     icon: this.awardImage,
                     underline: true,
                     uppercase: true,
+    
                 });
                 pdf.hobbyBlock(left, {
                     headerColor: this.textColor,
                     icon: this.hobbyImage,
                     underline: true,
                     uppercase: true,
+    
                 });
                 right.advance(40);
                 pdf.name(right, this.cvInfo.name, {
+                    style:this.nameTextStyle().clone({color:this.mainColor,size:48}),
                     textSize: 48,
-                    textColor: this.mainColor
                 });
                 pdf.title(right, this.cvInfo.title, {
-                    textSize: 24,
+                    style:this.titleTextStyle().clone({size:24}),
                     uppercase: true,
-                    textColor: this.textColor
                 });
                 pdf.introductionBlock(right, {
                     headerColor: this.textColor,
@@ -153,7 +153,7 @@ class Template13 extends PDFGenerator {
                     icon: this.educationImage,
                     underline: true,
                     uppercase: true,
-                    showTimeLine: true
+                    showTimeLine: true,
                 });
             }
         }));

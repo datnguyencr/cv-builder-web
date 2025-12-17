@@ -32,6 +32,13 @@ class TextStyle {
         this.color = color;
         this.style = style; // 'normal', 'bold', 'italic'
     }
+    clone(overrides = {}) {
+        return new TextStyle({
+            size: overrides.size ?? this.size,
+            color: overrides.color ?? [...this.color], // avoid shared array
+            style: overrides.style ?? this.style
+        });
+    }
 }
 
 class LayoutContext {
@@ -123,11 +130,15 @@ class PDFGenerator {
         this.leftY = this.margin;
         this.rightY = this.margin;
 
+
         // Style
         this.font = options.font || "custom";
         this.textColor = options.textColor || [0, 0, 0];
         this.mainColor = options.mainColor || [0, 0, 0];
         this.textSize = options.textSize || 12;
+        this.headerTextSize = options.headerTextSize || 14;
+        this.headerTextStyle = options.headerTextStyle || "bold";
+        this.separator=options.separator || false;
     }
 
     formatTime(monthValue) {
@@ -191,7 +202,21 @@ class PDFGenerator {
         this.leftY = leftCtx.y + (section.paddingBottom || 0);
         this.rightY = rightCtx.y + (section.paddingBottom || 0);
     }
+    nameTextStyle() {
+        return new TextStyle({
+            color: this.textColor,
+            size: 24,
+            style: "bold"
+        });
+    }
 
+    titleTextStyle() {
+        return new TextStyle({
+            color: this.textColor,
+            size: 12,
+            style: "bold"
+        });
+    }
     blockTitleStyle() {
         return new TextStyle({
             style: 'bold',
@@ -213,40 +238,40 @@ class PDFGenerator {
         });
     }
 
-writeTextPair(ctx, leftText, rightText, {
-    leftStyle = new TextStyle(),
-    rightStyle = new TextStyle(),
-    lineHeight = this.lineHeight,
-    padding = 5,
-    marker = null,
-    markerWidth = 0,
-    gap = 10
-} = {}) {
-    const totalWidth = ctx.width - padding * 2;
+    writeTextPair(ctx, leftText, rightText, {
+        leftStyle = new TextStyle(),
+        rightStyle = new TextStyle(),
+        lineHeight = this.lineHeight,
+        padding = 5,
+        marker = null,
+        markerWidth = 0,
+        gap = 10
+    } = {}) {
+        const totalWidth = ctx.width - padding * 2;
 
-    const leftW = totalWidth * 0.5;
-    const rightW = totalWidth - leftW;
-    const leftHeight = this.writeTextWithMarker(ctx, leftText, {
-        style: leftStyle,
-        lineHeight,
-        padding:padding,
-        customWidth: leftW,
-        marker,
-        markerWidth,
-        gap,
-        align: "left"
-    });
+        const leftW = totalWidth * 0.5;
+        const rightW = totalWidth - leftW;
+        const leftHeight = this.writeTextWithMarker(ctx, leftText, {
+            style: leftStyle,
+            lineHeight,
+            padding: padding,
+            customWidth: leftW,
+            marker,
+            markerWidth,
+            gap,
+            align: "left"
+        });
 
-    const rightHeight = this.writeTextWithMarker(ctx, rightText, {
-        style: rightStyle,
-        lineHeight,
-        padding:padding+leftW,
-        customWidth: rightW - gap,
-        align: "right"
-    });
+        const rightHeight = this.writeTextWithMarker(ctx, rightText, {
+            style: rightStyle,
+            lineHeight,
+            padding: padding + leftW,
+            customWidth: rightW - gap,
+            align: "right"
+        });
 
-    return Math.max(leftHeight, rightHeight);
-}
+        return Math.max(leftHeight, rightHeight);
+    }
 
     writeTextWithMarker(ctx, text, {
         style = new TextStyle(),
@@ -396,7 +421,7 @@ writeTextPair(ctx, leftText, rightText, {
             0,
             0,
             this.leftWidth,
-            this.pageHeight + 2,
+            this.pageHeight,
             "F"
         );
 
@@ -406,9 +431,16 @@ writeTextPair(ctx, leftText, rightText, {
             this.leftWidth,
             0,
             this.pageWidth - this.leftWidth,
-            this.pageHeight + 2,
+            this.pageHeight,
             "F"
         );
+        if(this.separator){
+            const lineThickness = 1;
+            this.doc.setLineWidth(lineThickness);
+            this.doc.setDrawColor(...this.mainColor);
+            this.doc.line(this.leftWidth, this.margin, this.leftWidth, this.pageHeight-this.margin);
+        }
+
     }
 
     contactLabelTextStyle() {
@@ -480,11 +512,12 @@ writeTextPair(ctx, leftText, rightText, {
         lineHeight = this.lineHeight,
         showTimeLine = false,
         timeLineColor = this.mainColor,
-        padding = 5
+        padding = 5,
+        textColor = this.textColor,
     } = {}) {
         this.doc.setFontSize(this.textSize);
         this.doc.setFont(this.font, "normal");
-        this.doc.setTextColor(...this.textColor);
+        this.doc.setTextColor(...textColor);
 
         const markerX = ctx.x + padding;
         const bulletX = markerX + (showTimeLine ? (markerWidth + gap) : 0);
@@ -514,10 +547,12 @@ writeTextPair(ctx, leftText, rightText, {
     }
 
 
-    join(ctx, items) {
+    join(ctx, items, {
+        textColor = this.textColor
+    } = {}) {
         this.doc.setFontSize(this.textSize);
         this.doc.setFont(this.font, 'normal');
-        this.doc.setTextColor(...this.textColor);
+        this.doc.setTextColor(...textColor);
 
         const text = `- ${items.join(", ")}.`;
         const lines = this.doc.splitTextToSize(text, ctx.width);
@@ -539,7 +574,7 @@ writeTextPair(ctx, leftText, rightText, {
         text = "",
         uppercase = false,
         center = false,
-        linePadding = 25,
+        linePadding = 10,
         underline = false,
         upperline = false,
         color = this.mainColor,
@@ -548,7 +583,7 @@ writeTextPair(ctx, leftText, rightText, {
         paddingTop = 20,
         paddingBottom = 20,
         dash = false,
-        textSize = 14,
+        textSize = this.headerTextSize,
     } = {}) {
         ctx.goToCurrentPage();
         ctx.advance(paddingTop);
@@ -563,7 +598,7 @@ writeTextPair(ctx, leftText, rightText, {
         ctx.ensureSpace(textSize, (column) => {
             this.addPageFor(ctx, column);
         });
-        this.doc.setFont(this.font, "bold");
+        this.doc.setFont(this.font, this.headerTextStyle);
         this.doc.setFontSize(textSize);
         this.doc.setTextColor(...color);
 
@@ -671,7 +706,7 @@ writeTextPair(ctx, leftText, rightText, {
     }
 
     avatar(ctx, imageBase64, {
-        size = 100,
+        size = 120,
         borderColor = this.mainColor,
         borderSize = 5,
         padding = 0,
@@ -711,49 +746,46 @@ writeTextPair(ctx, leftText, rightText, {
         return totalSize;
     }
 
-
     name(ctx, text, {
-        textSize = 24,
+        style = this.nameTextStyle(),
         lineHeight = 0,
         center = false,
-        textColor = this.textColor,
         uppercase = false,
         padding = 0,
     } = {}) {
-
+        ctx.goToCurrentPage();
         const content = uppercase ? text.toUpperCase() : text;
 
-        this.doc.setFont(this.font, "bold");
-        this.doc.setFontSize(textSize);
-        this.doc.setTextColor(...textColor);
+        this.doc.setFont(this.font, style.style);
+        this.doc.setFontSize(style.size);
+        this.doc.setTextColor(...style.color);
 
         return this.drawText(ctx, content, {
             center,
             padding,
-            lineHeight: textSize + lineHeight
+            lineHeight: style.size + lineHeight
         });
     }
 
     title(ctx, text, {
-        textSize = 12,
+        style = this.titleTextStyle(),
         lineHeight = 0,
         center = false,
-        textColor = this.textColor,
         uppercase = false,
         padding = 0,
     } = {}) {
-
+        ctx.goToCurrentPage();
         const content = uppercase ? text.toUpperCase() : text;
 
-        this.doc.setFont(this.font, "bold");
-        this.doc.setFontSize(textSize);
-        this.doc.setTextColor(...textColor);
+        this.doc.setFont(this.font, style.style);
+        this.doc.setFontSize(style.size);
+        this.doc.setTextColor(...style.color);
 
         return this.drawText(ctx, content, {
             indent: 0,
             center,
             padding,
-            lineHeight: textSize + lineHeight
+            lineHeight: style.size + lineHeight
         });
     }
 
@@ -876,6 +908,9 @@ writeTextPair(ctx, leftText, rightText, {
         lineColor = this.mainColor,
         icon = null,
         dash = false,
+        textSize = this.headerTextSize,
+        textColor = this.textColor,
+        linePadding = 10,
         style = "row"
     } = {}) {
         ctx.advance(10);
@@ -891,8 +926,10 @@ writeTextPair(ctx, leftText, rightText, {
                     lineColor: lineColor,
                     icon: icon,
                     dash: dash,
+                    textSize: textSize,
                     paddingTop: paddingTop,
-                    paddingBottom: paddingBottom
+                    paddingBottom: paddingBottom,
+                    linePadding: linePadding,
                 });
                 this.contactInfoRow(ctx);
                 break;
@@ -915,6 +952,8 @@ writeTextPair(ctx, leftText, rightText, {
         lineColor = this.mainColor,
         icon = null,
         dash = false,
+        textSize = this.headerTextSize,
+        textColor = this.textColor,
     } = {}) {
         this.header(ctx, {
             text: "Introduction",
@@ -926,12 +965,14 @@ writeTextPair(ctx, leftText, rightText, {
             lineColor: lineColor,
             icon: icon,
             dash: dash,
+            textSize: textSize,
             paddingTop: paddingTop,
             paddingBottom: paddingBottom
         });
 
         this.introduction(ctx, this.cvInfo.introduction, {
             style: 'italic',
+            textColor: textColor
         });
     }
 
@@ -948,7 +989,10 @@ writeTextPair(ctx, leftText, rightText, {
         icon = null,
         showTimeLine = false,
         dash = false,
+        textSize = this.headerTextSize,
+        textColor = this.textColor,
         timeLineColor = this.mainColor,
+        linePadding = 10,
     } = {}) {
         if (!this.cvInfo.workExpArr.length) return;
 
@@ -963,7 +1007,9 @@ writeTextPair(ctx, leftText, rightText, {
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
-            dash: dash
+            dash: dash,
+            textSize: textSize,
+            linePadding: linePadding,
         });
 
         for (const item of this.cvInfo.workExpArr) {
@@ -997,7 +1043,7 @@ writeTextPair(ctx, leftText, rightText, {
         thickness = 1,
         dash = false,
         color = this.textColor,
-        spacing = 6,
+        spacing = 5,
     } = {}) {
         ctx.ensureSpace(spacing, (column) => {
             this.addPageFor(ctx, column);
@@ -1048,6 +1094,9 @@ writeTextPair(ctx, leftText, rightText, {
         icon = null,
         showTimeLine = false,
         dash = false,
+        textSize = this.headerTextSize,
+        textColor = this.textColor,
+        linePadding = 10,
     } = {}) {
         if (!this.cvInfo.educationArr.length) return;
 
@@ -1062,7 +1111,9 @@ writeTextPair(ctx, leftText, rightText, {
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
-            dash: dash
+            dash: dash,
+            textSize: textSize,
+            linePadding: linePadding,
         });
 
         for (const item of this.cvInfo.educationArr) {
@@ -1100,6 +1151,9 @@ writeTextPair(ctx, leftText, rightText, {
         lineColor = this.mainColor,
         icon = null,
         dash = false,
+        textSize = this.headerTextSize,
+        textColor = this.textColor,
+        linePadding = 10,
     } = {}) {
         if (!this.cvInfo.skillArr.length) return;
         this.header(ctx, {
@@ -1113,12 +1167,16 @@ writeTextPair(ctx, leftText, rightText, {
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
-            dash: dash
+            dash: dash,
+            textSize: textSize,
+            linePadding: linePadding,
         });
 
         ctx.advance(10);
 
-        this.join(ctx, this.cvInfo.skillArr.map(h => h.name));
+        this.join(ctx, this.cvInfo.skillArr.map(h => h.name), {
+            textColor: textColor
+        });
     }
 
     referencesBlock(ctx, {
@@ -1132,6 +1190,9 @@ writeTextPair(ctx, leftText, rightText, {
         lineColor = this.mainColor,
         icon = null,
         dash = false,
+        textSize = this.headerTextSize,
+        textColor = this.textColor,
+        linePadding = 10,
     } = {}) {
         if (!this.cvInfo.referenceArr.length) return;
 
@@ -1146,10 +1207,15 @@ writeTextPair(ctx, leftText, rightText, {
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
-            dash: dash
+            dash: dash,
+            textSize: textSize,
+            textColor: textColor,
+            linePadding: linePadding,
         });
 
-        this.ul(ctx, this.cvInfo.referenceArr.map(h => h.name));
+        this.ul(ctx, this.cvInfo.referenceArr.map(h => h.name), {
+            textColor: textColor
+        });
     }
 
     awardsBlock(ctx, {
@@ -1163,9 +1229,11 @@ writeTextPair(ctx, leftText, rightText, {
         lineColor = this.mainColor,
         icon = null,
         dash = false,
+        textSize = this.headerTextSize,
+        textColor = this.textColor,
+        linePadding = 10,
     } = {}) {
         if (!this.cvInfo.awardArr.length) return;
-
         this.header(ctx, {
             text: "Awards",
             paddingTop: paddingTop,
@@ -1177,10 +1245,14 @@ writeTextPair(ctx, leftText, rightText, {
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
-            dash: dash
+            dash: dash,
+            textSize: textSize,
+            linePadding: linePadding,
         });
 
-        this.ul(ctx, this.cvInfo.awardArr.map(h => h.name));
+        this.ul(ctx, this.cvInfo.awardArr.map(h => h.name), {
+            textColor: textColor
+        });
     }
 
     hobbyBlock(ctx, {
@@ -1194,6 +1266,9 @@ writeTextPair(ctx, leftText, rightText, {
         lineColor = this.mainColor,
         icon = null,
         dash = false,
+        textSize = this.headerTextSize,
+        textColor = this.textColor,
+        linePadding = 10,
     } = {}) {
         if (!this.cvInfo.hobbyArr.length) return;
 
@@ -1208,10 +1283,14 @@ writeTextPair(ctx, leftText, rightText, {
             color: headerColor,
             lineColor: lineColor,
             icon: icon,
-            dash: dash
+            dash: dash,
+            textSize: textSize,
+            linePadding: linePadding,
         });
 
-        this.ul(ctx, this.cvInfo.hobbyArr.map(h => h.name));
+        this.ul(ctx, this.cvInfo.hobbyArr.map(h => h.name), {
+            textColor: textColor
+        });
     }
 
     content() {

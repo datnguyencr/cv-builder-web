@@ -3,9 +3,12 @@ const {
 } = window.jspdf;
 window.TEMPLATES = {
     1:Template1,
-    2:Template2,//
+    2:Template2,
     3:Template3,
     4:Template4,
+    5:Template5,
+    6:Template6,
+    7:Template7,
     9:Template9,
     13:Template13,
     14:Template14,

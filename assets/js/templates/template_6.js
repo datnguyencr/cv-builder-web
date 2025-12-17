@@ -1,30 +1,40 @@
-class Template2 extends PDFGenerator {
-
+class Template6 extends PDFGenerator {
 
     constructor(cvInfo, options = {
         leftRatio: .4,
         rightRatio: .6,
+        leftBackgroundColor: [131, 206, 178],
+        mainColor: [131, 206, 178],
+        textColor: [100, 102, 101],
+        headerTextSize: 20,
+        headerTextStyle: "normal"
     }) {
         super(cvInfo, options);
     }
 
     async loadFonts() {
-        await this.loadFont('assets/fonts/Lora-Regular.ttf', 'custom', 'normal');
-        await this.loadFont('assets/fonts/Lora-Bold.ttf', 'custom', 'bold');
-        await this.loadFont('assets/fonts/Lora-Italic.ttf', 'custom', 'italic');
+        await this.loadFont('assets/fonts/Adamina-Regular.ttf', 'custom', 'normal');
+        await this.loadFont('assets/fonts/OpenSans-Bold.ttf', 'custom', 'bold');
+        await this.loadFont('assets/fonts/OpenSans-Italic.ttf', 'custom', 'italic');
         this.font = 'custom';
     }
 
+    formatTime(monthValue) {
+        if (!monthValue) return '';
+        const y = monthValue.split('-')[0];
+        return y || '';
+    }
 
     blockTitleStyle() {
         return new TextStyle({
-            color: this.textColor,
+            color: this.leftBackgroundColor,
             style: 'bold'
         });
     }
     blockDescriptionStyle() {
         return new TextStyle({
             style: 'bold',
+            size: 10,
             color: this.textColor
         });
     }
@@ -32,6 +42,7 @@ class Template2 extends PDFGenerator {
     blockDatesStyle() {
         return new TextStyle({
             style: 'normal',
+            size: 10,
             color: this.textColor
         });
     }
@@ -50,18 +61,17 @@ class Template2 extends PDFGenerator {
         this.doc.setDrawColor(...timelineColor);
 
         ctx.advance(this.writeTextWithMarker(
-            ctx,
-            `${title.text} | ${description.text}`, {
+            ctx, title.text, {
                 style: title.style,
                 lineHeight: 0,
                 marker: showTimeLine ? marker : null
             }
         ));
         ctx.advance(20);
-        ctx.advance(this.writeTextWithMarker(
-            ctx,
-            dates.text, {
-                style: dates.style,
+        ctx.advance(this.writeTextPair(
+            ctx, description.text, dates.text, {
+                leftStyle: description.style,
+                rightStyle: dates.style,
                 lineHeight: 0,
                 marker: showTimeLine ?
                     (x, y, w, pdf) => {
@@ -78,40 +88,19 @@ class Template2 extends PDFGenerator {
         ctx.advance(20);
     }
 
+    contactLabelTextStyle() {
+        return new TextStyle({
+            color: this.rightBackgroundColor,
+            style: "bold"
+        });
+    }
+    contactValueTextStyle() {
+        return new TextStyle({
+            color: this.rightBackgroundColor,
+            style: "normal"
+        });
+    }
     content() {
-        this.renderSection(new Section({
-            leftRatio: 0.25,
-            rightRatio: 0.75,
-            render: ({
-                left,
-                right,
-                pdf
-            }) => {
-                pdf.avatar(left, this.cvInfo.avatar, {});
-                right.advance(50);
-                pdf.name(right, this.cvInfo.name, {});
-                pdf.title(right, this.cvInfo.title, {});
-            }
-        }));
-
-        this.renderSection(new Section({
-            leftRatio: .6,
-            rightRatio: .4,
-            render: ({
-                left,
-                right,
-                pdf
-            }) => {
-                pdf.introductionBlock(left, {
-                    headerColor: this.textColor,
-                    icon: this.introductionImage,
-                });
-                pdf.contactInfoBlock(right, {
-                    headerColor: this.textColor,
-                    icon: this.contactImage,
-                });
-            }
-        }));
         this.renderSection(new Section({
             leftRatio: .4,
             rightRatio: .6,
@@ -120,31 +109,52 @@ class Template2 extends PDFGenerator {
                 right,
                 pdf
             }) => {
+                pdf.avatar(left, this.cvInfo.avatar, {
+                    center: true,
+                    borderSize: 10,
+                    borderColor: this.rightBackgroundColor,
+                });
+                left.advance(40);
+                pdf.name(left, this.cvInfo.name, {
+                    style:this.nameTextStyle().clone({color:this.rightBackgroundColor}),
+                });
+                pdf.drawLineBlock(left, {
+                    color: this.rightBackgroundColor,
+                    thickness: 3,
+                });
+                left.advance(10);
+                pdf.title(left, this.cvInfo.title, {
+                    style:this.titleTextStyle().clone({color:this.rightBackgroundColor}),
+                });
+
+                pdf.contactInfoBlock(left, {
+                    headerColor: this.textColor,
+                });
+                pdf.introductionBlock(left, {
+                    headerColor: this.textColor,
+                    textColor: this.rightBackgroundColor,
+                });
                 pdf.skillsBlock(left, {
                     headerColor: this.textColor,
-                    icon: this.skillImage,
+                    textColor: this.rightBackgroundColor,
                 });
                 pdf.referencesBlock(left, {
                     headerColor: this.textColor,
-                    icon: this.referenceImage,
+                    textColor: this.rightBackgroundColor,
                 });
                 pdf.awardsBlock(left, {
                     headerColor: this.textColor,
-                    icon: this.awardImage,
+                    textColor: this.rightBackgroundColor,
                 });
                 pdf.hobbyBlock(left, {
                     headerColor: this.textColor,
-                    icon: this.hobbyImage,
+                    textColor: this.rightBackgroundColor,
                 });
                 pdf.workExpBlock(right, {
                     headerColor: this.textColor,
-                    icon: this.workExpImage,
-                    showTimeLine: true
                 });
                 pdf.educationBlock(right, {
                     headerColor: this.textColor,
-                    icon: this.educationImage,
-                    showTimeLine: true
                 });
             }
         }));

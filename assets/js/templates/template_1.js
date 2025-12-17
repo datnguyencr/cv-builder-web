@@ -28,16 +28,16 @@ class Template1 extends PDFGenerator {
                 pdf
             }) => {
                 pdf.avatar(left, this.cvInfo.avatar, {
-                    size: 100,
                     center: true
                 });
                 left.advance(40);
                 pdf.name(left, this.cvInfo.name, {
-                    textColor: this.mainColor,
+                    style: this.nameTextStyle().clone({
+                        color: this.mainColor
+                    }),
                     center: true,
                 });
                 pdf.title(left, this.cvInfo.title, {
-                    textColor: this.textColor,
                     center: true,
                 });
                 pdf.drawLineBlock(left, {

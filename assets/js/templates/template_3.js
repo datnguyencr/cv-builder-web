@@ -97,17 +97,16 @@ class Template3 extends PDFGenerator {
             }) => {
                 pdf.avatar(left, this.cvInfo.avatar, {
                     center: true,
-                    size: 90,
                     borderSize: 10,
                     borderColor: this.rightBackgroundColor,
                 });
                 left.advance(40);
                 pdf.name(left, this.cvInfo.name, {
-                    textColor: this.mainColor
+                    style: this.nameTextStyle().clone({
+                        color: this.mainColor
+                    }),
                 });
-                pdf.title(left, this.cvInfo.title, {
-                    textColor: this.textColor
-                });
+                pdf.title(left, this.cvInfo.title, {});
                 pdf.introductionBlock(left, {
                     headerColor: this.textColor,
                     icon: this.introductionImage,
