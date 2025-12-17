@@ -83,6 +83,7 @@ class Template14 extends PDFGenerator {
                 pdf
             }) => {
                 pdf.avatar(left, this.cvInfo.avatar, {
+                    size:100,
                     center: true
                 });
                 left.advance(40);

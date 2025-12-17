@@ -85,14 +85,14 @@ class Template4 extends PDFGenerator {
     }
     content() {
         this.renderSection(new Section({
-            leftRatio: 0.2,
-            rightRatio: 0.8,
+            leftRatio: 0.25,
+            rightRatio: 0.65,
             render: ({
                 left,
                 right,
                 pdf
             }) => {
-                pdf.avatar(left, this.cvInfo.avatar, {});
+                pdf.avatar(left, this.cvInfo.avatar, {size:100});
                 right.advance(40);
                 pdf.name(right, this.cvInfo.name, {});
                 pdf.title(right, this.cvInfo.title, {});
