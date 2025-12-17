@@ -134,26 +134,26 @@ class Template6 extends PDFGenerator {
                     headerColor: this.textColor,
                     textColor: this.rightBackgroundColor,
                 });
-                pdf.skillsBlock(left, {
+                pdf.skillListBlock(left, {
                     headerColor: this.textColor,
                     textColor: this.rightBackgroundColor,
                 });
-                pdf.referencesBlock(left, {
+                pdf.referenceListBlock(left, {
                     headerColor: this.textColor,
                     textColor: this.rightBackgroundColor,
                 });
-                pdf.awardsBlock(left, {
+                pdf.awardListBlock(left, {
                     headerColor: this.textColor,
                     textColor: this.rightBackgroundColor,
                 });
-                pdf.hobbyBlock(left, {
+                pdf.hobbyListBlock(left, {
                     headerColor: this.textColor,
                     textColor: this.rightBackgroundColor,
                 });
-                pdf.workExpBlock(right, {
+                pdf.workExpListBlock(right, {
                     headerColor: this.textColor,
                 });
-                pdf.educationBlock(right, {
+                pdf.educationListBlock(right, {
                     headerColor: this.textColor,
                 });
             }

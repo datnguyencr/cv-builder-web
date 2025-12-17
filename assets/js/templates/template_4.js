@@ -114,27 +114,27 @@ class Template4 extends PDFGenerator {
                     style: "column",
                     icon: this.contactImage,
                 });
-                pdf.workExpBlock(left, {
+                pdf.workExpListBlock(left, {
 
                     icon: this.workExpImage,
                 });
-                pdf.educationBlock(left, {
+                pdf.educationListBlock(left, {
 
                     icon: this.educationImage,
                 });
-                pdf.skillsBlock(left, {
+                pdf.skillListBlock(left, {
 
                     icon: this.skillImage,
                 });
-                pdf.referencesBlock(left, {
+                pdf.referenceListBlock(left, {
 
                     icon: this.referenceImage,
                 });
-                pdf.awardsBlock(left, {
+                pdf.awardListBlock(left, {
 
                     icon: this.awardImage,
                 });
-                pdf.hobbyBlock(left, {
+                pdf.hobbyListBlock(left, {
 
                     icon: this.hobbyImage,
                 });

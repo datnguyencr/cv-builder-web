@@ -135,28 +135,28 @@ class Template7 extends PDFGenerator {
                     underline: true,
                     lineColor: this.rightBackgroundColor,
                 });
-                pdf.skillsBlock(left, {
+                pdf.skillListBlock(left, {
                     headerColor: this.rightBackgroundColor,
                     uppercase: true,
                     underline: true,
                     lineColor: this.rightBackgroundColor,
                     textColor: this.rightBackgroundColor,
                 });
-                pdf.referencesBlock(left, {
+                pdf.referenceListBlock(left, {
                     headerColor: this.rightBackgroundColor,
                     uppercase: true,
                     underline: true,
                     lineColor: this.rightBackgroundColor,
                     textColor: this.rightBackgroundColor,
                 });
-                pdf.awardsBlock(left, {
+                pdf.awardListBlock(left, {
                     headerColor: this.rightBackgroundColor,
                     uppercase: true,
                     underline: true,
                     lineColor: this.rightBackgroundColor,
                     textColor: this.rightBackgroundColor,
                 });
-                pdf.hobbyBlock(left, {
+                pdf.hobbyListBlock(left, {
                     headerColor: this.rightBackgroundColor,
                     uppercase: true,
                     underline: true,
@@ -183,14 +183,14 @@ class Template7 extends PDFGenerator {
                     underline: true,
                     icon: this.introductionImage,
                 });
-                pdf.workExpBlock(right, {
+                pdf.workExpListBlock(right, {
                     headerColor: this.textColor,
                     uppercase: true,
                     underline: true,
                     icon: this.workExpImage,
                     showTimeLine:true,
                 });
-                pdf.educationBlock(right, {
+                pdf.educationListBlock(right, {
                     headerColor: this.textColor,
                     uppercase: true,
                     underline: true,

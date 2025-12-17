@@ -1,15 +1,14 @@
-class Template14 extends PDFGenerator {
+class Template8 extends PDFGenerator {
 
-    constructor(cvInfo, options = {}) {
+
+    constructor(cvInfo, options = {
+        leftBackgroundColor: [0, 0, 0],
+        mainColor: [255, 255, 255],
+        textColor: [255, 255, 255],
+    }) {
         super(cvInfo, options);
     }
 
-    async loadFonts() {
-        await this.loadFont('assets/fonts/Adamina-Regular.ttf', 'custom', 'normal');
-        await this.loadFont('assets/fonts/OpenSans-Bold.ttf', 'custom', 'bold');
-        await this.loadFont('assets/fonts/OpenSans-Italic.ttf', 'custom', 'italic');
-        this.font = 'custom';
-    }
     blockTitleStyle() {
         return new TextStyle({
             color: this.textColor,
@@ -18,8 +17,7 @@ class Template14 extends PDFGenerator {
     }
     blockDescriptionStyle() {
         return new TextStyle({
-            style: 'normal',
-            size: 10,
+            style: 'bold',
             color: this.textColor
         });
     }
@@ -27,7 +25,6 @@ class Template14 extends PDFGenerator {
     blockDatesStyle() {
         return new TextStyle({
             style: 'normal',
-            size: 10,
             color: this.textColor
         });
     }
@@ -46,17 +43,18 @@ class Template14 extends PDFGenerator {
         this.doc.setDrawColor(...timelineColor);
 
         ctx.advance(this.writeTextWithMarker(
-            ctx, title.text, {
+            ctx,
+            `${title.text} | ${description.text}`, {
                 style: title.style,
                 lineHeight: 0,
                 marker: showTimeLine ? marker : null
             }
         ));
         ctx.advance(20);
-        ctx.advance(this.writeTextPair(
-            ctx, description.text, dates.text, {
-                leftStyle: description.style,
-                rightStyle: dates.style,
+        ctx.advance(this.writeTextWithMarker(
+            ctx,
+            dates.text, {
+                style: dates.style,
                 lineHeight: 0,
                 marker: showTimeLine ?
                     (x, y, w, pdf) => {
@@ -75,82 +73,86 @@ class Template14 extends PDFGenerator {
 
     content() {
         this.renderSection(new Section({
-            leftRatio: 1,
-            rightRatio: 0,
+            leftRatio: 0.25,
+            rightRatio: 0.75,
             render: ({
                 left,
                 right,
                 pdf
             }) => {
                 pdf.avatar(left, this.cvInfo.avatar, {
-                    size:100,
-                    center: true
+                    size: 100
                 });
-                left.advance(40);
-                pdf.name(left, this.cvInfo.name, {
-                    style:this.nameTextStyle().clone({color:this.mainColor}),
-                    center: true,
-                });
-                pdf.title(left, this.cvInfo.title.toUpperCase(), {
-                    center: true,
-                });
-                pdf.drawLineBlock(left, {
-                    color: this.mainColor
-                });
+                right.advance(50);
+                pdf.name(right, this.cvInfo.name.toUpperCase(), {});
+                pdf.title(right, this.cvInfo.title.toUpperCase(), {});
+            }
+        }));
+        this.renderSection(new Section({
+            render: ({
+                left,
+                right,
+                pdf
+            }) => {
                 pdf.contactInfoBlock(left, {
-                    style: "column",
-                    uppercase: true,
-                    center: true,
+                    headerColor: this.textColor,
                     icon: this.contactImage,
+                    uppercase: true,
+                    style: "column"
                 });
-                pdf.drawLineBlock(left, {
-                    color: this.mainColor
-                });
+            }
+        }));
+        this.renderSection(new Section({
+            leftRatio: .5,
+            rightRatio: .5,
+            render: ({
+                left,
+                right,
+                pdf
+            }) => {
                 pdf.introductionBlock(left, {
-                    center: true,
+                    headerColor: this.textColor,
+                    icon: this.introductionImage,
+                    uppercase: true,fontStyle:"normal"
+                });
+                pdf.skillListBlock(right, {
+                    headerColor: this.textColor,
+                    icon: this.skillImage,
                     uppercase: true,
                 });
+            }
+        }));
+        this.renderSection(new Section({
+            render: ({
+                left,
+                right,
+                pdf
+            }) => {
                 pdf.workExpListBlock(left, {
-                    uppercase: true,
-                    center: true,
-                    upperline: true,
+                    headerColor: this.textColor,
                     icon: this.workExpImage,
-                    linePadding:20,
+                    uppercase: true,
                 });
                 pdf.educationListBlock(left, {
-                    uppercase: true,
-                    center: true,
-                    upperline: true,
+                    headerColor: this.textColor,
                     icon: this.educationImage,
-                    linePadding:20,
-                });
-                pdf.skillListBlock(left, {
                     uppercase: true,
-                    center: true,
-                    upperline: true,
-                    icon: this.skillImage,
-                    linePadding:20,
                 });
+
                 pdf.referenceListBlock(left, {
-                    uppercase: true,
-                    center: true,
-                    upperline: true,
+                    headerColor: this.textColor,
                     icon: this.referenceImage,
-                    linePadding:20,
+                    uppercase: true,
                 });
                 pdf.awardListBlock(left, {
-                    uppercase: true,
-                    center: true,
-                    upperline: true,
+                    headerColor: this.textColor,
                     icon: this.awardImage,
-                    linePadding:20,
+                    uppercase: true,
                 });
                 pdf.hobbyListBlock(left, {
-                    uppercase: true,
-                    center: true,
-                    upperline: true,
+                    headerColor: this.textColor,
                     icon: this.hobbyImage,
-                    linePadding:20,
+                    uppercase: true,
                 });
             }
         }));

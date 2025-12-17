@@ -173,7 +173,7 @@ class PDFGenerator {
         const leftCtx = new LayoutContext({
             x: this.margin,
             y: startY,
-            width: leftW - this.margin,
+            width: leftW - (section.leftRatio==1?0:this.margin),
             pageHeight: this.pageHeight,
             margin: this.margin,
             doc: this.doc,
@@ -183,7 +183,7 @@ class PDFGenerator {
         const rightCtx = new LayoutContext({
             x: this.margin + leftW + section.gap,
             y: startY,
-            width: rightW - this.margin,
+            width: rightW,
             pageHeight: this.pageHeight,
             margin: this.margin,
             doc: this.doc,
@@ -514,11 +514,10 @@ class PDFGenerator {
         timeLineColor = this.mainColor,
         padding = 5,
         textColor = this.textColor,
+        bulletColor= this.textColor,
     } = {}) {
         this.doc.setFontSize(this.textSize);
         this.doc.setFont(this.font, "normal");
-        this.doc.setTextColor(...textColor);
-
         const markerX = ctx.x + padding;
         const bulletX = markerX + (showTimeLine ? (markerWidth + gap) : 0);
         const textXOffset = bulletX + indent;
@@ -537,8 +536,10 @@ class PDFGenerator {
                 });
             }
 
+            this.doc.setTextColor(...bulletColor);
             this.doc.text("•", bulletX, ctx.y);
 
+            this.doc.setTextColor(...textColor);
             lines.forEach((line, i) => {
                 this.doc.text(line, textXOffset, ctx.y);
                 ctx.advance(lineHeight);
@@ -546,6 +547,34 @@ class PDFGenerator {
         });
     }
 
+    skillList(ctx, items, {
+        textColor = this.textColor,
+    } = {}) {
+        this.join(ctx,items.map(h => h.name),{textColor:textColor});
+    }
+
+    skillbar(ctx, items, {
+        textColor = this.textColor
+    } = {}) {
+        this.doc.setFontSize(this.textSize);
+        this.doc.setFont(this.font, 'normal');
+        this.doc.setTextColor(...textColor);
+
+        const text = `- ${items.join(", ")}.`;
+        const lines = this.doc.splitTextToSize(text, ctx.width);
+
+        let y = ctx.y;
+        lines.forEach(line => {
+            ctx.ensureSpace(this.lineHeight, (column) => {
+                this.addPageFor(ctx, column);
+            });
+
+            this.doc.text(line, ctx.x, y);
+            y += this.lineHeight;
+        });
+
+        ctx.advance(lines.length * this.lineHeight);
+    }
 
     join(ctx, items, {
         textColor = this.textColor
@@ -684,6 +713,7 @@ class PDFGenerator {
         indent = 10,
         showTimeLine = false,
         timeLineColor = this.mainColor,
+        bulletColor = this.textColor,
         lineGap = 10
     } = {}) {
         this.blockHeader(ctx, {
@@ -696,9 +726,10 @@ class PDFGenerator {
         if (detailList.length) {
             this.ul(ctx, detailList, {
                 lineHeight: 15,
-                indent,
-                showTimeLine,
-                timeLineColor
+                indent:indent,
+                showTimeLine:showTimeLine,
+                timeLineColor:timeLineColor,
+                bulletColor:bulletColor,
             });
         }
 
@@ -954,30 +985,34 @@ class PDFGenerator {
         dash = false,
         textSize = this.headerTextSize,
         textColor = this.textColor,
+        fontStyle="italic",header=true,
     } = {}) {
-        this.header(ctx, {
-            text: "Introduction",
-            uppercase: uppercase,
-            center: center,
-            underline: underline,
-            upperline: upperline,
-            color: headerColor,
-            lineColor: lineColor,
-            icon: icon,
-            dash: dash,
-            textSize: textSize,
-            paddingTop: paddingTop,
-            paddingBottom: paddingBottom
-        });
+        if(header){
+            this.header(ctx, {
+                text: "Introduction",
+                uppercase: uppercase,
+                center: center,
+                underline: underline,
+                upperline: upperline,
+                color: headerColor,
+                lineColor: lineColor,
+                icon: icon,
+                dash: dash,
+                textSize: textSize,
+                paddingTop: paddingTop,
+                paddingBottom: paddingBottom
+            });
+        }
+
 
         this.introduction(ctx, this.cvInfo.introduction, {
-            style: 'italic',
+            style: fontStyle,
             textColor: textColor
         });
     }
 
 
-    workExpBlock(ctx, {
+    workExpListBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -991,6 +1026,7 @@ class PDFGenerator {
         dash = false,
         textSize = this.headerTextSize,
         textColor = this.textColor,
+        bulletColor = this.textColor,
         timeLineColor = this.mainColor,
         linePadding = 10,
     } = {}) {
@@ -1032,6 +1068,7 @@ class PDFGenerator {
                 }),
                 indent: 15,
                 timeLineColor: timeLineColor,
+                bulletColor:bulletColor,
                 detailList: item.details,
                 showTimeLine: showTimeLine,
                 padding: showTimeLine ? 10 : 0
@@ -1082,7 +1119,7 @@ class PDFGenerator {
         this.doc.setLineWidth(1);
     }
 
-    educationBlock(ctx, {
+    educationListBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1096,6 +1133,7 @@ class PDFGenerator {
         dash = false,
         textSize = this.headerTextSize,
         textColor = this.textColor,
+        bulletColor = this.textColor,
         linePadding = 10,
     } = {}) {
         if (!this.cvInfo.educationArr.length) return;
@@ -1132,6 +1170,7 @@ class PDFGenerator {
                     text: dates,
                     style: this.blockDatesStyle()
                 }),
+                bulletColor:bulletColor,
                 detailList: item.details,
                 indent: 15,
                 showTimeLine: showTimeLine,
@@ -1140,7 +1179,7 @@ class PDFGenerator {
         }
     }
 
-    skillsBlock(ctx, {
+    skillListBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1154,6 +1193,7 @@ class PDFGenerator {
         textSize = this.headerTextSize,
         textColor = this.textColor,
         linePadding = 10,
+        type="text",
     } = {}) {
         if (!this.cvInfo.skillArr.length) return;
         this.header(ctx, {
@@ -1173,13 +1213,19 @@ class PDFGenerator {
         });
 
         ctx.advance(10);
+            if(type==="text"){
+                this.skillList(ctx, this.cvInfo.skillArr, {
+                    textColor: textColor
+                });
+            }else{
+                this.skillbar(ctx,this.cvInfo.skillArr,{
+                    textColor:textColor
+                });
+            }
 
-        this.join(ctx, this.cvInfo.skillArr.map(h => h.name), {
-            textColor: textColor
-        });
     }
 
-    referencesBlock(ctx, {
+    referenceListBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1218,7 +1264,7 @@ class PDFGenerator {
         });
     }
 
-    awardsBlock(ctx, {
+    awardListBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,
@@ -1255,7 +1301,7 @@ class PDFGenerator {
         });
     }
 
-    hobbyBlock(ctx, {
+    hobbyListBlock(ctx, {
         paddingTop = 20,
         paddingBottom = 20,
         uppercase = false,

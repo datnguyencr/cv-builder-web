@@ -117,33 +117,33 @@ class Template3 extends PDFGenerator {
                     icon: this.contactImage,
                     underline: true,
                 });
-                pdf.skillsBlock(left, {
+                pdf.skillListBlock(left, {
                     headerColor: this.textColor,
                     icon: this.skillImage,
                     underline: true,
                 });
-                pdf.referencesBlock(left, {
+                pdf.referenceListBlock(left, {
                     headerColor: this.textColor,
                     icon: this.referenceImage,
                     underline: true,
                 });
-                pdf.awardsBlock(left, {
+                pdf.awardListBlock(left, {
                     headerColor: this.textColor,
                     icon: this.awardImage,
                     underline: true,
                 });
-                pdf.hobbyBlock(left, {
+                pdf.hobbyListBlock(left, {
                     headerColor: this.textColor,
                     icon: this.hobbyImage,
                     underline: true,
                 });
-                pdf.workExpBlock(right, {
+                pdf.workExpListBlock(right, {
                     headerColor: this.textColor,
                     icon: this.workExpImage,
                     underline: true,
                     showTimeLine: true,
                 });
-                pdf.educationBlock(right, {
+                pdf.educationListBlock(right, {
                     headerColor: this.textColor,
                     icon: this.educationImage,
                     underline: true,

@@ -1,7 +1,8 @@
 class Template1 extends PDFGenerator {
 
     constructor(cvInfo, options = {
-        mainColor: [0, 95, 90]
+        mainColor: [0, 95, 90],
+
     }) {
         super(cvInfo, options);
     }
@@ -52,27 +53,27 @@ class Template1 extends PDFGenerator {
                     uppercase: true,
                     icon: this.contactImage,
                 });
-                pdf.workExpBlock(left, {
+                pdf.workExpListBlock(left, {
                     uppercase: true,
                     icon: this.workExpImage,
                 });
-                pdf.educationBlock(left, {
+                pdf.educationListBlock(left, {
                     uppercase: true,
                     icon: this.educationImage,
                 });
-                pdf.skillsBlock(left, {
+                pdf.skillListBlock(left, {
                     uppercase: true,
                     icon: this.skillImage,
                 });
-                pdf.referencesBlock(left, {
+                pdf.referenceListBlock(left, {
                     uppercase: true,
                     icon: this.referenceImage,
                 });
-                pdf.awardsBlock(left, {
+                pdf.awardListBlock(left, {
                     uppercase: true,
                     icon: this.awardImage,
                 });
-                pdf.hobbyBlock(left, {
+                pdf.hobbyListBlock(left, {
                     uppercase: true,
                     icon: this.hobbyImage,
                 });

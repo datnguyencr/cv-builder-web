@@ -120,27 +120,27 @@ class Template9 extends PDFGenerator {
                     headerColor: this.mainColor,
                     icon: this.contactImage,
                 });
-                pdf.skillsBlock(left, {
+                pdf.skillListBlock(left, {
                     headerColor: this.mainColor,
                     icon: this.skillImage,
                 });
-                pdf.referencesBlock(left, {
+                pdf.referenceListBlock(left, {
                     headerColor: this.mainColor,
                     icon: this.referenceImage,
                 });
-                pdf.awardsBlock(left, {
+                pdf.awardListBlock(left, {
                     headerColor: this.mainColor,
                     icon: this.awardImage,
                 });
-                pdf.hobbyBlock(left, {
+                pdf.hobbyListBlock(left, {
                     headerColor: this.mainColor,
                     icon: this.hobbyImage,
                 });
-                pdf.workExpBlock(right, {
+                pdf.workExpListBlock(right, {
                     headerColor: this.mainColor,
                     icon: this.workExpImage,
                 });
-                pdf.educationBlock(right, {
+                pdf.educationListBlock(right, {
                     headerColor: this.mainColor,
                     icon: this.educationImage,
                 });

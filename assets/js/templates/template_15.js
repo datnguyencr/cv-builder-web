@@ -115,22 +115,22 @@ class Template15 extends PDFGenerator {
                     icon: this.contactImage,
                     uppercase: true,
                 });
-                pdf.skillsBlock(left, {
+                pdf.skillListBlock(left, {
                     headerColor: this.textColor,
                     icon: this.skillImage,
                     uppercase: true,
                 });
-                pdf.referencesBlock(left, {
+                pdf.referenceListBlock(left, {
                     headerColor: this.textColor,
                     icon: this.referenceImage,
                     uppercase: true,
                 });
-                pdf.awardsBlock(left, {
+                pdf.awardListBlock(left, {
                     headerColor: this.textColor,
                     icon: this.awardImage,
                     uppercase: true,
                 });
-                pdf.hobbyBlock(left, {
+                pdf.hobbyListBlock(left, {
                     headerColor: this.textColor,
                     icon: this.hobbyImage,
                     uppercase: true,
@@ -153,12 +153,12 @@ class Template15 extends PDFGenerator {
                 pdf.drawLineBlock(right, {
                     color: this.mainColor
                 });
-                pdf.workExpBlock(right, {
+                pdf.workExpListBlock(right, {
                     headerColor: this.textColor,
                     icon: this.workExpImage,
                     uppercase: true,
                 });
-                pdf.educationBlock(right, {
+                pdf.educationListBlock(right, {
                     headerColor: this.textColor,
                     icon: this.educationImage,
                     uppercase:true,

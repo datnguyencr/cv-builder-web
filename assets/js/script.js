@@ -9,7 +9,9 @@ window.TEMPLATES = {
     5:Template5,
     6:Template6,
     7:Template7,
+    8:Template8,
     9:Template9,
+    10:Template10,
     13:Template13,
     14:Template14,
     15:Template15,
@@ -658,43 +660,37 @@ function initInfo() {
                     "Completed thesis on scalable microservices design.",
                     "Led a team in an Agile software development project.", "Research Grant Recipient"
                 ],
-            },
-            {
-                id: 3,
-                degree: "MSc Software Engineering",
-                school: "Tech University",
-                from: "2021-09",
-                to: "2023-06",
-                details: [
-                    "Focused on software architecture and cloud systems.",
-                    "Completed thesis on scalable microservices design.",
-                    "Led a team in an Agile software development project.", "Research Grant Recipient"
-                ],
             }
         ],
         skillArr: [{
                 id: 1,
-                name: "JavaScript"
+                name: "JavaScript",
+                value:60,
             },
             {
                 id: 2,
-                name: "Python"
+                name: "Python",
+                value:50,
             },
             {
                 id: 3,
-                name: "Dart"
+                name: "Dart",
+                value:100,
             },
             {
                 id: 4,
-                name: "React"
+                name: "React",
+                value:30,
             },
             {
                 id: 5,
-                name: "Node.js"
+                name: "Node.js",
+                value:30,
             },
             {
                 id: 6,
-                name: "Flutter"
+                name: "Flutter",
+                value:90,
             }
         ],
         referenceArr: [{
@@ -826,7 +822,7 @@ document.addEventListener("DOMContentLoaded", () => {
             templates.push({
                 id: i,
                 name: `Template ${i}`,
-                src: `templates/${i}.webp`
+                src: `templates/${i}.avif`
             });
         }
 
