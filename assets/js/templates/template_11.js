@@ -40,20 +40,18 @@ class Template11 extends PDFGenerator {
             title = new Text(),
             description = new Text(),
             dates = new Text(),
-            timelineColor = this.mainColor,
+            timeLineColor = this.mainColor,
             showTimeLine = false,
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
-
-        this.doc.setFillColor(...timelineColor);
-        this.doc.setDrawColor(...timelineColor);
 
         ctx.advance(
             this.writeTextWithMarker(ctx, title.text, {
                 style: title.style,
                 lineHeight: 0,
                 marker: showTimeLine ? marker : null,
+                timeLineColor: timeLineColor,
             })
         );
         ctx.advance(20);
@@ -64,7 +62,14 @@ class Template11 extends PDFGenerator {
                 {
                     style: description.style,
                     lineHeight: 0,
-                    marker: showTimeLine ? marker : null,
+                    marker: showTimeLine
+                        ? (x, y, w, pdf) => {
+                              pdf.drawLine(x, y - w * 2, x, y + w + 5, {
+                                  thickness: 1,
+                                  color: timeLineColor,
+                              });
+                          }
+                        : null,
                 }
             )
         );

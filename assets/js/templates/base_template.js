@@ -45,6 +45,24 @@ class PDFGenerator {
         this.headerBackgroundColor = options.headerBackgroundColor || null;
         this.iconSize = 14;
         this.markerWidth = 10;
+        this.useContactIcon = options.useContactIcon || false;
+        this.educationImageColor =
+            options.educationImageColor || this.mainColor;
+        this.workExpImageColor = options.workExpImageColor || this.mainColor;
+        this.contactImageColor = options.contactImageColor || this.mainColor;
+        this.skillImageColor = options.skillImageColor || this.mainColor;
+        this.referenceImageColor =
+            options.referenceImageColor || this.mainColor;
+        this.awardImageColor = options.awardImageColor || this.mainColor;
+        this.introductionImageColor =
+            options.introductionImageColor || this.mainColor;
+        this.hobbyImageColor = options.hobbyImageColor || this.mainColor;
+        this.phoneImageColor = options.phoneImageColor || this.mainColor;
+        this.linkImageColor = options.linkImageColor || this.mainColor;
+        this.emailImageColor = options.emailImageColor || this.mainColor;
+        this.avatarShape = options.avatarShape || AvatarShape.CICLE;
+        this.avatarWidth = options.avatarWidth || 120;
+        this.avatarHeight = options.avatarHeight || 120;
     }
 
     parseYearMonth(value) {
@@ -258,8 +276,11 @@ class PDFGenerator {
             const y = ctx.y;
 
             if (i === 0 && marker) {
-                this.doc.setFillColor(...timeLineColor);
                 this.doc.setDrawColor(...timeLineColor);
+                this.doc.setFillColor(...timeLineColor);
+                // this.doc.setLineWidth(0.5);
+                // this.doc.setDrawColor(...timeLineColor);
+                // this.doc.setFillColor(...[255, 255, 255]);
                 marker(baseX, y, markerWidth, this);
             }
 
@@ -291,14 +312,11 @@ class PDFGenerator {
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
-
-        this.doc.setFillColor(...timeLineColor);
-        this.doc.setDrawColor(...timeLineColor);
-
         ctx.advance(
             this.writeTextWithMarker(ctx, `${title.text} | ${dates.text}`, {
                 style: title.style,
                 marker: showTimeLine ? marker : null,
+                timeLineColor: timeLineColor,
             })
         );
         ctx.advance(5);
@@ -308,6 +326,7 @@ class PDFGenerator {
                 marker: showTimeLine
                     ? (x, y, w, pdf) => {
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
+                              thickness: 1,
                               color: timeLineColor,
                           });
                       }
@@ -319,28 +338,37 @@ class PDFGenerator {
 
     async loadImages() {
         this.educationImage = await svgToPngData(
-            await educationSvgString(this.mainColor)
+            await educationSvgString(this.educationImageColor)
         );
         this.workExpImage = await svgToPngData(
-            await workExpSvgString(this.mainColor)
+            await workExpSvgString(this.workExpImageColor)
         );
         this.contactImage = await svgToPngData(
-            await contactSvgString(this.mainColor)
+            await contactSvgString(this.contactImageColor)
         );
         this.skillImage = await svgToPngData(
-            await skillSvgString(this.mainColor)
+            await skillSvgString(this.skillImageColor)
         );
         this.referenceImage = await svgToPngData(
-            await referenceSvgString(this.mainColor)
+            await referenceSvgString(this.referenceImageColor)
         );
         this.awardImage = await svgToPngData(
-            await awardSvgString(this.mainColor)
+            await awardSvgString(this.awardImageColor)
         );
         this.introductionImage = await svgToPngData(
-            await introductionSvgString(this.mainColor)
+            await introductionSvgString(this.introductionImageColor)
         );
         this.hobbyImage = await svgToPngData(
-            await hobbySvgString(this.mainColor)
+            await hobbySvgString(this.hobbyImageColor)
+        );
+        this.phoneImage = await svgToPngData(
+            await phoneSvgString(this.phoneImageColor)
+        );
+        this.linkImage = await svgToPngData(
+            await linkSvgString(this.linkImageColor)
+        );
+        this.emailImage = await svgToPngData(
+            await emailSvgString(this.emailImageColor)
         );
     }
 
@@ -537,12 +565,18 @@ class PDFGenerator {
     skillList(
         ctx,
         items,
-        { textColor = this.textColor, indent = 10, padding = 5 } = {}
+        {
+            textColor = this.textColor,
+            indent = 10,
+            padding = 5,
+            bulletColor = this.textColor,
+        } = {}
     ) {
         this.ul(ctx, [items.map((h) => h.name).join(", ")], {
             textColor: textColor,
             indent: indent,
             padding: padding,
+            bulletColor: bulletColor,
         });
     }
 
@@ -735,11 +769,11 @@ class PDFGenerator {
         } = {}
     ) {
         this.blockHeader(ctx, {
-            title,
-            description,
-            dates,
-            showTimeLine,
-            timeLineColor,
+            title: title,
+            description: description,
+            dates: dates,
+            showTimeLine: showTimeLine,
+            timeLineColor: timeLineColor,
         });
         if (detailList.length) {
             this.ul(ctx, detailList, {
@@ -759,7 +793,8 @@ class PDFGenerator {
         ctx,
         imageBase64,
         {
-            size = 120,
+            width = this.avatarWidth,
+            height = this.avatarHeight,
             borderColor = this.mainColor,
             borderSize = 5,
             padding = 0,
@@ -768,8 +803,8 @@ class PDFGenerator {
     ) {
         if (!imageBase64) return 0;
 
-        const totalSize = size + padding * 2;
-        const x = center ? ctx.x + (ctx.width - size) / 2 : ctx.x;
+        const totalSize = height + padding * 2;
+        const x = center ? ctx.x + (ctx.width - width) / 2 : ctx.x;
 
         const y = ctx.y;
 
@@ -777,11 +812,19 @@ class PDFGenerator {
         if (borderSize > 0) {
             this.doc.setDrawColor(...borderColor);
             this.doc.setLineWidth(borderSize);
-            this.doc.circle(x + size / 2, y + size / 2, size / 2 + padding);
+            if (this.avatarShape === AvatarShape.CICLE) {
+                this.doc.circle(
+                    x + width / 2,
+                    y + height / 2,
+                    width / 2 + padding
+                );
+            } else {
+                this.doc.rect(x, y, width, height * 1.2);
+            }
         }
 
         // image
-        this.doc.addImage(imageBase64, "PNG", x, y, size, size);
+        this.doc.addImage(imageBase64, "PNG", x, y, width, height);
 
         ctx.advance(totalSize);
         return totalSize;
@@ -866,20 +909,52 @@ class PDFGenerator {
         });
     }
 
+    writePairWithIcon(
+        ctx,
+        {
+            text = "",
+            style = new PdfText({
+                text: "",
+                style: this.contactValueTextStyle(),
+            }),
+            icon = null,
+        } = {}
+    ) {
+        this.doc.setFont(this.font, style.style);
+        this.doc.setFontSize(style.size);
+        this.doc.setTextColor(...style.color);
+
+        const iconW = this.iconSize;
+        const iconH = this.iconSize;
+        const gap = icon ? 4 : 0;
+
+        const y = ctx.y;
+        const x = ctx.x;
+
+        if (icon) {
+            this.doc.addImage(icon, "PNG", x, y - iconH * 0.8, iconW, iconH);
+        }
+        this.doc.text(text, icon ? x + iconW + gap : x, y);
+        ctx.advance(this.lineHeight + 5);
+    }
+
     contactInfoRow(ctx) {
         const lineHeight = 15;
         const items = [
             {
                 label: "Phone:",
                 value: this.cvInfo.phone,
+                icon: this.phoneImage,
             },
             {
                 label: "Email:",
                 value: this.cvInfo.email,
+                icon: this.emailImage,
             },
             {
                 label: "Links:",
                 value: this.cvInfo.url,
+                icon: this.linkImage,
             },
         ];
 
@@ -887,18 +962,25 @@ class PDFGenerator {
             ctx.ensureSpace(lineHeight, (column) => {
                 this.addPageFor(ctx, column);
             });
-
-            this.writePair(ctx, {
-                label: new PdfText({
-                    text: item.label,
-                    style: this.contactLabelTextStyle(),
-                }),
-                value: new PdfText({
+            if (this.useContactIcon) {
+                this.writePairWithIcon(ctx, {
                     text: item.value,
                     style: this.contactValueTextStyle(),
-                }),
-                lineHeight,
-            });
+                    icon: item.icon,
+                });
+            } else {
+                this.writePair(ctx, {
+                    label: new PdfText({
+                        text: item.label,
+                        style: this.contactLabelTextStyle(),
+                    }),
+                    value: new PdfText({
+                        text: item.value,
+                        style: this.contactValueTextStyle(),
+                    }),
+                    lineHeight,
+                });
+            }
         }
     }
 
@@ -968,26 +1050,29 @@ class PDFGenerator {
             textColor = this.textColor,
             linePadding = 10,
             style = "row",
+            header = true,
         } = {}
     ) {
         ctx.advance(10);
         switch (style) {
             case "row":
-                this.header(ctx, {
-                    text: "Contact",
-                    uppercase: uppercase,
-                    center: center,
-                    underline: underline,
-                    upperline: upperline,
-                    color: headerColor,
-                    lineColor: lineColor,
-                    icon: icon,
-                    dash: dash,
-                    textSize: textSize,
-                    paddingTop: paddingTop,
-                    paddingBottom: paddingBottom,
-                    linePadding: linePadding,
-                });
+                if (header) {
+                    this.header(ctx, {
+                        text: "Contact",
+                        uppercase: uppercase,
+                        center: center,
+                        underline: underline,
+                        upperline: upperline,
+                        color: headerColor,
+                        lineColor: lineColor,
+                        icon: icon,
+                        dash: dash,
+                        textSize: textSize,
+                        paddingTop: paddingTop,
+                        paddingBottom: paddingBottom,
+                        linePadding: linePadding,
+                    });
+                }
                 this.contactInfoRow(ctx);
                 break;
             case "column":
@@ -1009,6 +1094,7 @@ class PDFGenerator {
             upperline = false,
             headerColor = this.mainColor,
             lineColor = this.mainColor,
+            linePadding = 10,
             icon = null,
             dash = false,
             textSize = this.headerTextSize,
@@ -1033,6 +1119,7 @@ class PDFGenerator {
                 paddingTop: paddingTop,
                 paddingBottom: paddingBottom,
                 backgroundColor: backgroundColor,
+                linePadding: linePadding,
             });
         }
 
@@ -1083,7 +1170,6 @@ class PDFGenerator {
             textSize: textSize,
             linePadding: linePadding,
             backgroundColor: backgroundColor,
-            bgColor: [200, 200, 200],
         });
 
         for (const item of this.cvInfo.workExpArr) {
@@ -1173,6 +1259,7 @@ class PDFGenerator {
             textSize = this.headerTextSize,
             textColor = this.textColor,
             bulletColor = this.textColor,
+            timeLineColor = this.mainColor,
             linePadding = 10,
             backgroundColor = this.headerBackgroundColor,
             indent = 10,
@@ -1219,6 +1306,7 @@ class PDFGenerator {
                 bulletColor: bulletColor,
                 detailList: item.details,
                 indent: indent,
+                timeLineColor: timeLineColor,
                 showTimeLine: showTimeLine,
                 padding: showTimeLine ? 10 : 0,
             });
@@ -1245,6 +1333,7 @@ class PDFGenerator {
             type = "text",
             indent = 10,
             padding = 5,
+            bulletColor = this.textColor,
         } = {}
     ) {
         if (!this.cvInfo.skillArr.length) return;
@@ -1271,6 +1360,7 @@ class PDFGenerator {
                 textColor: textColor,
                 indent: indent,
                 padding: padding,
+                bulletColor: bulletColor,
             });
         } else {
             this.skillbar(ctx, this.cvInfo.skillArr, {
@@ -1298,6 +1388,7 @@ class PDFGenerator {
             backgroundColor = this.headerBackgroundColor,
             indent = 10,
             padding = 5,
+            bulletColor = this.textColor,
         } = {}
     ) {
         if (!this.cvInfo.referenceArr.length) return;
@@ -1327,6 +1418,7 @@ class PDFGenerator {
                 textColor: textColor,
                 indent: indent,
                 padding: padding,
+                bulletColor: bulletColor,
             }
         );
     }
@@ -1350,6 +1442,7 @@ class PDFGenerator {
             backgroundColor = this.headerBackgroundColor,
             indent = 10,
             padding = 5,
+            bulletColor = this.textColor,
         } = {}
     ) {
         if (!this.cvInfo.awardArr.length) return;
@@ -1377,6 +1470,7 @@ class PDFGenerator {
                 textColor: textColor,
                 indent: indent,
                 padding: padding,
+                bulletColor: bulletColor,
             }
         );
     }
@@ -1400,6 +1494,7 @@ class PDFGenerator {
             backgroundColor = this.headerBackgroundColor,
             indent = 10,
             padding = 5,
+            bulletColor = this.textColor,
         } = {}
     ) {
         if (!this.cvInfo.hobbyArr.length) return;
@@ -1428,6 +1523,7 @@ class PDFGenerator {
                 textColor: textColor,
                 indent: indent,
                 padding: padding,
+                bulletColor: bulletColor,
             }
         );
     }
@@ -1557,24 +1653,8 @@ class Section {
         this.render = render;
     }
 }
-const TimeFormat = Object.freeze({
-    YEAR: "year",
-    MONTH_YEAR: "monthYear",
-});
 
 const TIMELINE_MARKERS = {
-    circle: (x, y, w, ctx) => {
-        ctx.doc.circle(x, y - w / 2, w / 2, "F");
-    },
-
-    line: (x, y, w, ctx) => {
-        ctx.drawLine(x, y - w * 2, x, y + w);
-    },
-    square: (x, y, w, ctx) => {
-        ctx.doc.rect(x - 3, y - 3, 6, 6, "F");
-    },
-};
-const DATE_FORMATS = {
     circle: (x, y, w, ctx) => {
         ctx.doc.circle(x, y - w / 2, w / 2, "F");
     },

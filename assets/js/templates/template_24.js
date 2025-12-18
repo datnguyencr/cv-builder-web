@@ -1,12 +1,11 @@
-class Template5 extends PDFGenerator {
+class Template24 extends PDFGenerator {
     constructor(
         cvInfo,
         options = {
-            mainColor: [229, 211, 194],
-            leftRatio: 0.4,
-            rightRatio: 0.6,
-            headerTextSize: 16,
-            separator: true,
+            mainColor: [85, 113, 109],
+            headerBackgroundColor: [152, 190, 186],
+            leftRatio: 0.5,
+            rightRatio: 0.5,
             normalFont: "AdventPro-Regular.ttf",
             boldFont: "AdventPro-Bold.ttf",
             italicFont: "AdventPro-Italic.ttf",
@@ -15,6 +14,12 @@ class Template5 extends PDFGenerator {
         super(cvInfo, options);
     }
 
+    blockTitleStyle() {
+        return new TextStyle({
+            color: this.textColor,
+            style: "bold",
+        });
+    }
     blockDescriptionStyle() {
         return new TextStyle({
             style: "bold",
@@ -28,6 +33,20 @@ class Template5 extends PDFGenerator {
             color: this.textColor,
         });
     }
+    nameTextStyle() {
+        return new TextStyle({
+            color: this.rightBackgroundColor,
+            size: 34,
+            style: "bold",
+        });
+    }
+
+    titleTextStyle() {
+        return new TextStyle({
+            color: this.rightBackgroundColor,
+            size: 20,
+        });
+    }
 
     blockHeader(
         ctx,
@@ -35,11 +54,14 @@ class Template5 extends PDFGenerator {
             title = new Text(),
             description = new Text(),
             dates = new Text(),
-            timeLineColor = this.mainColor,
+            timelineColor = this.mainColor,
             showTimeLine = false,
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
+
+        this.doc.setFillColor(...timelineColor);
+        this.doc.setDrawColor(...timelineColor);
 
         ctx.advance(
             this.writeTextWithMarker(
@@ -49,7 +71,6 @@ class Template5 extends PDFGenerator {
                     style: title.style,
                     lineHeight: 0,
                     marker: showTimeLine ? marker : null,
-                    timeLineColor: timeLineColor,
                 }
             )
         );
@@ -62,7 +83,6 @@ class Template5 extends PDFGenerator {
                     ? (x, y, w, pdf) => {
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
                               thickness: 1,
-                              color: timeLineColor,
                           });
                       }
                     : null,
@@ -80,20 +100,29 @@ class Template5 extends PDFGenerator {
                 rightRatio: 0.75,
                 render: ({ left, right, pdf }) => {
                     pdf.avatar(left, this.cvInfo.avatar, {
-                        size: 100,
+                        size: 90,
+                        borderColor: this.rightBackgroundColor,
+                        padding: 5,
+                        borderSize: 3,
                     });
-                    right.advance(50);
-                    pdf.name(right, this.cvInfo.name.toUpperCase(), {});
-                    pdf.title(right, this.cvInfo.title.toUpperCase(), {});
+                    right.advance(40);
+                    pdf.name(right, this.cvInfo.name.toUpperCase());
+                    pdf.title(right, this.cvInfo.title.toUpperCase());
                 },
             })
         );
 
         this.renderSection(
             new Section({
-                leftRatio: 0.4,
-                rightRatio: 0.6,
+                leftRatio: 0.5,
+                rightRatio: 0.5,
                 render: ({ left, right, pdf }) => {
+                    left.advance(20);
+                    pdf.introductionBlock(left, {
+                        headerColor: this.textColor,
+                        icon: this.introductionImage,
+                        uppercase: true,
+                    });
                     pdf.contactInfoBlock(left, {
                         headerColor: this.textColor,
                         icon: this.contactImage,
@@ -119,15 +148,7 @@ class Template5 extends PDFGenerator {
                         icon: this.hobbyImage,
                         uppercase: true,
                     });
-                    right.advance(10);
-                    pdf.introductionBlock(right, {
-                        headerColor: this.textColor,
-                        icon: this.introductionImage,
-                        uppercase: true,
-                    });
-                    this.drawLineBlock(right, {
-                        color: this.mainColor,
-                    });
+                    right.advance(20);
                     pdf.workExpListBlock(right, {
                         headerColor: this.textColor,
                         icon: this.workExpImage,

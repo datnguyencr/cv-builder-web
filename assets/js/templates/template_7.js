@@ -12,6 +12,10 @@ class Template7 extends PDFGenerator {
             boldFont: "OpenSans-Bold.ttf",
             italicFont: "OpenSans-Italic.ttf",
             timeFormat: TimeFormat.YEAR,
+            useContactIcon: true,
+            phoneImageColor: [255, 255, 255],
+            linkImageColor: [255, 255, 255],
+            emailImageColor: [255, 255, 255],
         }
     ) {
         super(cvInfo, options);
@@ -38,20 +42,18 @@ class Template7 extends PDFGenerator {
             title = new Text(),
             description = new Text(),
             dates = new Text(),
-            timelineColor = this.mainColor,
+            timeLineColor = this.mainColor,
             showTimeLine = false,
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
-
-        this.doc.setFillColor(...timelineColor);
-        this.doc.setDrawColor(...timelineColor);
 
         ctx.advance(
             this.writeTextWithMarker(ctx, title.text.toUpperCase(), {
                 style: title.style,
                 lineHeight: 0,
                 marker: showTimeLine ? marker : null,
+                timeLineColor: timeLineColor,
             })
         );
         ctx.advance(20);
@@ -63,6 +65,7 @@ class Template7 extends PDFGenerator {
                     ? (x, y, w, pdf) => {
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
                               thickness: 1,
+                              color: timeLineColor,
                           });
                       }
                     : null,
@@ -77,6 +80,7 @@ class Template7 extends PDFGenerator {
                     ? (x, y, w, pdf) => {
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
                               thickness: 1,
+                              timeLineColor: timeLineColor,
                           });
                       }
                     : null,
@@ -123,6 +127,7 @@ class Template7 extends PDFGenerator {
                         underline: true,
                         lineColor: this.rightBackgroundColor,
                         textColor: this.rightBackgroundColor,
+                        bulletColor: this.rightBackgroundColor,
                     });
                     pdf.referenceListBlock(left, {
                         headerColor: this.rightBackgroundColor,
@@ -130,6 +135,7 @@ class Template7 extends PDFGenerator {
                         underline: true,
                         lineColor: this.rightBackgroundColor,
                         textColor: this.rightBackgroundColor,
+                        bulletColor: this.rightBackgroundColor,
                     });
                     pdf.awardListBlock(left, {
                         headerColor: this.rightBackgroundColor,
@@ -137,6 +143,7 @@ class Template7 extends PDFGenerator {
                         underline: true,
                         lineColor: this.rightBackgroundColor,
                         textColor: this.rightBackgroundColor,
+                        bulletColor: this.rightBackgroundColor,
                     });
                     pdf.hobbyListBlock(left, {
                         headerColor: this.rightBackgroundColor,
@@ -144,6 +151,7 @@ class Template7 extends PDFGenerator {
                         underline: true,
                         lineColor: this.rightBackgroundColor,
                         textColor: this.rightBackgroundColor,
+                        bulletColor: this.rightBackgroundColor,
                     });
                     right.advance(20);
                     pdf.name(right, this.cvInfo.name.toUpperCase(), {

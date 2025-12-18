@@ -39,7 +39,7 @@ class Template15 extends PDFGenerator {
             title = new Text(),
             description = new Text(),
             dates = new Text(),
-            timelineColor = this.mainColor,
+            timeLineColor = this.mainColor,
             showTimeLine = false,
         } = {}
     ) {
@@ -53,6 +53,7 @@ class Template15 extends PDFGenerator {
                 style: title.style,
                 lineHeight: 0,
                 marker: showTimeLine ? marker : null,
+                timeLineColor: timeLineColor,
             })
         );
         ctx.advance(20);
@@ -65,6 +66,7 @@ class Template15 extends PDFGenerator {
                           this.doc.setLineWidth(1);
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
                               thickness: 1,
+                              color: timeLineColor,
                           });
                       }
                     : null,
@@ -80,6 +82,7 @@ class Template15 extends PDFGenerator {
                           this.doc.setLineWidth(1);
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
                               thickness: 1,
+                              color: timeLineColor,
                           });
                       }
                     : null,

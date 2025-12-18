@@ -47,20 +47,18 @@ class Template6 extends PDFGenerator {
             title = new Text(),
             description = new Text(),
             dates = new Text(),
-            timelineColor = this.mainColor,
+            timeLineColor = this.mainColor,
             showTimeLine = false,
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
-
-        this.doc.setFillColor(...timelineColor);
-        this.doc.setDrawColor(...timelineColor);
 
         ctx.advance(
             this.writeTextWithMarker(ctx, title.text, {
                 style: title.style,
                 lineHeight: 0,
                 marker: showTimeLine ? marker : null,
+                timeLineColor: timeLineColor,
             })
         );
         ctx.advance(20);
@@ -73,6 +71,7 @@ class Template6 extends PDFGenerator {
                     ? (x, y, w, pdf) => {
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
                               thickness: 1,
+                              color: timeLineColor,
                           });
                       }
                     : null,
@@ -131,18 +130,22 @@ class Template6 extends PDFGenerator {
                     pdf.skillListBlock(left, {
                         headerColor: this.textColor,
                         textColor: this.rightBackgroundColor,
+                        bulletColor: this.rightBackgroundColor,
                     });
                     pdf.referenceListBlock(left, {
                         headerColor: this.textColor,
                         textColor: this.rightBackgroundColor,
+                        bulletColor: this.rightBackgroundColor,
                     });
                     pdf.awardListBlock(left, {
                         headerColor: this.textColor,
                         textColor: this.rightBackgroundColor,
+                        bulletColor: this.rightBackgroundColor,
                     });
                     pdf.hobbyListBlock(left, {
                         headerColor: this.textColor,
                         textColor: this.rightBackgroundColor,
+                        bulletColor: this.rightBackgroundColor,
                     });
                     pdf.workExpListBlock(right, {
                         headerColor: this.textColor,

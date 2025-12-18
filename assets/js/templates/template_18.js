@@ -1,20 +1,39 @@
-class Template4 extends PDFGenerator {
+class Template18 extends PDFGenerator {
     constructor(
         cvInfo,
         options = {
-            normalFont: "Adamina-Regular.ttf",
-            boldFont: "OpenSans-Bold.ttf",
-            italicFont: "OpenSans-Italic.ttf",
+            mainColor: [183, 31, 28],
+            headerTextStyle: "normal",
         }
     ) {
         super(cvInfo, options);
     }
+    nameTextStyle() {
+        return new TextStyle({
+            color: this.mainColor,
+            size: 24,
+            style: "normal",
+        });
+    }
 
+    titleTextStyle() {
+        return new TextStyle({
+            color: this.mainColor,
+            style: "normal",
+        });
+    }
+    blockTitleStyle() {
+        return new TextStyle({
+            style: "bold",
+            size: 14,
+            color: this.textColor,
+        });
+    }
     blockDescriptionStyle() {
         return new TextStyle({
             style: "normal",
             size: 12,
-            color: this.mainColor,
+            color: this.textColor,
         });
     }
 
@@ -22,7 +41,7 @@ class Template4 extends PDFGenerator {
         return new TextStyle({
             style: "normal",
             size: 10,
-            color: this.mainColor,
+            color: this.textColor,
         });
     }
     contactLabelTextStyle() {
@@ -48,7 +67,6 @@ class Template4 extends PDFGenerator {
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
-
         ctx.advance(
             this.writeTextWithMarker(ctx, title.text, {
                 style: title.style,
@@ -79,7 +97,7 @@ class Template4 extends PDFGenerator {
         this.renderSection(
             new Section({
                 leftRatio: 0.25,
-                rightRatio: 0.65,
+                rightRatio: 0.75,
                 render: ({ left, right, pdf }) => {
                     pdf.avatar(left, this.cvInfo.avatar, {
                         size: 100,
@@ -95,31 +113,54 @@ class Template4 extends PDFGenerator {
                 leftRatio: 1,
                 rightRatio: 0,
                 render: ({ left, right, pdf }) => {
-                    pdf.drawLineBlock(left, {
-                        color: this.mainColor,
-                    });
-                    pdf.introductionBlock(left, {});
                     pdf.contactInfoBlock(left, {
-                        style: "column",
                         icon: this.contactImage,
+                        header: false,
+                        style: "column",
+                    });
+                    pdf.introductionBlock(left, {
+                        headerColor: this.mainColor,
+                        upperline: true,
+                        linePadding: 20,
+                        uppercase: true,
                     });
                     pdf.workExpListBlock(left, {
-                        icon: this.workExpImage,
+                        headerColor: this.mainColor,
+                        upperline: true,
+                        linePadding: 20,
+                        uppercase: true,
+                        timeLineColor: this.textColor,
                     });
                     pdf.educationListBlock(left, {
-                        icon: this.educationImage,
+                        headerColor: this.mainColor,
+                        upperline: true,
+                        linePadding: 20,
+                        uppercase: true,
+                        timeLineColor: this.textColor,
                     });
                     pdf.skillListBlock(left, {
-                        icon: this.skillImage,
+                        headerColor: this.mainColor,
+                        upperline: true,
+                        linePadding: 20,
+                        uppercase: true,
                     });
                     pdf.referenceListBlock(left, {
-                        icon: this.referenceImage,
+                        headerColor: this.mainColor,
+                        upperline: true,
+                        linePadding: 20,
+                        uppercase: true,
                     });
                     pdf.awardListBlock(left, {
-                        icon: this.awardImage,
+                        headerColor: this.mainColor,
+                        upperline: true,
+                        linePadding: 20,
+                        uppercase: true,
                     });
                     pdf.hobbyListBlock(left, {
-                        icon: this.hobbyImage,
+                        headerColor: this.mainColor,
+                        upperline: true,
+                        linePadding: 20,
+                        uppercase: true,
                     });
                 },
             })

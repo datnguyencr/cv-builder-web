@@ -1,22 +1,30 @@
+const TimeFormat = Object.freeze({
+    YEAR: "YEAR",
+    MONTH_YEAR: "MONTH_YEAR",
+});
+const AvatarShape = Object.freeze({
+    CICLE: "CICLE",
+    RECTANGLE: "RECTANGLE",
+});
 
 async function svgToPngData(svgString) {
     return new Promise((resolve) => {
         const blob = new Blob([svgString], {
-            type: 'image/svg+xml'
+            type: "image/svg+xml",
         });
         const url = URL.createObjectURL(blob);
         const img = new Image();
 
         img.onload = () => {
             const size = 24;
-            const canvas = document.createElement('canvas');
+            const canvas = document.createElement("canvas");
             canvas.width = size;
             canvas.height = size;
 
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0);
 
-            const pngData = canvas.toDataURL('image/png');
+            const pngData = canvas.toDataURL("image/png");
             URL.revokeObjectURL(url);
             resolve(pngData);
         };
@@ -82,21 +90,40 @@ async function hobbySvgString(color = [0, 0, 0]) {
         <path d="M15.98 1.804a1 1 0 0 0-1.96 0l-.24 1.192a1 1 0 0 1-.784.785l-1.192.238a1 1 0 0 0 0 1.962l1.192.238a1 1 0 0 1 .785.785l.238 1.192a1 1 0 0 0 1.962 0l.238-1.192a1 1 0 0 1 .785-.785l1.192-.238a1 1 0 0 0 0-1.962l-1.192-.238a1 1 0 0 1-.785-.785l-.238-1.192ZM6.949 5.684a1 1 0 0 0-1.898 0l-.683 2.051a1 1 0 0 1-.633.633l-2.051.683a1 1 0 0 0 0 1.898l2.051.684a1 1 0 0 1 .633.632l.683 2.051a1 1 0 0 0 1.898 0l.683-2.051a1 1 0 0 1 .633-.633l2.051-.683a1 1 0 0 0 0-1.898l-2.051-.683a1 1 0 0 1-.633-.633L6.95 5.684ZM13.949 13.684a1 1 0 0 0-1.898 0l-.184.551a1 1 0 0 1-.632.633l-.551.183a1 1 0 0 0 0 1.898l.551.183a1 1 0 0 1 .633.633l.183.551a1 1 0 0 0 1.898 0l.184-.551a1 1 0 0 1 .632-.633l.551-.183a1 1 0 0 0 0-1.898l-.551-.184a1 1 0 0 1-.633-.632l-.183-.551Z" />
         </svg>`;
 }
-
+async function linkSvgString(color = [0, 0, 0]) {
+    const cssColor = this.rgbToCss(color);
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
+        <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+        <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+        </svg>`;
+}
+async function emailSvgString(color = [0, 0, 0]) {
+    const cssColor = this.rgbToCss(color);
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
+        <path d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z" />
+        <path d="m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z" />
+        </svg>`;
+}
+async function phoneSvgString(color = [0, 0, 0]) {
+    const cssColor = this.rgbToCss(color);
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="${cssColor}" class="size-5">
+        <path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 0 1 3.5 2h1.148a1.5 1.5 0 0 1 1.465 1.175l.716 3.223a1.5 1.5 0 0 1-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 0 0 6.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 0 1 1.767-1.052l3.223.716A1.5 1.5 0 0 1 18 15.352V16.5a1.5 1.5 0 0 1-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 0 1 2.43 8.326 13.019 13.019 0 0 1 2 5V3.5Z" clip-rule="evenodd" />
+        </svg>`;
+}
 function formatMonth(monthValue) {
-    if (!monthValue) return '';
+    if (!monthValue) return "";
     // monthValue like "2022-09" -> display "Sep 2022"
     try {
-        const [y, m] = monthValue.split('-');
+        const [y, m] = monthValue.split("-");
         const d = new Date(Number(y), Number(m) - 1);
         return d.toLocaleString(undefined, {
-            month: 'short',
-            year: 'numeric'
+            month: "short",
+            year: "numeric",
         });
     } catch {
         return monthValue;
     }
-};
+}
 
 function convertToPng(base64) {
     return new Promise((resolve, reject) => {
@@ -115,15 +142,13 @@ function convertToPng(base64) {
         img.src = base64;
     });
 }
-/**
- * Convert any File into a jsPDF-compatible base64 image
- * with optional pre-clipping to circle/square.
- * @param {File} file - Image file
- * @param {number} size - Output size in px
- * @param {"circle"|"square"} shape - Shape to preclip
- * @returns {Promise<{base64: string, type: "PNG"|"JPEG"}>}
- */
-async function fileToJsPdfImage(file, size = 128, shape = "square") {
+
+async function fileToJsPdfImage(
+    file,
+    width = 128,
+    height = 128,
+    shape = AvatarShape.CICLE
+) {
     // Helper: convert to PNG using canvas
     const convertToPng = (base64) =>
         new Promise((resolve) => {
@@ -131,30 +156,29 @@ async function fileToJsPdfImage(file, size = 128, shape = "square") {
             img.crossOrigin = "anonymous";
             img.onload = () => {
                 const canvas = document.createElement("canvas");
-                canvas.width = size;
-                canvas.height = size;
+                canvas.width = width;
+                canvas.height = height;
                 const ctx = canvas.getContext("2d");
 
                 // Clip if circle
-                if (shape === "circle") {
+                if (shape === AvatarShape.CICLE) {
                     ctx.beginPath();
-                    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+                    ctx.arc(width / 2, width / 2, width / 2, 0, Math.PI * 2);
                     ctx.closePath();
                     ctx.clip();
                 }
 
                 // Scale and center
-                const scale = Math.max(size / img.width, size / img.height);
+                const scale = Math.max(width / img.width, height / img.height);
                 const w = img.width * scale;
                 const h = img.height * scale;
-                const dx = (size - w) / 2;
-                const dy = (size - h) / 2;
+                const dx = (width - w) / 2;
+                const dy = (height - h) / 2;
 
                 ctx.drawImage(img, dx, dy, w, h);
                 resolve(canvas.toDataURL("image/png"));
             };
             img.src = base64;
-            
         });
 
     return new Promise((resolve, reject) => {
@@ -174,13 +198,16 @@ async function fileToJsPdfImage(file, size = 128, shape = "square") {
                 }
 
                 // If preclip circle/square
-                if (shape === "circle" || shape === "square") {
+                if (
+                    shape === AvatarShape.CICLE ||
+                    shape === AvatarShape.RECTANGLE
+                ) {
                     base64 = await convertToPng(base64); // always PNG after preclip
                 }
 
                 resolve({
                     base64,
-                    type: base64.includes("image/jpeg") ? "JPEG" : "PNG"
+                    type: base64.includes("image/jpeg") ? "JPEG" : "PNG",
                 });
                 console.log(base64);
             } catch (e) {
@@ -194,11 +221,15 @@ async function fileToJsPdfImage(file, size = 128, shape = "square") {
 }
 
 function escapeHtml(s) {
-    return (s || '').toString().replace(/[&<>"']/g, c => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-    } [c]));
+    return (s || "").toString().replace(
+        /[&<>"']/g,
+        (c) =>
+            ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+            }[c])
+    );
 }

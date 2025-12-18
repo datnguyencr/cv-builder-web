@@ -1,20 +1,28 @@
-class Template4 extends PDFGenerator {
+class Template20 extends PDFGenerator {
     constructor(
         cvInfo,
         options = {
-            normalFont: "Adamina-Regular.ttf",
-            boldFont: "OpenSans-Bold.ttf",
-            italicFont: "OpenSans-Italic.ttf",
+            mainColor: [126, 56, 128],
+            headerTextSize: 18,
+            avatarShape: AvatarShape.RECTANGLE,
+            avatarWidth: 100,
+            avatarHeight: 120,
         }
     ) {
         super(cvInfo, options);
     }
-
+    nameTextStyle() {
+        return new TextStyle({
+            color: this.textColor,
+            size: 32,
+            style: "bold",
+        });
+    }
     blockDescriptionStyle() {
         return new TextStyle({
             style: "normal",
             size: 12,
-            color: this.mainColor,
+            color: this.textColor,
         });
     }
 
@@ -22,12 +30,12 @@ class Template4 extends PDFGenerator {
         return new TextStyle({
             style: "normal",
             size: 10,
-            color: this.mainColor,
+            color: this.textColor,
         });
     }
     contactLabelTextStyle() {
         return new TextStyle({
-            color: this.textColor,
+            color: this.mainColor,
             style: "bold",
         });
     }
@@ -48,7 +56,6 @@ class Template4 extends PDFGenerator {
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
-
         ctx.advance(
             this.writeTextWithMarker(ctx, title.text, {
                 style: title.style,
@@ -59,34 +66,40 @@ class Template4 extends PDFGenerator {
         );
         ctx.advance(20);
         ctx.advance(
-            this.writeTextPair(ctx, description.text, dates.text, {
-                leftStyle: description.style,
-                rightStyle: dates.style,
-                lineHeight: 0,
-                marker: showTimeLine
-                    ? (x, y, w, pdf) => {
-                          pdf.drawLine(x, y - w * 2, x, y + w + 5, {
-                              thickness: 1,
-                              color: timeLineColor,
-                          });
-                      }
-                    : null,
-            })
+            this.writeTextWithMarker(
+                ctx,
+                `${description.text}   (${dates.text})`,
+                {
+                    style: description.style,
+                    lineHeight: 0,
+                    marker: showTimeLine
+                        ? (x, y, w, pdf) => {
+                              pdf.drawLine(x, y - w * 2, x, y + w + 5, {
+                                  thickness: 1,
+                                  color: timeLineColor,
+                              });
+                          }
+                        : null,
+                    timeLineColor: timeLineColor,
+                }
+            )
         );
         ctx.advance(20);
     }
     content() {
         this.renderSection(
             new Section({
-                leftRatio: 0.25,
-                rightRatio: 0.65,
+                leftRatio: 0.7,
+                rightRatio: 0.3,
                 render: ({ left, right, pdf }) => {
-                    pdf.avatar(left, this.cvInfo.avatar, {
-                        size: 100,
+                    left.advance(20);
+                    pdf.name(left, this.cvInfo.name, {});
+                    pdf.title(left, this.cvInfo.title, {});
+                    pdf.contactInfoBlock(left, {
+                        icon: this.contactImage,
+                        header: false,
                     });
-                    right.advance(40);
-                    pdf.name(right, this.cvInfo.name, {});
-                    pdf.title(right, this.cvInfo.title, {});
+                    pdf.avatar(right, this.cvInfo.avatar);
                 },
             })
         );
@@ -95,30 +108,34 @@ class Template4 extends PDFGenerator {
                 leftRatio: 1,
                 rightRatio: 0,
                 render: ({ left, right, pdf }) => {
-                    pdf.drawLineBlock(left, {
-                        color: this.mainColor,
-                    });
-                    pdf.introductionBlock(left, {});
-                    pdf.contactInfoBlock(left, {
-                        style: "column",
-                        icon: this.contactImage,
+                    pdf.introductionBlock(left, {
+                        headerColor: this.mainColor,
+                        icon: this.introductionImage,
                     });
                     pdf.workExpListBlock(left, {
+                        headerColor: this.mainColor,
+                        timeLineColor: this.textColor,
                         icon: this.workExpImage,
                     });
                     pdf.educationListBlock(left, {
+                        headerColor: this.mainColor,
+                        timeLineColor: this.textColor,
                         icon: this.educationImage,
                     });
                     pdf.skillListBlock(left, {
+                        headerColor: this.mainColor,
                         icon: this.skillImage,
                     });
                     pdf.referenceListBlock(left, {
+                        headerColor: this.mainColor,
                         icon: this.referenceImage,
                     });
                     pdf.awardListBlock(left, {
+                        headerColor: this.mainColor,
                         icon: this.awardImage,
                     });
                     pdf.hobbyListBlock(left, {
+                        headerColor: this.mainColor,
                         icon: this.hobbyImage,
                     });
                 },

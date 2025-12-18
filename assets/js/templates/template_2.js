@@ -37,10 +37,6 @@ class Template2 extends PDFGenerator {
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
-
-        this.doc.setFillColor(...timeLineColor);
-        this.doc.setDrawColor(...timeLineColor);
-
         ctx.advance(
             this.writeTextWithMarker(
                 ctx,
@@ -49,6 +45,7 @@ class Template2 extends PDFGenerator {
                     style: title.style,
                     lineHeight: 0,
                     marker: showTimeLine ? marker : null,
+                    timeLineColor: timeLineColor,
                 }
             )
         );
@@ -61,6 +58,7 @@ class Template2 extends PDFGenerator {
                     ? (x, y, w, pdf) => {
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
                               thickness: 1,
+                              color: timeLineColor,
                           });
                       }
                     : null,

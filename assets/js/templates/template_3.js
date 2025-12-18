@@ -11,6 +11,7 @@ class Template3 extends PDFGenerator {
             boldFont: "Lora-Bold.ttf",
             italicFont: "Lora-Italic.ttf",
             timeFormat: TimeFormat.YEAR,
+            useContactIcon: true,
         }
     ) {
         super(cvInfo, options);
@@ -44,14 +45,12 @@ class Template3 extends PDFGenerator {
     ) {
         const marker = TIMELINE_MARKERS["circle"];
 
-        this.doc.setFillColor(...timeLineColor);
-        this.doc.setDrawColor(...timeLineColor);
-
         ctx.advance(
             this.writeTextWithMarker(ctx, title.text, {
                 style: title.style,
                 lineHeight: 0,
                 marker: showTimeLine ? marker : null,
+                timeLineColor: timeLineColor,
             })
         );
         ctx.advance(20);
