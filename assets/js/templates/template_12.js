@@ -2,11 +2,10 @@ class Template12 extends PDFGenerator {
     constructor(
         cvInfo,
         options = {
-            mainColor: [229, 211, 194],
-            leftRatio: 0.4,
-            rightRatio: 0.6,
-            headerTextSize: 16,
-            separator: true,
+            mainColor: [85, 113, 109],
+            headerBackgroundColor: [152, 190, 186],
+            leftRatio: 0.5,
+            rightRatio: 0.5,
             normalFont: "AdventPro-Regular.ttf",
             boldFont: "AdventPro-Bold.ttf",
             italicFont: "AdventPro-Italic.ttf",
@@ -32,6 +31,20 @@ class Template12 extends PDFGenerator {
         return new TextStyle({
             style: "normal",
             color: this.textColor,
+        });
+    }
+    nameTextStyle() {
+        return new TextStyle({
+            color: this.rightBackgroundColor,
+            size: 34,
+            style: "bold",
+        });
+    }
+
+    titleTextStyle() {
+        return new TextStyle({
+            color: this.rightBackgroundColor,
+            size: 20,
         });
     }
 
@@ -87,20 +100,29 @@ class Template12 extends PDFGenerator {
                 rightRatio: 0.75,
                 render: ({ left, right, pdf }) => {
                     pdf.avatar(left, this.cvInfo.avatar, {
-                        size: 100,
+                        size: 90,
+                        borderColor: this.rightBackgroundColor,
+                        padding: 5,
+                        borderSize: 3,
                     });
-                    right.advance(50);
-                    pdf.name(right, this.cvInfo.name.toUpperCase(), {});
-                    pdf.title(right, this.cvInfo.title.toUpperCase(), {});
+                    right.advance(40);
+                    pdf.name(right, this.cvInfo.name.toUpperCase());
+                    pdf.title(right, this.cvInfo.title.toUpperCase());
                 },
             })
         );
 
         this.renderSection(
             new Section({
-                leftRatio: 0.4,
-                rightRatio: 0.6,
+                leftRatio: 0.5,
+                rightRatio: 0.5,
                 render: ({ left, right, pdf }) => {
+                    left.advance(20);
+                    pdf.introductionBlock(left, {
+                        headerColor: this.textColor,
+                        icon: this.introductionImage,
+                        uppercase: true,
+                    });
                     pdf.contactInfoBlock(left, {
                         headerColor: this.textColor,
                         icon: this.contactImage,
@@ -126,15 +148,7 @@ class Template12 extends PDFGenerator {
                         icon: this.hobbyImage,
                         uppercase: true,
                     });
-                    right.advance(10);
-                    pdf.introductionBlock(right, {
-                        headerColor: this.textColor,
-                        icon: this.introductionImage,
-                        uppercase: true,
-                    });
-                    this.drawLineBlock(right, {
-                        color: this.mainColor,
-                    });
+                    right.advance(20);
                     pdf.workExpListBlock(right, {
                         headerColor: this.textColor,
                         icon: this.workExpImage,
