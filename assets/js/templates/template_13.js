@@ -129,7 +129,6 @@ class Template13 extends PDFGenerator {
                             color: this.mainColor,
                             size: 48,
                         }),
-                        textSize: 48,
                     });
                     pdf.title(right, this.cvInfo.title, {
                         style: this.titleTextStyle().clone({

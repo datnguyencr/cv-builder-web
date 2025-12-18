@@ -2,24 +2,34 @@ class Template26 extends PDFGenerator {
     constructor(
         cvInfo,
         options = {
-            mainColor: [85, 113, 109],
-            headerBackgroundColor: [152, 190, 186],
+            mainColor: [184, 222, 239],
             leftRatio: 0.5,
             rightRatio: 0.5,
-            normalFont: "AdventPro-Regular.ttf",
-            boldFont: "AdventPro-Bold.ttf",
-            italicFont: "AdventPro-Italic.ttf",
+            headerTextSize: 16,
+            normalFont: "Amiri-Regular.ttf",
+            boldFont: "Amiri-Bold.ttf",
+            italicFont: "OpenSans-Italic.ttf",
+                    useContactIcon: [0,0,0],
+        educationImageColor  : [0,0,0],
+        workExpImageColor :  [0,0,0],
+        contactImageColor : [0,0,0],
+        skillImageColor :  [0,0,0],
+        referenceImageColor :
+            [0,0,0],
+        awardImageColor :  [0,0,0],
+        introductionImageColor :
+            [0,0,0],
+        hobbyImageColor :  [0,0,0],
+        phoneImageColor :  [0,0,0],
+        linkImageColor : [0,0,0],
+        emailImageColor :  [0,0,0],
+        avatarWidth : 90,
+        avatarHeight :  90,
         }
     ) {
         super(cvInfo, options);
     }
 
-    blockTitleStyle() {
-        return new TextStyle({
-            color: this.textColor,
-            style: "bold",
-        });
-    }
     blockDescriptionStyle() {
         return new TextStyle({
             style: "bold",
@@ -33,20 +43,6 @@ class Template26 extends PDFGenerator {
             color: this.textColor,
         });
     }
-    nameTextStyle() {
-        return new TextStyle({
-            color: this.rightBackgroundColor,
-            size: 34,
-            style: "bold",
-        });
-    }
-
-    titleTextStyle() {
-        return new TextStyle({
-            color: this.rightBackgroundColor,
-            size: 20,
-        });
-    }
 
     blockHeader(
         ctx,
@@ -54,14 +50,11 @@ class Template26 extends PDFGenerator {
             title = new Text(),
             description = new Text(),
             dates = new Text(),
-            timelineColor = this.mainColor,
+            timeLineColor = this.mainColor,
             showTimeLine = false,
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
-
-        this.doc.setFillColor(...timelineColor);
-        this.doc.setDrawColor(...timelineColor);
 
         ctx.advance(
             this.writeTextWithMarker(
@@ -71,6 +64,7 @@ class Template26 extends PDFGenerator {
                     style: title.style,
                     lineHeight: 0,
                     marker: showTimeLine ? marker : null,
+                    timeLineColor: timeLineColor,
                 }
             )
         );
@@ -83,6 +77,7 @@ class Template26 extends PDFGenerator {
                     ? (x, y, w, pdf) => {
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
                               thickness: 1,
+                              color: timeLineColor,
                           });
                       }
                     : null,
@@ -93,36 +88,29 @@ class Template26 extends PDFGenerator {
 
     content() {
         this.doc.setFillColor(...this.mainColor);
-        this.doc.rect(0, 0, this.pageWidth, 150, "F");
+        this.doc.rect(0, 0, this.pageWidth, 140, "F");
         this.renderSection(
             new Section({
                 leftRatio: 0.25,
                 rightRatio: 0.75,
                 render: ({ left, right, pdf }) => {
                     pdf.avatar(left, this.cvInfo.avatar, {
-                        size: 90,
-                        borderColor: this.rightBackgroundColor,
+                        width: 80,height:80,                    borderSize: 3,
                         padding: 5,
-                        borderSize: 3,
+                        borderColor: this.rightBackgroundColor,
                     });
                     right.advance(40);
-                    pdf.name(right, this.cvInfo.name.toUpperCase());
-                    pdf.title(right, this.cvInfo.title.toUpperCase());
+                    pdf.name(right, this.cvInfo.name.toUpperCase(), {});
+                    pdf.title(right, this.cvInfo.title.toUpperCase(), {});
                 },
             })
         );
 
         this.renderSection(
             new Section({
-                leftRatio: 0.5,
-                rightRatio: 0.5,
+                leftRatio: 0.4,
+                rightRatio: 0.6,
                 render: ({ left, right, pdf }) => {
-                    left.advance(20);
-                    pdf.introductionBlock(left, {
-                        headerColor: this.textColor,
-                        icon: this.introductionImage,
-                        uppercase: true,
-                    });
                     pdf.contactInfoBlock(left, {
                         headerColor: this.textColor,
                         icon: this.contactImage,
@@ -148,7 +136,15 @@ class Template26 extends PDFGenerator {
                         icon: this.hobbyImage,
                         uppercase: true,
                     });
-                    right.advance(20);
+                    right.advance(10);
+                    pdf.introductionBlock(right, {
+                        headerColor: this.textColor,
+                        icon: this.introductionImage,
+                        uppercase: true,
+                    });
+                    this.drawLineBlock(right, {
+                        color: this.mainColor,
+                    });
                     pdf.workExpListBlock(right, {
                         headerColor: this.textColor,
                         icon: this.workExpImage,

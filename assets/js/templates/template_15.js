@@ -44,10 +44,6 @@ class Template15 extends PDFGenerator {
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
-
-        this.doc.setFillColor(...timelineColor);
-        this.doc.setDrawColor(...timelineColor);
-
         ctx.advance(
             this.writeTextWithMarker(ctx, title.text, {
                 style: title.style,

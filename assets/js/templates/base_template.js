@@ -1,10 +1,6 @@
 class PDFGenerator {
     constructor(cvInfo, options = {}) {
         this.cvInfo = cvInfo;
-        this.doc = new jsPDF({
-            unit: "pt",
-            format: "a4",
-        });
 
         this.svgElement = document.getElementById("iconSVG");
         this.leftBackgroundColor = options.leftBackgroundColor || [
@@ -20,15 +16,6 @@ class PDFGenerator {
         // Layout
         this.margin = options.margin || 30;
         this.lineHeight = options.lineHeight || 15;
-
-        this.pageWidth = this.doc.internal.pageSize.getWidth();
-        this.pageHeight = this.doc.internal.pageSize.getHeight();
-
-        this.leftWidth = this.pageWidth * this.leftRatio;
-        this.rightWidth = this.pageWidth * this.rightRatio;
-
-        this.leftY = this.margin;
-        this.rightY = this.margin;
 
         // Style
         this.font = options.font || "custom";
@@ -670,13 +657,10 @@ class PDFGenerator {
         const lines = this.doc.splitTextToSize(title, maxWidth);
 
         const rectHeight = lines.length * this.textSize;
-        const textWidth = Math.max(
-            ...lines.map((line) => this.doc.getTextWidth(line))
-        );
-        const rectWidth = icon ? textWidth + iconW + gap : textWidth;
-        const rectX = center ? x + (width - rectWidth) / 2 : x;
-        const rectY = y - paddingTop;
+
         if (backgroundColor) {
+            const rectX = x;
+            const rectY = y - paddingTop;
             this.doc.setFillColor(...backgroundColor);
             this.doc.rect(
                 rectX,
@@ -1207,14 +1191,16 @@ class PDFGenerator {
             dash = false,
             color = this.textColor,
             spacing = 5,
+            marginHorizontal=0,
         } = {}
     ) {
         ctx.ensureSpace(spacing, (column) => {
             this.addPageFor(ctx, column);
         });
         const y = ctx.y;
-        const xStart = ctx.x;
-        const xEnd = ctx.x + ctx.width;
+        const xStart = ctx.x+marginHorizontal;
+        const xEnd = ctx.x + ctx.width-marginHorizontal;
+        ctx.advance(spacing);
         this.drawLine(xStart, y, xEnd, y, {
             dash: dash,
             color: color,
@@ -1569,6 +1555,18 @@ class PDFGenerator {
     }
 
     async generate() {
+        this.doc = new jsPDF({
+            unit: "pt",
+            format: "a4",
+        });
+        this.pageWidth = this.doc.internal.pageSize.getWidth();
+        this.pageHeight = this.doc.internal.pageSize.getHeight();
+
+        this.leftWidth = this.pageWidth * this.leftRatio;
+        this.rightWidth = this.pageWidth * this.rightRatio;
+
+        this.leftY = this.margin;
+        this.rightY = this.margin;
         await this.loadFonts();
         await this.loadImages();
         this.drawBackground();

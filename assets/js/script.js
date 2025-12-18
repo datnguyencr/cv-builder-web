@@ -19,12 +19,12 @@ window.TEMPLATES = {
     17: Template17, //
     18: Template18,
     19: Template19, //
-    20: Template20,
-    21: Template21,
-    22: Template22,
+    20: Template20,//
+    21: Template21,//
+    22: Template22,//
     23: Template23,
     24: Template24,
-    25: Template25,
+    25: Template25,//
     26: Template26,
     27: Template27,
     28: Template28,
@@ -797,6 +797,7 @@ function getTemplate(id) {
 }
 
 async function generatePDF() {
+    var template = getTemplate(selectedTemplateId);
     return template.generate();
 }
 
@@ -828,6 +829,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (storedTemplateId) {
         selectedTemplateId = Number(storedTemplateId); // convert to number
         template = getTemplate(selectedTemplateId);
+        console.log(`selectedTemplateId=${selectedTemplateId}`);
     }
     const aboutUsMenu = document.querySelector("#sideMenu .about-us-menu");
     const templateMenu = document.querySelector("#sideMenu .template-menu");

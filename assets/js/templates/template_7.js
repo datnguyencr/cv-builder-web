@@ -155,13 +155,11 @@ class Template7 extends PDFGenerator {
                     });
                     right.advance(20);
                     pdf.name(right, this.cvInfo.name.toUpperCase(), {
-                        textSize: 32,
                         style: this.nameTextStyle().clone({
                             color: this.mainColor,
                         }),
                     });
                     pdf.title(right, this.cvInfo.title.toUpperCase(), {
-                        textSize: 20,
                         style: this.titleTextStyle().clone({
                             color: this.mainColor,
                         }),
