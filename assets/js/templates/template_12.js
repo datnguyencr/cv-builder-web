@@ -1,25 +1,29 @@
-class Template3 extends PDFGenerator {
+class Template12 extends PDFGenerator {
     constructor(
         cvInfo,
         options = {
+            mainColor: [229, 211, 194],
             leftRatio: 0.4,
             rightRatio: 0.6,
-            leftBackgroundColor: [246, 246, 246],
-            mainColor: [95, 137, 191],
-            textColor: [100, 102, 101],
-            normalFont: "Lora-Regular.ttf",
-            boldFont: "Lora-Bold.ttf",
-            italicFont: "Lora-Italic.ttf",
-            timeFormat: TimeFormat.YEAR,
+            headerTextSize: 16,
+            separator: true,
+            normalFont: "AdventPro-Regular.ttf",
+            boldFont: "AdventPro-Bold.ttf",
+            italicFont: "AdventPro-Italic.ttf",
         }
     ) {
         super(cvInfo, options);
     }
 
+    blockTitleStyle() {
+        return new TextStyle({
+            color: this.textColor,
+            style: "bold",
+        });
+    }
     blockDescriptionStyle() {
         return new TextStyle({
             style: "bold",
-            size: 10,
             color: this.textColor,
         });
     }
@@ -27,7 +31,6 @@ class Template3 extends PDFGenerator {
     blockDatesStyle() {
         return new TextStyle({
             style: "normal",
-            size: 10,
             color: this.textColor,
         });
     }
@@ -38,33 +41,34 @@ class Template3 extends PDFGenerator {
             title = new Text(),
             description = new Text(),
             dates = new Text(),
-            timeLineColor = this.mainColor,
+            timelineColor = this.mainColor,
             showTimeLine = false,
         } = {}
     ) {
         const marker = TIMELINE_MARKERS["circle"];
 
-        this.doc.setFillColor(...timeLineColor);
-        this.doc.setDrawColor(...timeLineColor);
+        this.doc.setFillColor(...timelineColor);
+        this.doc.setDrawColor(...timelineColor);
 
         ctx.advance(
-            this.writeTextWithMarker(ctx, title.text, {
-                style: title.style,
-                lineHeight: 0,
-                marker: showTimeLine ? marker : null,
-            })
+            this.writeTextWithMarker(
+                ctx,
+                `${title.text} | ${description.text}`,
+                {
+                    style: title.style,
+                    lineHeight: 0,
+                    marker: showTimeLine ? marker : null,
+                }
+            )
         );
         ctx.advance(20);
         ctx.advance(
-            this.writeTextPair(ctx, description.text, dates.text, {
-                leftStyle: description.style,
-                rightStyle: dates.style,
+            this.writeTextWithMarker(ctx, dates.text, {
+                style: dates.style,
                 lineHeight: 0,
-                timeLineColor: timeLineColor,
                 marker: showTimeLine
                     ? (x, y, w, pdf) => {
                           pdf.drawLine(x, y - w * 2, x, y + w + 5, {
-                              color: timeLineColor,
                               thickness: 1,
                           });
                       }
@@ -75,64 +79,71 @@ class Template3 extends PDFGenerator {
     }
 
     content() {
+        this.doc.setFillColor(...this.mainColor);
+        this.doc.rect(0, 0, this.pageWidth, 150, "F");
+        this.renderSection(
+            new Section({
+                leftRatio: 0.25,
+                rightRatio: 0.75,
+                render: ({ left, right, pdf }) => {
+                    pdf.avatar(left, this.cvInfo.avatar, {
+                        size: 100,
+                    });
+                    right.advance(50);
+                    pdf.name(right, this.cvInfo.name.toUpperCase(), {});
+                    pdf.title(right, this.cvInfo.title.toUpperCase(), {});
+                },
+            })
+        );
+
         this.renderSection(
             new Section({
                 leftRatio: 0.4,
                 rightRatio: 0.6,
                 render: ({ left, right, pdf }) => {
-                    pdf.avatar(left, this.cvInfo.avatar, {
-                        center: true,
-                        borderSize: 10,
-                        borderColor: this.rightBackgroundColor,
-                    });
-                    left.advance(40);
-                    pdf.name(left, this.cvInfo.name, {
-                        style: this.nameTextStyle().clone({
-                            color: this.mainColor,
-                        }),
-                    });
-                    pdf.title(left, this.cvInfo.title, {});
-                    pdf.introductionBlock(left, {
-                        headerColor: this.textColor,
-                        icon: this.introductionImage,
-                        underline: true,
-                    });
                     pdf.contactInfoBlock(left, {
                         headerColor: this.textColor,
                         icon: this.contactImage,
-                        underline: true,
+                        uppercase: true,
                     });
                     pdf.skillListBlock(left, {
                         headerColor: this.textColor,
                         icon: this.skillImage,
-                        underline: true,
+                        uppercase: true,
                     });
                     pdf.referenceListBlock(left, {
                         headerColor: this.textColor,
                         icon: this.referenceImage,
-                        underline: true,
+                        uppercase: true,
                     });
                     pdf.awardListBlock(left, {
                         headerColor: this.textColor,
                         icon: this.awardImage,
-                        underline: true,
+                        uppercase: true,
                     });
                     pdf.hobbyListBlock(left, {
                         headerColor: this.textColor,
                         icon: this.hobbyImage,
-                        underline: true,
+                        uppercase: true,
+                    });
+                    right.advance(10);
+                    pdf.introductionBlock(right, {
+                        headerColor: this.textColor,
+                        icon: this.introductionImage,
+                        uppercase: true,
+                    });
+                    this.drawLineBlock(right, {
+                        color: this.mainColor,
                     });
                     pdf.workExpListBlock(right, {
                         headerColor: this.textColor,
                         icon: this.workExpImage,
-                        underline: true,
-                        showTimeLine: true,
+                        uppercase: true,
                     });
                     pdf.educationListBlock(right, {
                         headerColor: this.textColor,
                         icon: this.educationImage,
-                        underline: true,
-                        showTimeLine: true,
+                        uppercase: true,
                     });
                 },
             })

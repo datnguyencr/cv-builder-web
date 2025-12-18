@@ -1,15 +1,19 @@
-class Template4 extends PDFGenerator {
+class Template11 extends PDFGenerator {
     constructor(
         cvInfo,
         options = {
-            normalFont: "Adamina-Regular.ttf",
-            boldFont: "OpenSans-Bold.ttf",
-            italicFont: "OpenSans-Italic.ttf",
+            headerBackgroundColor: [208, 237, 228],
         }
     ) {
         super(cvInfo, options);
     }
 
+    blockTitleStyle() {
+        return new TextStyle({
+            color: this.textColor,
+            style: "bold",
+        });
+    }
     blockDescriptionStyle() {
         return new TextStyle({
             style: "normal",
@@ -18,13 +22,6 @@ class Template4 extends PDFGenerator {
         });
     }
 
-    blockDatesStyle() {
-        return new TextStyle({
-            style: "normal",
-            size: 10,
-            color: this.mainColor,
-        });
-    }
     contactLabelTextStyle() {
         return new TextStyle({
             color: this.textColor,
@@ -61,18 +58,15 @@ class Template4 extends PDFGenerator {
         );
         ctx.advance(20);
         ctx.advance(
-            this.writeTextPair(ctx, description.text, dates.text, {
-                leftStyle: description.style,
-                rightStyle: dates.style,
-                lineHeight: 0,
-                marker: showTimeLine
-                    ? (x, y, w, pdf) => {
-                          pdf.drawLine(x, y - w * 2, x, y + w + 5, {
-                              thickness: 1,
-                          });
-                      }
-                    : null,
-            })
+            this.writeTextWithMarker(
+                ctx,
+                `${description.text} (${dates.text})`,
+                {
+                    style: description.style,
+                    lineHeight: 0,
+                    marker: showTimeLine ? marker : null,
+                }
+            )
         );
         ctx.advance(20);
     }
@@ -83,7 +77,7 @@ class Template4 extends PDFGenerator {
                 rightRatio: 0.65,
                 render: ({ left, right, pdf }) => {
                     pdf.avatar(left, this.cvInfo.avatar, {
-                        size: 100,
+                        size: 90,
                     });
                     right.advance(40);
                     pdf.name(right, this.cvInfo.name, {});
@@ -99,28 +93,47 @@ class Template4 extends PDFGenerator {
                     pdf.drawLineBlock(left, {
                         color: this.mainColor,
                     });
-                    pdf.introductionBlock(left, {});
+                    left.advance(20);
+                    pdf.introductionBlock(left, { header: false });
                     pdf.contactInfoBlock(left, {
                         style: "column",
                         icon: this.contactImage,
                     });
                     pdf.workExpListBlock(left, {
                         icon: this.workExpImage,
+                        headerBackgroundColor: this.headerBackgroundColor,
+                        padding: 10,
+                        indent: 20,
                     });
                     pdf.educationListBlock(left, {
                         icon: this.educationImage,
+                        headerBackgroundColor: this.headerBackgroundColor,
+                        padding: 10,
+                        indent: 20,
                     });
                     pdf.skillListBlock(left, {
                         icon: this.skillImage,
+                        headerBackgroundColor: this.headerBackgroundColor,
+                        padding: 10,
+                        indent: 20,
                     });
                     pdf.referenceListBlock(left, {
                         icon: this.referenceImage,
+                        headerBackgroundColor: this.headerBackgroundColor,
+                        padding: 10,
+                        indent: 20,
                     });
                     pdf.awardListBlock(left, {
                         icon: this.awardImage,
+                        headerBackgroundColor: this.headerBackgroundColor,
+                        padding: 10,
+                        indent: 20,
                     });
                     pdf.hobbyListBlock(left, {
                         icon: this.hobbyImage,
+                        headerBackgroundColor: this.headerBackgroundColor,
+                        padding: 10,
+                        indent: 20,
                     });
                 },
             })

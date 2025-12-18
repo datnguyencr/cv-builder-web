@@ -11,7 +11,9 @@ window.TEMPLATES = {
     7:Template7,
     8:Template8,
     9:Template9,
-    10:Template10,
+    10:Template10,//
+    11:Template11,
+    12:Template12,
     13:Template13,
     14:Template14,
     15:Template15,
