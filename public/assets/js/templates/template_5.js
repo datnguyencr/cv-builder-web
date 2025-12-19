@@ -13,17 +13,18 @@ class Template5 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.textColor,
+        });
+        this.titleTextStyle = this.titleTextStyle.clone({
+            color: this.textColor,
+        });
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.BOLD,
             color: this.textColor,
         });
-    }
 
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             color: this.textColor,
         });
@@ -73,7 +74,7 @@ class Template5 extends PDFGenerator {
 
     content() {
         this.doc.setFillColor(...this.mainColor);
-        this.doc.rect(0, 0, this.pageWidth, 150, "F");
+        this.doc.rect(0, 0, this.pageWidth, 170, "F");
         this.renderSection(
             new Section({
                 leftRatio: 0.25,
@@ -83,8 +84,8 @@ class Template5 extends PDFGenerator {
                         size: 100,
                     });
                     right.advance(50);
-                    pdf.name(right, this.cvInfo.name.toUpperCase(), {});
-                    pdf.title(right, this.cvInfo.title.toUpperCase(), {});
+                    pdf.name(right, this.cvInfo.name.toUpperCase());
+                    pdf.title(right, this.cvInfo.title.toUpperCase());
                 },
             })
         );

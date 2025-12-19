@@ -11,17 +11,12 @@ class Template8 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.BOLD,
             color: this.textColor,
         });
-    }
 
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             color: this.textColor,
         });
@@ -79,8 +74,8 @@ class Template8 extends PDFGenerator {
                         size: 100,
                     });
                     right.advance(50);
-                    pdf.name(right, this.cvInfo.name.toUpperCase(), {});
-                    pdf.title(right, this.cvInfo.title.toUpperCase(), {});
+                    pdf.name(right, this.cvInfo.name.toUpperCase());
+                    pdf.title(right, this.cvInfo.title.toUpperCase());
                 },
             })
         );
@@ -91,7 +86,7 @@ class Template8 extends PDFGenerator {
                         headerColor: this.textColor,
                         icon: this.contactImage,
                         uppercase: true,
-                        style: "column",
+                        style: ContactInfoType.COLUMN,
                     });
                 },
             })

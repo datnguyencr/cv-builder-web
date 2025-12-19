@@ -1,116 +1,111 @@
 class PDFGenerator {
     constructor(cvInfo, options = {}) {
         this.cvInfo = cvInfo;
-
         this.svgElement = document.getElementById("iconSVG");
-        this.leftBackgroundColor = options.leftBackgroundColor || [
-            255, 255, 255,
-        ];
-        this.rightBackgroundColor = options.rightBackgroundColor || [
-            255, 255, 255,
-        ];
 
-        this.leftRatio = options.leftRatio || 1;
-        this.rightRatio = options.rightRatio || 0;
+        const mergedOptions = { ...DEFAULT_OPTIONS, ...options };
 
         // Layout
-        this.margin = options.margin || 30;
-        this.lineHeight = options.lineHeight || 15;
+        this.leftBackgroundColor = mergedOptions.leftBackgroundColor;
+        this.rightBackgroundColor = mergedOptions.rightBackgroundColor;
+        this.leftRatio = mergedOptions.leftRatio;
+        this.rightRatio = mergedOptions.rightRatio;
+        this.margin = mergedOptions.margin;
+        this.lineHeight = mergedOptions.lineHeight;
 
         // Style
-        this.font = options.font || "custom";
-        this.textColor = options.textColor || [0, 0, 0];
-        this.mainColor = options.mainColor || [0, 0, 0];
-        this.textSize = options.textSize || 12;
-        this.headerTextSize = options.headerTextSize || 14;
-        this.headerTextStyle = options.headerTextStyle || FontStyle.BOLD;
-        this.separator = options.separator || false;
-        this.normalFont = options.normalFont || "Adamina-Regular.ttf";
-        this.boldFont = options.boldFont || "OpenSans-Bold.ttf";
-        this.italicFont = options.italicFont || "OpenSans-Italic.ttf";
-        this.timeFormat = options.timeFormat || TimeFormat.MONTH_YEAR;
-        this.headerBackgroundColor = options.headerBackgroundColor || null;
+        this.font = mergedOptions.font;
+        this.textColor = mergedOptions.textColor;
+        this.mainColor = mergedOptions.mainColor;
+        this.textSize = mergedOptions.textSize;
+        this.headerTextSize = mergedOptions.headerTextSize;
+        this.headerTextStyle = mergedOptions.headerTextStyle;
+        this.separator = mergedOptions.separator;
+
+        this.normalFont = mergedOptions.normalFont;
+        this.boldFont = mergedOptions.boldFont;
+        this.italicFont = mergedOptions.italicFont;
+
+        this.timeFormat = mergedOptions.timeFormat;
+        this.headerBackgroundColor = mergedOptions.headerBackgroundColor;
+        this.useContactIcon = mergedOptions.useContactIcon;
+
+        // Derived colors (correctly depend on mainColor)
+        this.educationImageColor =
+            options.educationImageColor ?? this.mainColor;
+        this.workExpImageColor = options.workExpImageColor ?? this.mainColor;
+        this.contactImageColor = options.contactImageColor ?? this.mainColor;
+        this.skillImageColor = options.skillImageColor ?? this.mainColor;
+        this.referenceImageColor =
+            options.referenceImageColor ?? this.mainColor;
+        this.awardImageColor = options.awardImageColor ?? this.mainColor;
+        this.introductionImageColor =
+            options.introductionImageColor ?? this.mainColor;
+        this.hobbyImageColor = options.hobbyImageColor ?? this.mainColor;
+        this.phoneImageColor = options.phoneImageColor ?? this.mainColor;
+        this.linkImageColor = options.linkImageColor ?? this.mainColor;
+        this.emailImageColor = options.emailImageColor ?? this.mainColor;
+
+        // Avatar
+        this.avatarShape = mergedOptions.avatarShape;
+        this.avatarWidth = mergedOptions.avatarWidth;
+        this.avatarHeight = mergedOptions.avatarHeight;
+
+        // Internal constants
         this.iconSize = 14;
         this.markerWidth = 10;
-        this.useContactIcon = options.useContactIcon || false;
-        this.educationImageColor =
-            options.educationImageColor || this.mainColor;
-        this.workExpImageColor = options.workExpImageColor || this.mainColor;
-        this.contactImageColor = options.contactImageColor || this.mainColor;
-        this.skillImageColor = options.skillImageColor || this.mainColor;
-        this.referenceImageColor =
-            options.referenceImageColor || this.mainColor;
-        this.awardImageColor = options.awardImageColor || this.mainColor;
-        this.introductionImageColor =
-            options.introductionImageColor || this.mainColor;
-        this.hobbyImageColor = options.hobbyImageColor || this.mainColor;
-        this.phoneImageColor = options.phoneImageColor || this.mainColor;
-        this.linkImageColor = options.linkImageColor || this.mainColor;
-        this.emailImageColor = options.emailImageColor || this.mainColor;
-        this.avatarShape = options.avatarShape || AvatarShape.CICLE;
-        this.avatarWidth = options.avatarWidth || 120;
-        this.avatarHeight = options.avatarHeight || 120;
-    }
-
-    parseYearMonth(value) {
-        if (!value || typeof value !== "string") return null;
-
-        const parts = value.split("-");
-        if (parts.length < 2) return null;
-
-        const y = Number(parts[0]);
-        const m = Number(parts[1]);
-
-        if (Number.isNaN(y) || m < 1 || m > 12) return null;
-
-        return { y, m };
-    }
-
-    formatMonthYear(value, locale) {
-        const parsed = this.parseYearMonth(value);
-        if (!parsed) return "";
-
-        const { y, m } = parsed;
-        const d = new Date(y, m - 1);
-
-        return d.toLocaleString(locale, {
-            month: "short",
-            year: "numeric",
+        this.contactLabelTextStyle = new TextStyle({
+            color: this.mainColor,
+            style: FontStyle.BOLD,
         });
-    }
+        this.contactValueTextStyle = new TextStyle({
+            color: this.textColor,
+            style: FontStyle.NORMAL,
+        });
 
-    formatYear(value) {
-        const parsed = this.parseYearMonth(value);
-        return parsed ? String(parsed.y) : "";
-    }
+        this.nameTextStyle = new TextStyle({
+            color: this.mainColor,
+            size: 24,
+            style: FontStyle.BOLD,
+        });
+        this.titleTextStyle = new TextStyle({
+            color: this.mainColor,
+            style: FontStyle.BOLD,
+        });
+        this.blockTitleStyle = new TextStyle({
+            style: FontStyle.BOLD,
+            color: this.textColor,
+        });
+        this.blockDescriptionStyle = new TextStyle({
+            style: FontStyle.ITALIC,
+            color: this.mainColor,
+        });
+        this.blockDatesStyle = new TextStyle({
+            style: FontStyle.BOLD,
+            color: this.textColor,
+        });
 
-    formatTime(value, locale) {
-        switch (this.timeFormat) {
-            case TimeFormat.YEAR:
-                return this.formatYear(value);
-            case TimeFormat.MONTH_YEAR:
-            default:
-                return this.formatMonthYear(value, locale);
-        }
+        this.markerFill = mergedOptions.markerFill;
     }
 
     async loadFonts() {
+        var name = "custom";
         await this.loadFont(
             `assets/fonts/${this.normalFont}`,
-            "custom",
+            name,
             FontStyle.NORMAL
         );
         await this.loadFont(
             `assets/fonts/${this.boldFont}`,
-            "custom",
+            name,
             FontStyle.BOLD
         );
         await this.loadFont(
             `assets/fonts/${this.normalFont}`,
-            "custom",
+            name,
             FontStyle.ITALIC
         );
-        this.font = "custom";
+        this.font = name;
     }
 
     renderSection(section) {
@@ -151,42 +146,6 @@ class PDFGenerator {
 
         this.leftY = leftCtx.y + (section.paddingBottom || 0);
         this.rightY = rightCtx.y + (section.paddingBottom || 0);
-    }
-
-    nameTextStyle() {
-        return new TextStyle({
-            color: this.textColor,
-            size: 24,
-            style: FontStyle.BOLD,
-        });
-    }
-
-    titleTextStyle() {
-        return new TextStyle({
-            color: this.textColor,
-            style: FontStyle.BOLD,
-        });
-    }
-
-    blockTitleStyle() {
-        return new TextStyle({
-            style: FontStyle.BOLD,
-            color: this.textColor,
-        });
-    }
-
-    blockDescriptionStyle() {
-        return new TextStyle({
-            style: FontStyle.ITALIC,
-            color: this.mainColor,
-        });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
-            style: FontStyle.BOLD,
-            color: this.textColor,
-        });
     }
 
     writeTextPair(
@@ -267,11 +226,13 @@ class PDFGenerator {
             const y = ctx.y;
 
             if (i === 0 && marker) {
+                this.doc.setLineWidth(0.5);
                 this.doc.setDrawColor(...timeLineColor);
-                this.doc.setFillColor(...timeLineColor);
-                // this.doc.setLineWidth(0.5);
-                // this.doc.setDrawColor(...timeLineColor);
-                // this.doc.setFillColor(...[255, 255, 255]);
+                if (this.markerFill) {
+                    this.doc.setFillColor(...timeLineColor);
+                } else {
+                    this.doc.setFillColor(...[255, 255, 255]);
+                }
                 marker(baseX, y, markerWidth, this);
             }
 
@@ -428,29 +389,16 @@ class PDFGenerator {
         }
     }
 
-    contactLabelTextStyle() {
-        return new TextStyle({
-            color: this.mainColor,
-            style: FontStyle.BOLD,
-        });
-    }
-    contactValueTextStyle() {
-        return new TextStyle({
-            color: this.textColor,
-            style: FontStyle.NORMAL,
-        });
-    }
-
     writePair(
         ctx,
         {
             label = new PdfText({
                 text: "",
-                style: this.contactLabelTextStyle(),
+                style: this.contactLabelTextStyle,
             }),
             value = new PdfText({
                 text: "",
-                style: this.contactValueTextStyle(),
+                style: this.contactValueTextStyle,
             }),
             padding = 4,
             lineHeight = this.lineHeight,
@@ -776,26 +724,18 @@ class PDFGenerator {
 
         ctx.advance(lineGap);
     }
-
-    avatar(
-        ctx,
+    drawAvatar(
         imageBase64,
         {
-            width = this.avatarWidth,
-            height = this.avatarHeight,
+            x = this.margin,
+            y = this.mainColor,
+            width = null,
+            height = null,
             borderColor = this.mainColor,
             borderSize = 5,
             padding = 0,
-            center = false,
         } = {}
     ) {
-        if (!imageBase64) return 0;
-
-        const totalSize = height + padding * 2;
-        const x = center ? ctx.x + (ctx.width - width) / 2 : ctx.x;
-
-        const y = ctx.y;
-
         // border
         if (borderSize > 0) {
             this.doc.setDrawColor(...borderColor);
@@ -807,13 +747,41 @@ class PDFGenerator {
                     width / 2 + padding
                 );
             } else {
-                this.doc.rect(x, y, width, height * 1.2);
+                this.doc.rect(x, y, width, height);
             }
         }
-
         // image
         this.doc.addImage(imageBase64, "PNG", x, y, width, height);
+    }
+    avatar(
+        ctx,
+        imageBase64,
+        {
+            starX = null,
+            startY = null,
+            width = this.avatarWidth,
+            height = this.avatarHeight,
+            borderColor = this.mainColor,
+            borderSize = 5,
+            padding = 0,
+            center = false,
+        } = {}
+    ) {
+        if (!imageBase64) return 0;
 
+        const totalSize = height + padding * 2;
+        const x = starX ?? center ? ctx.x + (ctx.width - width) / 2 : ctx.x;
+
+        const y = startY ?? ctx.y;
+        this.drawAvatar(imageBase64, {
+            x: x,
+            y: y,
+            width: width,
+            height: height,
+            borderColor: borderColor,
+            borderSize: borderSize,
+            padding: padding,
+        });
         ctx.advance(totalSize);
         return totalSize;
     }
@@ -822,7 +790,7 @@ class PDFGenerator {
         ctx,
         text,
         {
-            style = this.nameTextStyle(),
+            style = this.nameTextStyle,
             lineHeight = 0,
             center = false,
             uppercase = false,
@@ -847,7 +815,7 @@ class PDFGenerator {
         ctx,
         text,
         {
-            style = this.titleTextStyle(),
+            style = this.titleTextStyle,
             lineHeight = 0,
             center = false,
             uppercase = false,
@@ -953,18 +921,18 @@ class PDFGenerator {
             if (this.useContactIcon) {
                 this.writePairWithIcon(ctx, {
                     text: item.value,
-                    style: this.contactValueTextStyle(),
+                    style: this.contactValueTextStyle,
                     icon: item.icon,
                 });
             } else {
                 this.writePair(ctx, {
                     label: new PdfText({
                         text: item.label,
-                        style: this.contactLabelTextStyle(),
+                        style: this.contactLabelTextStyle,
                     }),
                     value: new PdfText({
                         text: item.value,
-                        style: this.contactValueTextStyle(),
+                        style: this.contactValueTextStyle,
                     }),
                     lineHeight,
                 });
@@ -1037,13 +1005,13 @@ class PDFGenerator {
             textSize = this.headerTextSize,
             textColor = this.textColor,
             linePadding = 10,
-            style = "row",
+            style = ContactInfoType.LIST,
             header = true,
         } = {}
     ) {
         ctx.advance(10);
         switch (style) {
-            case "row":
+            case ContactInfoType.LIST:
                 if (header) {
                     this.header(ctx, {
                         text: "Contact",
@@ -1063,7 +1031,7 @@ class PDFGenerator {
                 }
                 this.contactInfoRow(ctx);
                 break;
-            case "column":
+            case ContactInfoType.COLUMN:
             default:
                 this.contactInfoColumn(ctx);
                 break;
@@ -1162,21 +1130,25 @@ class PDFGenerator {
 
         for (const item of this.cvInfo.workExpArr) {
             const dates = item.current
-                ? `${this.formatTime(item.from)} - Present`
-                : `${this.formatTime(item.from)} - ${this.formatTime(item.to)}`;
+                ? `${formatTime(item.from, {
+                      format: this.timeFormat,
+                  })} - Present`
+                : `${formatTime(item.from, {
+                      format: this.timeFormat,
+                  })} - ${formatTime(item.to, { format: this.timeFormat })}`;
 
             this.block(ctx, {
                 title: new PdfText({
                     text: item.title,
-                    style: this.blockTitleStyle(),
+                    style: this.blockTitleStyle,
                 }),
                 description: new PdfText({
                     text: item.company,
-                    style: this.blockDescriptionStyle(),
+                    style: this.blockDescriptionStyle,
                 }),
                 dates: new PdfText({
                     text: dates,
-                    style: this.blockDatesStyle(),
+                    style: this.blockDatesStyle,
                 }),
                 indent: indent,
                 timeLineColor: timeLineColor,
@@ -1276,22 +1248,22 @@ class PDFGenerator {
         });
 
         for (const item of this.cvInfo.educationArr) {
-            const dates = `${this.formatTime(item.from)} - ${this.formatTime(
-                item.to
-            )}`;
+            const dates = `${formatTime(item.from, {
+                format: this.timeFormat,
+            })} - ${formatTime(item.to, { format: this.timeFormat })}`;
 
             this.block(ctx, {
                 title: new PdfText({
                     text: item.degree,
-                    style: this.blockTitleStyle(),
+                    style: this.blockTitleStyle,
                 }),
                 description: new PdfText({
                     text: item.school,
-                    style: this.blockDescriptionStyle(),
+                    style: this.blockDescriptionStyle,
                 }),
                 dates: new PdfText({
                     text: dates,
-                    style: this.blockDatesStyle(),
+                    style: this.blockDatesStyle,
                 }),
                 bulletColor: bulletColor,
                 detailList: item.details,
@@ -1662,7 +1634,7 @@ class Section {
 
 const TIMELINE_MARKERS = {
     circle: (x, y, w, ctx) => {
-        ctx.doc.circle(x, y - w / 2, w / 2, "F");
+        ctx.doc.circle(x, y - w / 2, w / 2, "FD");
     },
 
     line: (x, y, w, ctx) => {
@@ -1671,4 +1643,39 @@ const TIMELINE_MARKERS = {
     square: (x, y, w, ctx) => {
         ctx.doc.rect(x - 3, y - 3, 6, 6, "F");
     },
+};
+const DEFAULT_OPTIONS = {
+    leftBackgroundColor: [255, 255, 255],
+    rightBackgroundColor: [255, 255, 255],
+
+    leftRatio: 1,
+    rightRatio: 0,
+
+    // Layout
+    margin: 30,
+    lineHeight: 15,
+
+    // Style
+    font: "custom",
+    textColor: [0, 0, 0],
+    mainColor: [0, 0, 0],
+    textSize: 12,
+    headerTextSize: 14,
+    headerTextStyle: FontStyle.BOLD,
+    separator: false,
+
+    normalFont: "Adamina-Regular.ttf",
+    boldFont: "OpenSans-Bold.ttf",
+    italicFont: "OpenSans-Italic.ttf",
+
+    timeFormat: TimeFormat.MONTH_YEAR,
+    headerBackgroundColor: null,
+
+    useContactIcon: false,
+
+    avatarShape: AvatarShape.CICLE,
+    avatarWidth: 120,
+    avatarHeight: 120,
+
+    markerFill: true,
 };

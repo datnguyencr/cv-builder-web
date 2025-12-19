@@ -4,58 +4,45 @@ class Template18 extends PDFGenerator {
         options = {
             mainColor: [183, 31, 28],
             headerTextStyle: FontStyle.NORMAL,
+            avatarWidth: 90,
+            avatarHeight: 90,
         }
     ) {
         super(cvInfo, options);
-    }
-    nameTextStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
             color: this.mainColor,
             size: 24,
             style: FontStyle.NORMAL,
         });
-    }
-
-    titleTextStyle() {
-        return new TextStyle({
+        this.titleTextStyle = this.titleTextStyle.clone({
             color: this.mainColor,
             style: FontStyle.NORMAL,
         });
-    }
-    blockTitleStyle() {
-        return new TextStyle({
+        this.blockTitleStyle = this.blockTitleStyle.clone({
             style: FontStyle.BOLD,
             size: 14,
             color: this.textColor,
         });
-    }
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.NORMAL,
             size: 12,
             color: this.textColor,
         });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
         });
-    }
-    contactLabelTextStyle() {
-        return new TextStyle({
+        this.contactLabelTextStyle = this.contactLabelTextStyle.clone({
             color: this.textColor,
             style: FontStyle.BOLD,
         });
-    }
-    contactValueTextStyle() {
-        return new TextStyle({
+        this.contactValueTextStyle = this.contactValueTextStyle.clone({
             color: this.textColor,
             style: FontStyle.NORMAL,
         });
     }
+
     blockHeader(
         ctx,
         {
@@ -103,8 +90,8 @@ class Template18 extends PDFGenerator {
                         size: 100,
                     });
                     right.advance(40);
-                    pdf.name(right, this.cvInfo.name, {});
-                    pdf.title(right, this.cvInfo.title, {});
+                    pdf.name(right, this.cvInfo.name);
+                    pdf.title(right, this.cvInfo.title);
                 },
             })
         );
@@ -116,7 +103,7 @@ class Template18 extends PDFGenerator {
                     pdf.contactInfoBlock(left, {
                         icon: this.contactImage,
                         header: false,
-                        style: "column",
+                        style: ContactInfoType.COLUMN,
                     });
                     pdf.introductionBlock(left, {
                         headerColor: this.mainColor,

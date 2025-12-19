@@ -4,38 +4,41 @@ class Template17 extends PDFGenerator {
         options = {
             mainColor: [241, 244, 250],
             headerTextStyle: FontStyle.NORMAL,
+            avatarWidth: 100,
+            avatarHeight: 100,
+            markerFill: false,
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.textColor,
+            size: 24,
+            style: FontStyle.NORMAL,
+        });
+        this.titleTextStyle = this.titleTextStyle.clone({
+            color: this.textColor,
+            style: FontStyle.NORMAL,
+        });
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.NORMAL,
             size: 12,
             color: this.textColor,
         });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
         });
-    }
-    contactLabelTextStyle() {
-        return new TextStyle({
+        this.contactLabelTextStyle = this.contactLabelTextStyle.clone({
             color: this.textColor,
             style: FontStyle.BOLD,
         });
-    }
-    contactValueTextStyle() {
-        return new TextStyle({
+        this.contactValueTextStyle = this.contactValueTextStyle.clone({
             color: this.textColor,
             style: FontStyle.NORMAL,
         });
     }
+
     blockHeader(
         ctx,
         {
@@ -82,15 +85,13 @@ class Template17 extends PDFGenerator {
                     this.doc.setFillColor(...this.mainColor);
                     this.doc.rect(0, 0, this.pageWidth, 160, "F");
                     left.advance(20);
-                    pdf.name(left, this.cvInfo.name, {});
-                    pdf.title(left, this.cvInfo.title, {});
+                    pdf.name(left, this.cvInfo.name);
+                    pdf.title(left, this.cvInfo.title);
                     pdf.contactInfoBlock(left, {
                         icon: this.contactImage,
                         header: false,
                     });
-                    pdf.avatar(right, this.cvInfo.avatar, {
-                        size: 100,
-                    });
+                    pdf.avatar(right, this.cvInfo.avatar, {});
                 },
             })
         );

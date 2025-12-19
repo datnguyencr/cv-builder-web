@@ -9,27 +9,28 @@ class Template13 extends PDFGenerator {
             normalFont: "Afacad-Regular.ttf",
             boldFont: "Afacad-Bold.ttf",
             italicFont: "Afacad-Italic.ttf",
+            avatarWidth: 120,
+            avatarHeight: 120,
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockTitleStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.mainColor,
+            size: 48,
+        });
+        this.titleTextStyle = this.titleTextStyle.clone({
+            size: 24,
+        });
+        this.blockTitleStyle = this.blockTitleStyle.clone({
             style: FontStyle.BOLD,
             color: this.textColor,
         });
-    }
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
         });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.ITALIC,
             size: 10,
             color: this.textColor,
@@ -124,16 +125,8 @@ class Template13 extends PDFGenerator {
                         uppercase: true,
                     });
                     right.advance(40);
-                    pdf.name(right, this.cvInfo.name, {
-                        style: this.nameTextStyle().clone({
-                            color: this.mainColor,
-                            size: 48,
-                        }),
-                    });
+                    pdf.name(right, this.cvInfo.name);
                     pdf.title(right, this.cvInfo.title, {
-                        style: this.titleTextStyle().clone({
-                            size: 24,
-                        }),
                         uppercase: true,
                     });
                     pdf.introductionBlock(right, {

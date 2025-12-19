@@ -8,35 +8,30 @@ class Template4 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
 
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.NORMAL,
             size: 12,
             color: this.mainColor,
         });
-    }
 
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.mainColor,
         });
-    }
-    contactLabelTextStyle() {
-        return new TextStyle({
+
+        this.contactLabelTextStyle = this.contactLabelTextStyle.clone({
             color: this.textColor,
             style: FontStyle.BOLD,
         });
-    }
-    contactValueTextStyle() {
-        return new TextStyle({
+
+        this.contactValueTextStyle = this.contactValueTextStyle.clone({
             color: this.textColor,
             style: FontStyle.NORMAL,
         });
     }
+
     blockHeader(
         ctx,
         {
@@ -85,8 +80,8 @@ class Template4 extends PDFGenerator {
                         size: 100,
                     });
                     right.advance(40);
-                    pdf.name(right, this.cvInfo.name, {});
-                    pdf.title(right, this.cvInfo.title, {});
+                    pdf.name(right, this.cvInfo.name);
+                    pdf.title(right, this.cvInfo.title);
                 },
             })
         );
@@ -98,9 +93,9 @@ class Template4 extends PDFGenerator {
                     pdf.drawLineBlock(left, {
                         color: this.mainColor,
                     });
-                    pdf.introductionBlock(left, {});
+                    pdf.introductionBlock(left);
                     pdf.contactInfoBlock(left, {
-                        style: "column",
+                        style: ContactInfoType.COLUMN,
                         icon: this.contactImage,
                     });
                     pdf.workExpListBlock(left, {

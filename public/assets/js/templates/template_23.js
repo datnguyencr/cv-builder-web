@@ -9,34 +9,24 @@ class Template23 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
-    nameTextStyle() {
-        return new TextStyle({
-            color: this.textColor,
+
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.mainColor,
             size: 26,
         });
-    }
-    titleTextStyle() {
-        return new TextStyle({
+        this.titleTextStyle = this.titleTextStyle.clone({
             color: this.textColor,
         });
-    }
-    blockTitleStyle() {
-        return new TextStyle({
+        this.blockTitleStyle = this.blockTitleStyle.clone({
             color: this.textColor,
             style: FontStyle.BOLD,
         });
-    }
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
         });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
@@ -95,9 +85,6 @@ class Template23 extends PDFGenerator {
                     });
                     left.advance(40);
                     pdf.name(left, this.cvInfo.name, {
-                        style: this.nameTextStyle().clone({
-                            color: this.mainColor,
-                        }),
                         center: true,
                     });
                     pdf.title(left, this.cvInfo.title.toUpperCase(), {
@@ -108,7 +95,7 @@ class Template23 extends PDFGenerator {
                         color: this.headerBackgroundColor,
                     });
                     pdf.contactInfoBlock(left, {
-                        style: "column",
+                        style: ContactInfoType.COLUMN,
                         uppercase: true,
                         center: true,
                         icon: this.contactImage,

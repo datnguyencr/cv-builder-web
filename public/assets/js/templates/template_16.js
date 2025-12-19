@@ -14,56 +14,42 @@ class Template16 extends PDFGenerator {
             phoneImageColor: [0, 0, 0],
             linkImageColor: [0, 0, 0],
             emailImageColor: [0, 0, 0],
+            avatarWidth: 90,
+            avatarHeight: 90,
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockTitleStyle() {
-        return new TextStyle({
+        this.blockTitleStyle = this.blockTitleStyle.clone({
             color: this.textColor,
             style: FontStyle.BOLD,
         });
-    }
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.NORMAL,
             color: this.textColor,
         });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             color: this.textColor,
         });
-    }
-    nameTextStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
             color: this.textColor,
             size: 34,
             style: FontStyle.BOLD,
         });
-    }
-
-    titleTextStyle() {
-        return new TextStyle({
+        this.titleTextStyle = this.titleTextStyle.clone({
             color: this.textColor,
             size: 20,
         });
-    }
-    contactLabelTextStyle() {
-        return new TextStyle({
+        this.contactLabelTextStyle = this.contactLabelTextStyle.clone({
             color: this.textColor,
             style: FontStyle.BOLD,
         });
-    }
-    contactValueTextStyle() {
-        return new TextStyle({
+        this.contactValueTextStyle = this.contactValueTextStyle.clone({
             color: this.textColor,
             style: FontStyle.NORMAL,
         });
     }
+
     blockHeader(
         ctx,
         {
@@ -128,7 +114,6 @@ class Template16 extends PDFGenerator {
                 rightRatio: 0.75,
                 render: ({ left, right, pdf }) => {
                     pdf.avatar(left, this.cvInfo.avatar, {
-                        size: 90,
                         borderColor: this.textColor,
                         borderSize: 3,
                     });

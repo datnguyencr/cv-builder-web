@@ -16,28 +16,38 @@ class Template6 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
 
-    blockTitleStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.rightBackgroundColor,
+        });
+
+        this.titleTextStyle = this.titleTextStyle.clone({
+            color: this.rightBackgroundColor,
+        });
+        this.blockTitleStyle = this.blockTitleStyle.clone({
             color: this.leftBackgroundColor,
             style: FontStyle.BOLD,
         });
-    }
 
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.BOLD,
             size: 10,
             color: this.textColor,
         });
-    }
 
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
+        });
+
+        this.contactLabelTextStyle = this.contactLabelTextStyle.clone({
+            color: this.rightBackgroundColor,
+            style: FontStyle.BOLD,
+        });
+        this.contactValueTextStyle = this.contactValueTextStyle.clone({
+            color: this.rightBackgroundColor,
+            style: FontStyle.NORMAL,
         });
     }
 
@@ -80,18 +90,6 @@ class Template6 extends PDFGenerator {
         ctx.advance(20);
     }
 
-    contactLabelTextStyle() {
-        return new TextStyle({
-            color: this.rightBackgroundColor,
-            style: FontStyle.BOLD,
-        });
-    }
-    contactValueTextStyle() {
-        return new TextStyle({
-            color: this.rightBackgroundColor,
-            style: FontStyle.NORMAL,
-        });
-    }
     content() {
         this.renderSection(
             new Section({
@@ -104,21 +102,13 @@ class Template6 extends PDFGenerator {
                         borderColor: this.rightBackgroundColor,
                     });
                     left.advance(40);
-                    pdf.name(left, this.cvInfo.name, {
-                        style: this.nameTextStyle().clone({
-                            color: this.rightBackgroundColor,
-                        }),
-                    });
+                    pdf.name(left, this.cvInfo.name);
                     pdf.drawLineBlock(left, {
                         color: this.rightBackgroundColor,
                         thickness: 3,
                     });
                     left.advance(10);
-                    pdf.title(left, this.cvInfo.title, {
-                        style: this.titleTextStyle().clone({
-                            color: this.rightBackgroundColor,
-                        }),
-                    });
+                    pdf.title(left, this.cvInfo.title);
 
                     pdf.contactInfoBlock(left, {
                         headerColor: this.textColor,

@@ -26,17 +26,17 @@ class Template26 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.textColor,
+        });
+        this.titleTextStyle = this.titleTextStyle.clone({
+            color: this.textColor,
+        });
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.BOLD,
             color: this.textColor,
         });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             color: this.textColor,
         });
@@ -100,8 +100,8 @@ class Template26 extends PDFGenerator {
                         borderColor: this.rightBackgroundColor,
                     });
                     right.advance(40);
-                    pdf.name(right, this.cvInfo.name.toUpperCase(), {});
-                    pdf.title(right, this.cvInfo.title.toUpperCase(), {});
+                    pdf.name(right, this.cvInfo.name.toUpperCase());
+                    pdf.title(right, this.cvInfo.title.toUpperCase());
                 },
             })
         );

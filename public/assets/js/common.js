@@ -12,6 +12,55 @@ const FontStyle = Object.freeze({
     BOLD: "BOLD",
     ITALIC: "ITALIC",
 });
+const ContactInfoType = Object.freeze({
+    COLUMN: "COLUMN",
+    LIST: "LIST",
+});
+
+function parseYearMonth(value) {
+    if (!value || typeof value !== "string") return null;
+
+    const parts = value.split("-");
+    if (parts.length < 2) return null;
+
+    const y = Number(parts[0]);
+    const m = Number(parts[1]);
+
+    if (Number.isNaN(y) || m < 1 || m > 12) return null;
+
+    return { y, m };
+}
+
+function formatMonthYear(value, locale) {
+    const parsed = parseYearMonth(value);
+    if (!parsed) return "";
+
+    const { y, m } = parsed;
+    const d = new Date(y, m - 1);
+
+    return d.toLocaleString(locale, {
+        month: "short",
+        year: "numeric",
+    });
+}
+
+function formatYear(value) {
+    const parsed = parseYearMonth(value);
+    return parsed ? String(parsed.y) : "";
+}
+
+function formatTime(
+    value,
+    { locale = navigator.language || "en-US", format = TimeFormat.MONTH_YEAR }
+) {
+    switch (format) {
+        case TimeFormat.YEAR:
+            return formatYear(value);
+        case TimeFormat.MONTH_YEAR:
+        default:
+            return formatMonthYear(value, locale);
+    }
+}
 async function svgToPngData(svgString) {
     return new Promise((resolve) => {
         const blob = new Blob([svgString], {

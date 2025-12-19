@@ -11,22 +11,14 @@ class Template21 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockTitleStyle() {
-        return new TextStyle({
+        this.blockTitleStyle = this.blockTitleStyle.clone({
             color: this.mainColor,
             style: FontStyle.BOLD,
         });
-    }
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             color: this.textColor,
         });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             color: this.mainColor,
         });
@@ -92,12 +84,8 @@ class Template21 extends PDFGenerator {
                 rightRatio: 0.4,
                 render: ({ left, right, pdf }) => {
                     left.advance(20);
-                    pdf.name(left, this.cvInfo.name.toUpperCase(), {
-                        style: this.nameTextStyle(),
-                    });
-                    pdf.title(left, this.cvInfo.title.toUpperCase(), {
-                        style: this.titleTextStyle(),
-                    });
+                    pdf.name(left, this.cvInfo.name.toUpperCase());
+                    pdf.title(left, this.cvInfo.title.toUpperCase());
                     pdf.contactInfoBlock(right, {
                         icon: this.contactImage,
                         uppercase: true,

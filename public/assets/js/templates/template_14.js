@@ -1,24 +1,19 @@
 class Template14 extends PDFGenerator {
     constructor(cvInfo, options = {}) {
         super(cvInfo, options);
-    }
-
-    blockTitleStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.mainColor,
+        });
+        this.blockTitleStyle = this.blockTitleStyle.clone({
             color: this.textColor,
             style: FontStyle.BOLD,
         });
-    }
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
         });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
@@ -77,9 +72,6 @@ class Template14 extends PDFGenerator {
                     });
                     left.advance(40);
                     pdf.name(left, this.cvInfo.name, {
-                        style: this.nameTextStyle().clone({
-                            color: this.mainColor,
-                        }),
                         center: true,
                     });
                     pdf.title(left, this.cvInfo.title.toUpperCase(), {
@@ -89,7 +81,7 @@ class Template14 extends PDFGenerator {
                         color: this.mainColor,
                     });
                     pdf.contactInfoBlock(left, {
-                        style: "column",
+                        style: ContactInfoType.COLUMN,
                         uppercase: true,
                         center: true,
                         icon: this.contactImage,

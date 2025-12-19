@@ -19,20 +19,29 @@ class Template7 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.mainColor,
+        });
+        this.titleTextStyle = this.titleTextStyle.clone({
+            color: this.mainColor,
+        });
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.NORMAL,
             color: this.textColor,
         });
-    }
 
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
+        });
+        this.contactLabelTextStyle = this.contactLabelTextStyle.clone({
+            color: this.rightBackgroundColor,
+            style: FontStyle.BOLD,
+        });
+        this.contactValueTextStyle = this.contactValueTextStyle.clone({
+            color: this.rightBackgroundColor,
+            style: FontStyle.NORMAL,
         });
     }
 
@@ -89,18 +98,6 @@ class Template7 extends PDFGenerator {
         ctx.advance(20);
     }
 
-    contactLabelTextStyle() {
-        return new TextStyle({
-            color: this.rightBackgroundColor,
-            style: FontStyle.BOLD,
-        });
-    }
-    contactValueTextStyle() {
-        return new TextStyle({
-            color: this.rightBackgroundColor,
-            style: FontStyle.NORMAL,
-        });
-    }
     content() {
         this.renderSection(
             new Section({
@@ -154,16 +151,8 @@ class Template7 extends PDFGenerator {
                         bulletColor: this.rightBackgroundColor,
                     });
                     right.advance(20);
-                    pdf.name(right, this.cvInfo.name.toUpperCase(), {
-                        style: this.nameTextStyle().clone({
-                            color: this.mainColor,
-                        }),
-                    });
-                    pdf.title(right, this.cvInfo.title.toUpperCase(), {
-                        style: this.titleTextStyle().clone({
-                            color: this.mainColor,
-                        }),
-                    });
+                    pdf.name(right, this.cvInfo.name.toUpperCase());
+                    pdf.title(right, this.cvInfo.title.toUpperCase());
                     right.advance(20);
                     pdf.introductionBlock(right, {
                         headerColor: this.textColor,

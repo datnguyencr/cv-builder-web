@@ -15,21 +15,19 @@ class Template3 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             style: FontStyle.BOLD,
             size: 10,
             color: this.textColor,
         });
-    }
 
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             size: 10,
             color: this.textColor,
+        });
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.mainColor,
         });
     }
 
@@ -85,12 +83,8 @@ class Template3 extends PDFGenerator {
                         borderColor: this.rightBackgroundColor,
                     });
                     left.advance(40);
-                    pdf.name(left, this.cvInfo.name, {
-                        style: this.nameTextStyle().clone({
-                            color: this.mainColor,
-                        }),
-                    });
-                    pdf.title(left, this.cvInfo.title, {});
+                    pdf.name(left, this.cvInfo.name);
+                    pdf.title(left, this.cvInfo.title);
                     pdf.introductionBlock(left, {
                         headerColor: this.textColor,
                         icon: this.introductionImage,

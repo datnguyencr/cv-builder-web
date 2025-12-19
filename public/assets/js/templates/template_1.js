@@ -7,6 +7,9 @@ class Template1 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.mainColor,
+        });
     }
 
     content() {
@@ -20,9 +23,6 @@ class Template1 extends PDFGenerator {
                     });
                     left.advance(40);
                     pdf.name(left, this.cvInfo.name, {
-                        style: this.nameTextStyle().clone({
-                            color: this.mainColor,
-                        }),
                         center: true,
                     });
                     pdf.title(left, this.cvInfo.title, {
@@ -36,7 +36,7 @@ class Template1 extends PDFGenerator {
                         uppercase: true,
                     });
                     pdf.contactInfoBlock(left, {
-                        style: "column",
+                        style: ContactInfoType.COLUMN,
                         uppercase: true,
                         icon: this.contactImage,
                     });

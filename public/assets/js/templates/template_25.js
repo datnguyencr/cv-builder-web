@@ -7,22 +7,20 @@ class Template25 extends PDFGenerator {
         }
     ) {
         super(cvInfo, options);
-    }
-
-    blockTitleStyle() {
-        return new TextStyle({
+        this.nameTextStyle = this.nameTextStyle.clone({
+            color: this.rightBackgroundColor,
+        });
+        this.titleTextStyle = this.titleTextStyle.clone({
+            color: this.rightBackgroundColor,
+        });
+        this.blockTitleStyle = this.blockTitleStyle.clone({
             color: this.mainColor,
             style: FontStyle.BOLD,
         });
-    }
-    blockDescriptionStyle() {
-        return new TextStyle({
+        this.blockDescriptionStyle = this.blockDescriptionStyle.clone({
             color: this.textColor,
         });
-    }
-
-    blockDatesStyle() {
-        return new TextStyle({
+        this.blockDatesStyle = this.blockDatesStyle.clone({
             style: FontStyle.NORMAL,
             color: this.mainColor,
         });
@@ -93,16 +91,8 @@ class Template25 extends PDFGenerator {
                         size: 100,
                         borderColor: this.rightBackgroundColor,
                     });
-                    pdf.name(right, this.cvInfo.name.toUpperCase(), {
-                        style: this.nameTextStyle().clone({
-                            color: this.rightBackgroundColor,
-                        }),
-                    });
-                    pdf.title(right, this.cvInfo.title.toUpperCase(), {
-                        style: this.titleTextStyle().clone({
-                            color: this.rightBackgroundColor,
-                        }),
-                    });
+                    pdf.name(right, this.cvInfo.name.toUpperCase(), {});
+                    pdf.title(right, this.cvInfo.title.toUpperCase(), {});
                     this.drawLineBlock(right, {
                         color: this.rightBackgroundColor,
                     });
@@ -123,7 +113,7 @@ class Template25 extends PDFGenerator {
                         icon: this.contactImage,
                         underline: true,
                         uppercase: true,
-                        style: "column",
+                        style: ContactInfoType.COLUMN,
                     });
                     pdf.workExpListBlock(left, {
                         icon: this.workExpImage,

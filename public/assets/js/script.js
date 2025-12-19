@@ -19,17 +19,17 @@ window.TEMPLATES = {
     17: Template17, //
     18: Template18,
     19: Template19, //
-    20: Template20,//
-    21: Template21,//
-    22: Template22,//
+    20: Template20, //
+    21: Template21, //
+    22: Template22, //
     23: Template23,
     24: Template24,
-    25: Template25,//
+    25: Template25, //
     26: Template26,
     27: Template27,
-    28: Template28,
+    28: Template28, //
     29: Template29,
-    30: Template30,
+    30: Template30, //
 };
 
 const hamburger = document.getElementById("hamburger");
