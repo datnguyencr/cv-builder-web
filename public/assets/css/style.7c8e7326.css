@@ -1,0 +1,79 @@
+/* A4 Content */
+@font-face {
+    font-family: "Lora";
+    src: url("../fonts/Lora-Regular.ttf") format("truetype"),
+        url("../fonts/Lora-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Lora";
+    src: url("../fonts/Lora-Bold.ttf") format("truetype"),
+        url("../fonts/Lora-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+html,
+body {
+    font-family: "Lora";
+}
+#toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e22929;
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    opacity: 0;
+    z-index: 9999;
+}
+
+#toast.show {
+    opacity: 1;
+}
+
+#content {
+    width: 210mm; /* Exact A4 width */
+    min-height: 297mm; /* Exact A4 height so bottom text never cut */
+    background-color: white;
+    color: #1f2937;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+.bottom-action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 12px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+    z-index: 99;
+}
+.section-body.hidden {
+    display: none;
+}
+
+/* --- Bottom Sheet Overlay (click outside to close) --- */
+.bottomSheetOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.bottomSheetOverlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
