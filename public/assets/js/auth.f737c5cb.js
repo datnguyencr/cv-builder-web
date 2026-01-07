@@ -3,16 +3,18 @@ import {
     getAuth,
     onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCKODIvSMSeLRH_I7LrEy6RaMI-3LA088w",
     authDomain: "cv-builder-9ec5c.firebaseapp.com",
+    databaseURL: "https://cv-builder-9ec5c-default-rtdb.firebaseio.com",
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export const auth = getAuth(app);
 
-export { auth };
+export const db = getDatabase(app);
 
 export function verifyAuth(callback) {
     onAuthStateChanged(auth, (user) => {
@@ -24,7 +26,6 @@ verifyAuth((user) => {
     const accountEl = document.getElementById("account");
     if (accountEl) {
         if (user) {
-            // Logged-in user: show avatar
             accountEl.innerHTML = `
             <img 
                 src="${user.photoURL}" 
@@ -34,7 +35,6 @@ verifyAuth((user) => {
             />
         `;
         } else {
-            // No user: show placeholder circle, clickable
             accountEl.innerHTML = `
             <div 
                 class="w-24 h-24 rounded-full bg-gray-100 flex-shrink-0 cursor-pointer border-2 border-gray-400"
@@ -43,9 +43,7 @@ verifyAuth((user) => {
 
         `;
 
-            // Add click event to redirect
             accountEl.querySelector("div").addEventListener("click", () => {
-                // Save current URL so user can return after login
                 const redirectUrl = encodeURIComponent(window.location.href);
                 window.location.href = `/login.html?redirect=${redirectUrl}`;
             });

@@ -1,8 +1,15 @@
 const { jsPDF } = window.jspdf;
-import { auth } from "./auth.f737c5cb.js";
+import { auth, db } from "./auth.f737c5cb.js";
 import { CVInfo, Skill } from "./model.js";
 import * as Template from "./pdf_template.f2c11e11.js";
 import * as Utils from "./utils.7666b820.js";
+import {
+    ref,
+    set,
+    get,
+    push,
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
 window.TEMPLATES = {
     1: Template.Template1,
     2: Template.Template2,
@@ -865,16 +872,20 @@ async function previewPDF() {
     contentEl.appendChild(embed);
 }
 async function getAllPDFs() {
-    const db = await openDB();
+    const user = auth.currentUser;
 
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction("pdfs", "readonly");
-        const store = tx.objectStore("pdfs");
+    if (user) {
+        const snap = await get(ref(db, `users/${user.uid}/pdfs`));
 
-        const req = store.getAll();
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-    });
+        if (!snap.exists()) return [];
+
+        return Object.entries(snap.val()).map(([id, data]) => ({
+            id,
+            ...data,
+        }));
+    }
+
+    return getAllPDFsLocal();
 }
 async function getPDF(id) {
     const db = await openDB();
@@ -966,29 +977,30 @@ function openDB() {
         req.onerror = () => reject(req.error);
     });
 }
-
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+}
 async function savePDF(blob, filename) {
     const user = auth.currentUser;
 
     if (user) {
-        // Firebase Storage
+        const pdfRef = push(ref(db, `users/${user.uid}/pdfs`));
+        const base64 = await blobToBase64(blob);
         try {
-            const storage = getStorage();
-            const fileRef = storageRef(
-                storage,
-                `users/${user.uid}/pdfs/${filename}`
-            );
-            await uploadBytes(fileRef, blob);
-            const url = await getDownloadURL(fileRef);
-
-            // Optional: store metadata in Firebase DB if needed
-            return { source: "firebase", url };
+            await set(pdfRef, {
+                name: filename,
+                base64,
+                createdAt: Date.now(),
+            });
         } catch (err) {
-            console.error("Failed to save PDF to Firebase:", err);
-            throw err;
+            console.error("Failed to save PDF:", err);
         }
     } else {
-        // Local IndexedDB
         const db = await openDB();
         return new Promise((resolve, reject) => {
             const tx = db.transaction("pdfs", "readwrite");
