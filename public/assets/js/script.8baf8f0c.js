@@ -1,35 +1,39 @@
 const { jsPDF } = window.jspdf;
+import { auth } from "./auth.f737c5cb.js";
+import { CVInfo, Skill } from "./model.js";
+import * as Template from "./pdf_template.f2c11e11.js";
+import * as Utils from "./utils.7666b820.js";
 window.TEMPLATES = {
-    1: Template1,
-    2: Template2,
-    3: Template3,
-    4: Template4,
-    5: Template5,
-    6: Template6,
-    7: Template7,
-    8: Template8,
-    9: Template9,
-    10: Template10,
-    11: Template11,
-    12: Template12,
-    13: Template13,
-    14: Template14,
-    15: Template15,
-    16: Template16,
-    17: Template17,
-    18: Template18,
-    19: Template19,
-    20: Template20,
-    21: Template21,
-    22: Template22,
-    23: Template23,
-    24: Template24,
-    25: Template25,
-    26: Template26,
-    27: Template27,
-    28: Template28,
-    29: Template29,
-    30: Template30,
+    1: Template.Template1,
+    2: Template.Template2,
+    3: Template.Template3,
+    4: Template.Template4,
+    5: Template.Template5,
+    6: Template.Template6,
+    7: Template.Template7,
+    8: Template.Template8,
+    9: Template.Template9,
+    10: Template.Template10,
+    11: Template.Template11,
+    12: Template.Template12,
+    13: Template.Template13,
+    14: Template.Template14,
+    15: Template.Template15,
+    16: Template.Template16,
+    17: Template.Template17,
+    18: Template.Template18,
+    19: Template.Template19,
+    20: Template.Template20,
+    21: Template.Template21,
+    22: Template.Template22,
+    23: Template.Template23,
+    24: Template.Template24,
+    25: Template.Template25,
+    26: Template.Template26,
+    27: Template.Template27,
+    28: Template.Template28,
+    29: Template.Template29,
+    30: Template.Template30,
 };
 const EYE_ICON = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
@@ -114,7 +118,7 @@ let editingAwardId = null;
 let editingWorkExpId = null;
 let editingEducationId = null;
 let editingHobbyId = null;
-
+let cvInfo;
 ///////////////
 skillCancelBtn.addEventListener("click", clearSkillForm);
 
@@ -218,11 +222,13 @@ function renderWorkExpList() {
     cvInfo.workExpArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
         const left = clone.querySelector(".left");
-        left.querySelector(".title").textContent = escapeHtml(item.title);
-        left.querySelector(".company").textContent = escapeHtml(item.company);
+        left.querySelector(".title").textContent = Utils.escapeHtml(item.title);
+        left.querySelector(".company").textContent = Utils.escapeHtml(
+            item.company
+        );
         left.querySelector(".dates").textContent = item.current
-            ? `${formatMonth(item.from)} - Present`
-            : `${formatMonth(item.from)} - ${formatMonth(item.to)}`;
+            ? `${Utils.formatMonth(item.from)} - Present`
+            : `${Utils.formatMonth(item.from)} - ${Utils.formatMonth(item.to)}`;
         const detailsEl = clone.querySelector(".details");
         detailsEl.innerHTML = "";
 
@@ -374,11 +380,15 @@ function renderEducationList() {
         const clone = template.content.cloneNode(true);
 
         const left = clone.querySelector(".left");
-        left.querySelector(".degree").textContent = escapeHtml(item.degree);
-        left.querySelector(".school").textContent = escapeHtml(item.school);
-        left.querySelector(".dates").textContent = `${formatMonth(
+        left.querySelector(".degree").textContent = Utils.escapeHtml(
+            item.degree
+        );
+        left.querySelector(".school").textContent = Utils.escapeHtml(
+            item.school
+        );
+        left.querySelector(".dates").textContent = `${Utils.formatMonth(
             item.from
-        )} – ${formatMonth(item.to)}`;
+        )} – ${Utils.formatMonth(item.to)}`;
         const detailsEl = clone.querySelector(".details");
         detailsEl.innerHTML = "";
 
@@ -826,7 +836,7 @@ async function generatePDF() {
         avatarFile ||
         (await fetch("assets/images/default.avif").then((r) => r.blob()));
 
-    const img = await fileToJsPdfImage(
+    const img = await Utils.fileToJsPdfImage(
         file,
         template.avatarWidth,
         template.avatarHeight,
@@ -958,22 +968,44 @@ function openDB() {
 }
 
 async function savePDF(blob, filename) {
-    const db = await openDB();
+    const user = auth.currentUser;
 
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction("pdfs", "readwrite");
-        const store = tx.objectStore("pdfs");
+    if (user) {
+        // Firebase Storage
+        try {
+            const storage = getStorage();
+            const fileRef = storageRef(
+                storage,
+                `users/${user.uid}/pdfs/${filename}`
+            );
+            await uploadBytes(fileRef, blob);
+            const url = await getDownloadURL(fileRef);
 
-        store.put({
-            id: Date.now(),
-            name: filename,
-            blob,
-            createdAt: new Date(),
+            // Optional: store metadata in Firebase DB if needed
+            return { source: "firebase", url };
+        } catch (err) {
+            console.error("Failed to save PDF to Firebase:", err);
+            throw err;
+        }
+    } else {
+        // Local IndexedDB
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("pdfs", "readwrite");
+            const store = tx.objectStore("pdfs");
+
+            store.put({
+                id: Date.now(),
+                name: filename,
+                blob,
+                createdAt: new Date(),
+                email: user?.email || "guest",
+            });
+
+            tx.oncomplete = () => resolve({ source: "local" });
+            tx.onerror = () => reject(tx.error);
         });
-
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error);
-    });
+    }
 }
 
 async function downloadPDF() {
