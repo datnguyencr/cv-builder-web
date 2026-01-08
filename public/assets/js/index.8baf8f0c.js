@@ -114,10 +114,10 @@ const hobbyInput = document.getElementById("hobby");
 const hobbySaveBtn = document.getElementById("hobbySaveBtn");
 
 const hobbyListEl = document.getElementById("hobbyList");
+let template;
 let historyCache = null;
 let historyLoading = false;
 let selectedTemplateId = 1;
-let template;
 let avatarFile;
 let editingSkillId = null;
 let editingReferenceId = null;
@@ -130,17 +130,27 @@ let cvInfo;
 
 skillCancelBtn.addEventListener("click", clearSkillForm);
 
-function showToast(message, duration = 2000) {
+function showToast(message, { type = "error", duration = 2000 } = {}) {
     const toast = document.getElementById("toast");
     toast.textContent = message;
-    toast.classList.add("show");
+
+    const isSmallScreen = window.innerWidth < 768;
+    const bottomClass = isSmallScreen ? "bottom-40" : "bottom-20";
+
+    toast.className = `
+        fixed ${bottomClass} left-1/2 -translate-x-1/2
+        px-4 py-3 rounded-md text-sm text-white
+        ${type === "error" ? "bg-red-600" : "bg-green-600"}
+        z-[9999]
+        opacity-100
+        transition-opacity duration-300
+        pointer-events-none
+    `;
 
     clearTimeout(toast._timer);
     toast._timer = setTimeout(() => {
-        toast.classList.remove("show");
+        toast.classList.add("opacity-0");
     }, duration);
-
-    console.log(toast);
 }
 
 function resetCVToDefault() {
@@ -1134,14 +1144,20 @@ async function savePDF(blob, filename) {
         tx.onerror = () => reject(tx.error);
     });
 }
+async function savePDFFile() {
+    const doc = await generatePDF();
+    const timestamp = Date.now();
+    const filename = `CV_${timestamp}.pdf`;
+    let blob = doc.output("blob");
+    await savePDF(blob, filename);
+    showToast("PDF saved successfully", { type: "success" });
+}
 
 async function downloadPDF() {
     const doc = await generatePDF();
     const timestamp = Date.now();
     const filename = `CV_${timestamp}.pdf`;
     doc.save(filename);
-    let blob = doc.output("blob");
-    await savePDF(blob, filename);
 }
 
 function applySectionVisibility() {
@@ -1369,7 +1385,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         previewPDF();
         save(cvInfo);
     });
-
+    document.getElementById("save-info").addEventListener("click", () => {
+        savePDFFile();
+    });
     document.getElementById("generate").addEventListener("click", () => {
         downloadPDF();
     });
