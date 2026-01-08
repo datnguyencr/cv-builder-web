@@ -1,5 +1,4 @@
-const { jsPDF } = window.jspdf;
-import { auth, db } from "./auth.f737c5cb.js";
+import { auth, db, verifyAuth } from "./auth.f737c5cb.js";
 import { CVInfo, Skill } from "./model.js";
 import * as Template from "./pdf_template.f2c11e11.js";
 import * as Utils from "./utils.7666b820.js";
@@ -8,7 +7,14 @@ import {
     set,
     get,
     push,
+    remove,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+import {
+    signInWithPopup,
+    signOut,
+    GoogleAuthProvider,
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 window.TEMPLATES = {
     1: Template.Template1,
@@ -73,10 +79,8 @@ const workExpFromEl = document.getElementById("experienceFrom");
 const workExpToEl = document.getElementById("experienceTo");
 const workExpCurrentEl = document.getElementById("experienceCurrent");
 const workExpSaveBtn = document.getElementById("experienceSaveBtn");
-const workExpCancelBtn = document.getElementById("experienceCancelBtn");
 
 const avatarInput = document.getElementById("inputAvatar");
-const avatarPreview = document.getElementById("avatarPreview");
 
 const eduListEl = document.getElementById("eduList");
 const eduDegreeEl = document.getElementById("eduDegree");
@@ -94,13 +98,8 @@ const slider = document.getElementById("skillValue");
 const label = document.getElementById("skillValueLabel");
 
 const workExpDetailsList = document.getElementById("workExpDetailsList");
-const workExpDetailTemplate = document.getElementById(
-    "work-exp-detail-template"
-);
+
 const educationDetailsList = document.getElementById("educationDetailsList");
-const educationDetailTemplate = document.getElementById(
-    "education-detail-template"
-);
 
 const referenceInput = document.getElementById("reference");
 const referenceSaveBtn = document.getElementById("referenceSaveBtn");
@@ -113,9 +112,10 @@ const awardListEl = document.getElementById("awardList");
 
 const hobbyInput = document.getElementById("hobby");
 const hobbySaveBtn = document.getElementById("hobbySaveBtn");
-const hobbyCancelBtn = document.getElementById("hobbyCancelBtn");
-const hobbyListEl = document.getElementById("hobbyList");
 
+const hobbyListEl = document.getElementById("hobbyList");
+let historyCache = null;
+let historyLoading = false;
 let selectedTemplateId = 1;
 let template;
 let avatarFile;
@@ -127,6 +127,7 @@ let editingEducationId = null;
 let editingHobbyId = null;
 let cvInfo;
 ///////////////
+
 skillCancelBtn.addEventListener("click", clearSkillForm);
 
 function showToast(message, duration = 2000) {
@@ -206,15 +207,17 @@ avatarInput.addEventListener("change", async (e) => {
     avatarFile = file;
 });
 
-function showEmpty({ container, text }) {
-    const template = document.getElementById("empty-state-template");
+async function showEmpty({ container, text }) {
+    const template = await Utils.loadTemplate(
+        "templates/empty-state-template.html"
+    );
     const clone = template.content.cloneNode(true);
     clone.querySelector(".empty-message").textContent = text;
     container.innerHTML = "";
     container.appendChild(clone);
 }
 
-function renderWorkExpList() {
+async function renderWorkExpList() {
     workExpListEl.innerHTML = "";
 
     if (cvInfo.workExpArr.length === 0) {
@@ -225,7 +228,9 @@ function renderWorkExpList() {
         return;
     }
 
-    const template = document.getElementById("work-exp-item-template");
+    const template = await Utils.loadTemplate(
+        "templates/work-exp-item-template.html"
+    );
     cvInfo.workExpArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
         const left = clone.querySelector(".left");
@@ -261,7 +266,11 @@ function renderWorkExpList() {
         workExpListEl.appendChild(clone);
     });
 }
-document.getElementById("addWorkExpDetail").onclick = () => {
+document.getElementById("addWorkExpDetail").onclick = async () => {
+    const workExpDetailTemplate = await Utils.loadTemplate(
+        "templates/work-exp-detail-template.html"
+    );
+
     const node = workExpDetailTemplate.content.cloneNode(true);
     node.querySelector(".remove").onclick = (e) =>
         e.target.closest("div").remove();
@@ -367,11 +376,11 @@ workExpSaveBtn.addEventListener("click", () => {
     renderWorkExpList();
 });
 
-workExpCancelBtn.addEventListener("click", () => {
+document.getElementById("experienceCancelBtn").addEventListener("click", () => {
     clearWorkExperienceForm();
 });
 
-function renderEducationList() {
+async function renderEducationList() {
     eduListEl.innerHTML = "";
 
     if (cvInfo.educationArr.length === 0) {
@@ -382,7 +391,9 @@ function renderEducationList() {
         return;
     }
 
-    const template = document.getElementById("education-item-template");
+    const template = await Utils.loadTemplate(
+        "templates/education-item-template.html"
+    );
     cvInfo.educationArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
 
@@ -395,7 +406,7 @@ function renderEducationList() {
         );
         left.querySelector(".dates").textContent = `${Utils.formatMonth(
             item.from
-        )} – ${Utils.formatMonth(item.to)}`;
+        )} - ${Utils.formatMonth(item.to)}`;
         const detailsEl = clone.querySelector(".details");
         detailsEl.innerHTML = "";
 
@@ -420,14 +431,17 @@ function renderEducationList() {
         eduListEl.appendChild(clone);
     });
 }
-document.getElementById("addEducationDetail").onclick = () => {
+document.getElementById("addEducationDetail").onclick = async () => {
+    const educationDetailTemplate = await Utils.loadTemplate(
+        "templates/education-detail-template.html"
+    );
     const node = educationDetailTemplate.content.cloneNode(true);
     node.querySelector(".remove").onclick = (e) =>
         e.target.closest("div").remove();
     educationDetailsList.appendChild(node);
 };
 
-function startEditEducation(id) {
+async function startEditEducation(id) {
     const it = cvInfo.educationArr.find((e) => e.id === id);
     if (!it) return;
     editingEducationId = id;
@@ -439,6 +453,9 @@ function startEditEducation(id) {
     eduDegreeEl.focus();
 
     educationDetailsList.innerHTML = "";
+    const educationDetailTemplate = await Utils.loadTemplate(
+        "templates/education-detail-template.html"
+    );
     (it.details || []).forEach((detail) => {
         const node = educationDetailTemplate.content.cloneNode(true);
         const input = node.querySelector(".education-detail-input");
@@ -524,7 +541,7 @@ function startEditSkill(id) {
     skillInput.focus();
 }
 
-function renderSkillList() {
+async function renderSkillList() {
     skillListEl.innerHTML = "";
 
     if (!cvInfo.skillArr.length) {
@@ -535,7 +552,9 @@ function renderSkillList() {
         return;
     }
 
-    const template = document.getElementById("skill-item-template");
+    const template = await Utils.loadTemplate(
+        "templates/skill-item-template.html"
+    );
     cvInfo.skillArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
         clone.querySelector(".item").textContent = item.name;
@@ -593,7 +612,7 @@ function startEditReference(id) {
     referenceInput.focus();
 }
 
-function renderReferenceList() {
+async function renderReferenceList() {
     referenceListEl.innerHTML = "";
 
     if (!cvInfo.referenceArr.length) {
@@ -604,7 +623,9 @@ function renderReferenceList() {
         return;
     }
 
-    const template = document.getElementById("reference-item-template");
+    const template = await Utils.loadTemplate(
+        "templates/reference-item-template.html"
+    );
     cvInfo.referenceArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
         clone.querySelector(".item").textContent = item.name;
@@ -692,7 +713,7 @@ function startEditAward(id) {
     awardInput.focus();
 }
 
-function renderAwardList() {
+async function renderAwardList() {
     awardListEl.innerHTML = "";
 
     if (!cvInfo.awardArr.length) {
@@ -702,7 +723,9 @@ function renderAwardList() {
         });
         return;
     }
-    const template = document.getElementById("award-item-template");
+    const template = await Utils.loadTemplate(
+        "templates/award-item-template.html"
+    );
     cvInfo.awardArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
         clone.querySelector(".item").textContent = item.name;
@@ -757,7 +780,7 @@ function startEditHobby(id) {
     hobbyInput.focus();
 }
 
-function renderHobbyList() {
+async function renderHobbyList() {
     hobbyListEl.innerHTML = "";
 
     if (!cvInfo.hobbyArr.length) {
@@ -767,7 +790,9 @@ function renderHobbyList() {
         });
         return;
     }
-    const template = document.getElementById("hobby-item-template");
+    const template = await Utils.loadTemplate(
+        "templates/hobby-item-template.html"
+    );
     cvInfo.hobbyArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
         clone.querySelector(".item").textContent = item.name;
@@ -811,11 +836,12 @@ hobbySaveBtn.addEventListener("click", () => {
     renderHobbyList();
 });
 
-hobbyCancelBtn.addEventListener("click", clearHobbyForm);
+document
+    .getElementById("hobbyCancelBtn")
+    .addEventListener("click", clearHobbyForm);
 
-function initInfo() {
-    cvInfo = CVInfo.load();
-
+async function initInfo() {
+    cvInfo = await load();
     document.getElementById("inputName").value = cvInfo.name;
     document.getElementById("inputTitle").value = cvInfo.title;
     document.getElementById("inputEmail").value = cvInfo.email;
@@ -871,6 +897,7 @@ async function previewPDF() {
 
     contentEl.appendChild(embed);
 }
+
 async function getAllPDFs() {
     const user = auth.currentUser;
 
@@ -887,82 +914,141 @@ async function getAllPDFs() {
 
     return getAllPDFsLocal();
 }
-async function getPDF(id) {
+
+async function getAllPDFsLocal() {
     const db = await openDB();
 
     return new Promise((resolve, reject) => {
         const tx = db.transaction("pdfs", "readonly");
         const store = tx.objectStore("pdfs");
 
-        const req = store.get(id);
+        const req = store.getAll();
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
     });
 }
-async function openStoredPDF(id) {
-    const item = await getPDF(id);
-    if (!item) return;
 
-    const url = URL.createObjectURL(item.blob);
-    window.open(url);
+async function renderHistoryWithData(pdfs) {
+    const list = document.getElementById("historyList");
+    list.innerHTML = "";
+
+    if (!pdfs.length) {
+        const emptyTpl = await Utils.loadTemplate(
+            "templates/history-empty-template.html"
+        );
+        list.appendChild(emptyTpl.content.cloneNode(true));
+        return;
+    }
+
+    const itemTpl = await Utils.loadTemplate(
+        "templates/history-item-template.html"
+    );
+
+    // Sort by newest first
+    pdfs.sort((a, b) => b.createdAt - a.createdAt).forEach((item) => {
+        const node = itemTpl.content.cloneNode(true);
+
+        const nameEl = node.querySelector(".history-name");
+        const previewBtn = node.querySelector(".history-preview");
+        const downloadBtn = node.querySelector(".history-download");
+        const deleteBtn = node.querySelector(".history-delete");
+
+        nameEl.textContent = item.name;
+
+        // Add date element
+        const dateEl = node.querySelector(".history-date");
+        if (dateEl) {
+            const d = new Date(item.createdAt);
+            dateEl.textContent = `${d.getFullYear()}/${String(
+                d.getMonth() + 1
+            ).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
+        }
+
+        previewBtn.onclick = () => {
+            const blob = getBlob(item);
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+        };
+
+        downloadBtn.onclick = () => {
+            const blob = getBlob(item);
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = item.name;
+            a.click();
+
+            URL.revokeObjectURL(url);
+        };
+        deleteBtn.onclick = async () => {
+            if (!confirm("Delete this CV? This cannot be undone.")) return;
+
+            await deletePDF(item);
+            renderHistoryWithData(pdfs.filter((p) => p.id !== item.id));
+        };
+        list.appendChild(node);
+    });
 }
-async function deletePDF(id) {
+async function deleteLocalPDF(id) {
     const db = await openDB();
 
     return new Promise((resolve, reject) => {
         const tx = db.transaction("pdfs", "readwrite");
         tx.objectStore("pdfs").delete(id);
-
         tx.oncomplete = resolve;
         tx.onerror = () => reject(tx.error);
     });
 }
-async function renderHistory() {
-    const list = document.getElementById("historyList");
-    list.innerHTML = "";
 
-    const pdfs = await getAllPDFs();
+async function deleteFirebasePDF(id) {
+    const uid = auth.currentUser?.uid;
+    if (!uid) throw new Error("User not authenticated");
 
-    if (!pdfs.length) {
-        list.innerHTML =
-            '<p class="text-center text-gray-500">No CVs saved yet.</p>';
-        return;
+    await remove(ref(db, `users/${uid}/pdfs/${id}`));
+}
+
+async function deletePDF(item) {
+    if (item.source === "local") {
+        return deleteLocalPDF(item.id);
     }
 
-    pdfs.sort((a, b) => b.createdAt - a.createdAt).forEach((item) => {
-        const row = document.createElement("div");
-        row.className = "flex items-center justify-between border rounded p-3";
+    if (item.source === "firebase") {
+        return deleteFirebasePDF(item.id);
+    }
 
-        const name = document.createElement("span");
-        name.textContent = item.name;
-        name.className = "text-sm truncate";
+    throw new Error("Unknown PDF source");
+}
 
-        const actions = document.createElement("div");
-        actions.className = "flex gap-2";
+async function renderHistory() {
+    if (historyCache) {
+        renderHistoryWithData(historyCache);
+    }
 
-        const previewBtn = document.createElement("button");
-        previewBtn.textContent = "View";
-        previewBtn.className = "px-3 py-1 text-sm bg-gray-200 rounded";
-        previewBtn.onclick = () => {
-            const url = URL.createObjectURL(item.blob);
-            window.open(url);
-        };
+    if (historyLoading) return;
+    historyLoading = true;
 
-        const downloadBtn = document.createElement("button");
-        downloadBtn.textContent = "Download";
-        downloadBtn.className =
-            "px-3 py-1 text-sm bg-blue-500 text-white rounded";
-        downloadBtn.onclick = () => {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(item.blob);
-            a.download = item.name;
-            a.click();
-        };
+    try {
+        const fresh = await getAllPDFs();
 
-        actions.append(previewBtn, downloadBtn);
-        row.append(name, actions);
-        list.appendChild(row);
-    });
+        if (!isSameList(historyCache, fresh)) {
+            historyCache = fresh;
+            renderHistoryWithData(historyCache);
+        }
+    } finally {
+        historyLoading = false;
+    }
+}
+function isSameList(a, b) {
+    if (!a || !b) return false;
+    if (a.length !== b.length) return false;
+
+    for (let i = 0; i < a.length; i++) {
+        if (a[i].id !== b[i].id) return false;
+        if (+new Date(a[i].createdAt) !== +new Date(b[i].createdAt))
+            return false;
+    }
+    return true;
 }
 
 function openDB() {
@@ -985,39 +1071,68 @@ function blobToBase64(blob) {
         reader.readAsDataURL(blob);
     });
 }
+function base64ToBlob(base64, type = "application/pdf") {
+    const binary = atob(base64);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+
+    return new Blob([bytes], { type });
+}
+function getBlob(item) {
+    if (item.blob instanceof Blob) {
+        return item.blob; // IndexedDB case
+    }
+
+    if (item.base64) {
+        return base64ToBlob(item.base64); // Firebase case
+    }
+
+    throw new Error("Invalid PDF data");
+}
+
 async function savePDF(blob, filename) {
     const user = auth.currentUser;
-
+    const createdAt = Date.now();
     if (user) {
         const pdfRef = push(ref(db, `users/${user.uid}/pdfs`));
         const base64 = await blobToBase64(blob);
-        try {
-            await set(pdfRef, {
-                name: filename,
-                base64,
-                createdAt: Date.now(),
-            });
-        } catch (err) {
-            console.error("Failed to save PDF:", err);
-        }
-    } else {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-            const tx = db.transaction("pdfs", "readwrite");
-            const store = tx.objectStore("pdfs");
 
-            store.put({
-                id: Date.now(),
-                name: filename,
-                blob,
-                createdAt: new Date(),
-                email: user?.email || "guest",
-            });
+        const item = {
+            id: pdfRef.key,
+            name: filename,
+            base64,
+            createdAt,
+            source: "firebase",
+        };
 
-            tx.oncomplete = () => resolve({ source: "local" });
-            tx.onerror = () => reject(tx.error);
-        });
+        await set(pdfRef, item);
+        return item;
     }
+
+    const dbInstance = await openDB();
+    const id = crypto.randomUUID();
+
+    const item = {
+        id,
+        name: filename,
+        blob,
+        createdAt,
+        source: "local",
+    };
+
+    return new Promise((resolve, reject) => {
+        const tx = dbInstance.transaction("pdfs", "readwrite");
+        const store = tx.objectStore("pdfs");
+
+        store.put(item);
+
+        tx.oncomplete = () => resolve(item);
+        tx.onerror = () => reject(tx.error);
+    });
 }
 
 async function downloadPDF() {
@@ -1084,15 +1199,61 @@ function setupDialog({
 
     return { openDialog, closeDialog };
 }
+async function load() {
+    const user = auth.currentUser;
+    if (user) {
+        const snap = await get(ref(db, `users/${user.uid}/cvInfo`));
+        if (snap.exists()) {
+            return new CVInfo(snap.val());
+        }
+        return CVInfo.default();
+    }
 
-document.addEventListener("DOMContentLoaded", () => {
+    const raw = localStorage.getItem("cvInfo");
+    if (!raw) return CVInfo.default();
+    try {
+        return new CVInfo(JSON.parse(raw));
+    } catch {
+        localStorage.removeItem("cvInfo");
+        return CVInfo.default();
+    }
+}
+async function save(data) {
+    const user = auth.currentUser;
+    data.updatedAt = Date.now();
+    if (user) {
+        await set(ref(db, `users/${user.uid}/cvInfo`), data);
+    } else {
+        localStorage.setItem("cvInfo", JSON.stringify(data));
+    }
+}
+document.addEventListener("DOMContentLoaded", async () => {
+    const provider = new GoogleAuthProvider();
     const templateMenu = document.querySelector("#template-menu");
     const closeTemplateSheet = document.querySelector("#closeTemplateSheet");
-
+    var signInBtn = document.getElementById("sign-in");
+    var signOutBtn = document.getElementById("sign-out");
     skillValue.value = 0;
     skillInput.value = "";
     label.textContent = skillValue.value + "%";
-
+    verifyAuth(async (user) => {
+        if (user) {
+            signInBtn.classList.add("hidden");
+            signOutBtn.classList.remove("hidden");
+        } else {
+            signInBtn.classList.remove("hidden");
+            signOutBtn.classList.add("hidden");
+        }
+        await initInfo();
+        const storedTemplateId = localStorage.getItem("selectedTemplateId");
+        if (storedTemplateId) {
+            selectedTemplateId = Number(storedTemplateId);
+            template = getTemplate(selectedTemplateId);
+        }
+        applySectionVisibility();
+        template = getTemplate(selectedTemplateId);
+        previewPDF();
+    });
     hamburger.addEventListener("click", () => {
         sideMenu.classList.toggle("-translate-x-full");
         menuOverlay.classList.toggle("hidden");
@@ -1116,7 +1277,7 @@ document.addEventListener("DOMContentLoaded", () => {
             templates.push({
                 id: i,
                 name: `Template ${i}`,
-                src: `templates/template_${i}.avif`,
+                src: `assets/images/templates/template_${i}.avif`,
             });
         }
         const templateGrid = document.getElementById("templateGrid");
@@ -1206,18 +1367,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("inputIntroduction").value;
 
         previewPDF();
-        cvInfo.save();
+        save(cvInfo);
     });
-
-    initInfo();
-    const storedTemplateId = localStorage.getItem("selectedTemplateId");
-    if (storedTemplateId) {
-        selectedTemplateId = Number(storedTemplateId);
-        template = getTemplate(selectedTemplateId);
-    }
-    applySectionVisibility();
-    template = getTemplate(selectedTemplateId);
-    previewPDF();
 
     document.getElementById("generate").addEventListener("click", () => {
         downloadPDF();
@@ -1237,12 +1388,42 @@ document.addEventListener("DOMContentLoaded", () => {
             cvInfo.sections[sectionKey] = !hidden;
         });
     });
+
+    await Utils.loadDialog(
+        "templates/confirm-sign-out-dialog.html",
+        "confirmSignOutDialog"
+    );
+    setupDialog({
+        dialogId: "confirmSignOutDialog",
+        openBtn: signOutBtn,
+        onNegativePressed: () => {},
+        onPositivePressed: async () => {
+            await signOut(auth);
+        },
+    });
+    await Utils.loadDialog("templates/login-dialog.html", "loginDialog");
+
+    setupDialog({
+        dialogId: "loginDialog",
+        openBtn: signInBtn,
+        onNegativePressed: () => {},
+        onPositivePressed: async () => {
+            await signInWithPopup(auth, provider);
+        },
+    });
+
+    await Utils.loadDialog("templates/about-dialog.html", "aboutDialog");
     setupDialog({
         dialogId: "aboutDialog",
         openBtn: document.getElementById("about-us-menu"),
         onNegativePressed: () => {},
         onPositivePressed: () => {},
     });
+
+    await Utils.loadDialog(
+        "templates/confirm-new-cv-dialog.html",
+        "confirmNewCvDialog"
+    );
     setupDialog({
         dialogId: "confirmNewCvDialog",
         openBtn: document.getElementById("new-cv-menu"),
@@ -1251,6 +1432,8 @@ document.addEventListener("DOMContentLoaded", () => {
             resetCVToDefault();
         },
     });
+
+    await Utils.loadDialog("templates/history-dialog.html", "historyDialog");
     setupDialog({
         dialogId: "historyDialog",
         openBtn: document.getElementById("my-pdf-menu"),
@@ -1259,6 +1442,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document
         .getElementById("my-pdf-menu")
         .addEventListener("click", renderHistory);
+
     Sortable.create(workExpListEl, {
         animation: 150,
         onEnd: (evt) => {

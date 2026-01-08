@@ -147,21 +147,4 @@ export class CVInfo {
         this.awardArr = data.awardArr || [];
         this.hobbyArr = data.hobbyArr || [];
     }
-
-    save() {
-        localStorage.setItem("cvInfo", JSON.stringify(this));
-    }
-
-    static load() {
-        const raw = localStorage.getItem("cvInfo");
-        if (!raw) return CVInfo.default();
-
-        try {
-            return new CVInfo(JSON.parse(raw));
-        } catch {
-            console.warn("Invalid cvInfo, resetting");
-            localStorage.removeItem("cvInfo");
-            return CVInfo.default();
-        }
-    }
 }

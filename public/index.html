@@ -26,6 +26,12 @@
             </h2>
             <nav class="flex flex-col p-4 space-y-2">
                 <button
+                    id="sign-in"
+                    class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md hidden"
+                >
+                    Sign In
+                </button>
+                <button
                     id="new-cv-menu"
                     class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md"
                 >
@@ -48,6 +54,12 @@
                     class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md"
                 >
                     About Site
+                </button>
+                <button
+                    id="sign-out"
+                    class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md hidden"
+                >
+                    Sign Out
                 </button>
             </nav>
         </div>
@@ -529,322 +541,6 @@
                 </div>
             </div>
         </div>
-        <template id="work-exp-item-template">
-            <div class="flex items-start w-full gap-2 cursor-pointer">
-                <div
-                    class="flex-1 p-3 border rounded bg-gray-50 flex justify-between items-start"
-                >
-                    <div class="left">
-                        <div class="company font-semibold"></div>
-                        <div class="title text-sm text-gray-700"></div>
-                        <div class="dates text-xs text-gray-500 mt-1"></div>
-                        <ul
-                            class="details mt-2 list-disc list-inside pl-4 space-y-1 text-sm text-gray-700"
-                        ></ul>
-                    </div>
-                </div>
-
-                <div class="controls flex flex-col gap-2">
-                    <button class="edit text-sm text-blue-600">
-                        <svg class="size-6">
-                            <use href="#icon-edit"></use>
-                        </svg>
-                    </button>
-                    <button class="delete text-sm text-red-600">
-                        <svg class="size-6">
-                            <use href="#icon-delete"></use>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <template id="work-exp-detail-template">
-            <div class="flex gap-2 items-start">
-                <input
-                    type="text"
-                    class="work-exp-detail-input border p-2 rounded w-full"
-                    placeholder="Responsibility / achievement"
-                />
-                <button class="remove text-red-500 text-sm mt-2">✕</button>
-            </div>
-        </template>
-
-        <template id="education-item-template">
-            <div class="flex items-start w-full gap-2 cursor-pointer">
-                <div
-                    class="flex-1 p-3 border rounded bg-gray-50 flex justify-between items-start"
-                >
-                    <div class="left">
-                        <div class="degree font-semibold"></div>
-                        <div class="school text-sm text-gray-700"></div>
-                        <div class="dates text-xs text-gray-500 mt-1"></div>
-                        <ul
-                            class="details mt-2 list-disc list-inside pl-4 space-y-1 text-sm text-gray-700"
-                        ></ul>
-                    </div>
-                </div>
-
-                <div class="controls flex flex-col gap-2">
-                    <button class="edit text-sm text-blue-600">
-                        <svg class="size-6">
-                            <use href="#icon-edit"></use>
-                        </svg>
-                    </button>
-                    <button class="delete text-sm text-red-600">
-                        <svg class="size-6">
-                            <use href="#icon-delete"></use>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <template id="education-detail-template">
-            <div class="flex gap-2 items-start">
-                <input
-                    type="text"
-                    class="education-detail-input border p-2 rounded w-full"
-                    placeholder="Coursework, achievement, or activity"
-                />
-                <button class="remove text-red-500 text-sm mt-2">✕</button>
-            </div>
-        </template>
-        <template id="skill-item-preview-template">
-            <div class="mb-2">
-                <div class="flex justify-between text-xs font-semibold">
-                    <span class="name"></span>
-                    <span class="value"></span>
-                </div>
-                <div class="w-full bg-blue-200 rounded h-1.5 mt-1">
-                    <div class="bar bg-blue-500 h-1.5 rounded"></div>
-                </div>
-            </div>
-        </template>
-
-        <template id="skill-item-template">
-            <div class="flex items-center w-full gap-2 cursor-pointer">
-                <div class="flex-1 py-2 px-4 bg-gray-100 rounded">
-                    <span
-                        class="item block text-sm font-semibold text-gray-800"
-                    ></span>
-                    <div
-                        class="max-w-[300px] bg-blue-200 rounded h-1.5 mt-1 mb-1"
-                    >
-                        <div class="bar bg-blue-500 h-1.5 rounded"></div>
-                    </div>
-                </div>
-
-                <div class="controls flex flex-col gap-2">
-                    <button class="edit text-sm text-blue-600">
-                        <svg class="size-6">
-                            <use href="#icon-edit"></use>
-                        </svg>
-                    </button>
-                    <button class="delete text-sm text-red-600">
-                        <svg class="size-6">
-                            <use href="#icon-delete"></use>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <template id="reference-item-template">
-            <div class="flex items-center w-full gap-2 cursor-pointer">
-                <div class="flex-1 py-3 px-4 bg-gray-100 rounded">
-                    <span
-                        class="item block text-sm font-semibold text-gray-800"
-                    ></span>
-                </div>
-
-                <div class="controls flex flex-col gap-2">
-                    <button class="edit text-sm text-blue-600">
-                        <svg class="size-6">
-                            <use href="#icon-edit"></use>
-                        </svg>
-                    </button>
-                    <button class="delete text-sm text-red-600">
-                        <svg class="size-6">
-                            <use href="#icon-delete"></use>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <template id="award-item-template">
-            <div class="flex items-center w-full gap-2 cursor-pointer">
-                <div class="flex-1 py-3 px-4 bg-gray-100 rounded">
-                    <span
-                        class="item block text-sm font-semibold text-gray-800"
-                    ></span>
-                </div>
-
-                <div class="controls flex flex-col gap-2">
-                    <button class="edit text-sm text-blue-600">
-                        <svg class="size-6">
-                            <use href="#icon-edit"></use>
-                        </svg>
-                    </button>
-                    <button class="delete text-sm text-red-600">
-                        <svg class="size-6">
-                            <use href="#icon-delete"></use>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <template id="hobby-item-template">
-            <div class="flex items-center w-full gap-2 cursor-pointer">
-                <div class="flex-1 py-3 px-4 bg-gray-100 rounded">
-                    <span
-                        class="item block text-sm font-semibold text-gray-800"
-                    ></span>
-                </div>
-
-                <div class="controls flex flex-col gap-2">
-                    <button class="edit text-sm text-blue-600">
-                        <svg class="size-6">
-                            <use href="#icon-edit"></use>
-                        </svg>
-                    </button>
-                    <button class="delete text-sm text-red-600">
-                        <svg class="size-6">
-                            <use href="#icon-delete"></use>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <template id="skill-item-preview-template ">
-            <div class="mb-2">
-                <div class="flex justify-between text-sm font-semibold">
-                    <span class="name"></span>
-                    <span class="value"></span>
-                </div>
-                <div class="w-full bg-gray-200 rounded h-2 mt-1">
-                    <div class="bar bg-green-500 h-2 rounded"></div>
-                </div>
-            </div>
-        </template>
-
-        <template id="reference-item-preview-template">
-            <ul>
-                <li
-                    class="item list-disc list-inside text-sm text-gray-700"
-                ></li>
-            </ul>
-        </template>
-        <template id="award-item-preview-template">
-            <ul>
-                <li
-                    class="item list-disc list-inside text-sm text-gray-700"
-                ></li>
-            </ul>
-        </template>
-        <template id="hobby-item-preview-template">
-            <ul>
-                <li
-                    class="item list-disc list-inside text-sm text-gray-700"
-                ></li>
-            </ul>
-        </template>
-        <template id="empty-state-template">
-            <p class="text-gray-500 text-sm empty-message"></p>
-        </template>
-        <div
-            id="confirmNewCvDialog"
-            class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/50"
-        >
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-5">
-                <h3 class="text-lg font-semibold mb-3">Start a new CV?</h3>
-                <p class="text-sm text-gray-600 mb-5">
-                    This will erase your current CV. This action cannot be
-                    undone.
-                </p>
-                <div class="flex justify-center gap-3 mt-8">
-                    <button
-                        class="negative-btn px-8 py-2 rounded bg-gray-200 text-black hover:bg-gray-300 rounded-full min-w-[120px] shadow-sm hover:shadow-md"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        class="positive-btn px-8 py-2 rounded bg-blue-500 text-white hover:bg-blue-700 rounded-full min-w-[120px] shadow-sm hover:shadow-md"
-                    >
-                        New CV
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div
-            id="deleteItemConfirmDialog"
-            class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/50"
-        >
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-5">
-                <p class="text-lg sm:text-lg text-center">Delete this item?</p>
-
-                <div class="flex justify-center gap-3 mt-8">
-                    <button
-                        class="negative-btn px-8 py-2 rounded bg-gray-200 text-black hover:bg-gray-300 min-w-[120px] shadow-sm hover:shadow-md"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        class="positive-btn px-8 py-2 rounded bg-red-500 text-white hover:bg-red-700 min-w-[120px] shadow-sm hover:shadow-md"
-                    >
-                        Ok
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div
-            id="aboutDialog"
-            class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/50"
-        >
-            <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-5">
-                <p class="text-lg sm:text-sm text-center">
-                    <br class="hidden sm:block" />
-                    Professional CVs made easy<br />Walk into every interview
-                    with confidence. <br /><br />
-                    Built by
-                    <span class="font-bold text-gray-900">Dat Nguyen</span>.
-                </p>
-
-                <div class="flex justify-center gap-3 mt-8">
-                    <button
-                        class="positive-btn px-8 py-2 rounded bg-blue-500 text-white rounded-full hover:bg-blue-700 min-w-[120px] shadow-sm hover:shadow-md"
-                    >
-                        Ok
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div
-            id="historyDialog"
-            class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/50"
-        >
-            <div
-                class="bg-white rounded-lg shadow-lg w-full max-w-md p-5 max-h-[80vh] flex flex-col"
-            >
-                <h2 class="text-lg font-bold mb-3 text-center">CV History</h2>
-
-                <div
-                    id="historyList"
-                    class="flex-1 overflow-y-auto space-y-3"
-                ></div>
-
-                <div class="flex justify-center mt-4">
-                    <button
-                        class="positive-btn px-8 py-2 rounded bg-blue-500 text-white rounded-full hover:bg-blue-700 min-w-[120px] shadow-sm hover:shadow-md"
-                    >
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
             <symbol id="icon-eye" viewBox="0 0 20 20" fill="currentColor">
@@ -892,6 +588,6 @@
 
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
         <script src="assets/js/jspdf.umd.min.4e22322b.js"></script>
-        <script src="assets/js/script.8baf8f0c.js" type="module"></script>
+        <script src="assets/js/index.8baf8f0c.js" type="module"></script>
     </body>
 </html>

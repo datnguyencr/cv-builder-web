@@ -1,0 +1,31 @@
+<template>
+    <div
+        id="loginDialog"
+        class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/50"
+    >
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-5">
+            <h1 class="text-xl font-semibold text-center mb-4">Sign in</h1>
+
+            <button
+                id="google-login"
+                class="positive-btn w-full flex items-center justify-center gap-3 bg-blue-700 text-white font-medium py-2 rounded-lg hover:bg-blue-800 transition"
+            >
+                <img
+                    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                    alt="Google"
+                    class="w-5 h-5"
+                />
+                Login with Google
+            </button>
+
+            <div class="flex justify-center mt-8">
+                <button
+                    id="close-login-btn"
+                    class="negative-btn px-8 py-2 bg-gray-400 text-white rounded-full hover:bg-gray-500 min-w-[120px]"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</template>

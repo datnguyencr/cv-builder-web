@@ -1,0 +1,29 @@
+<template>
+    <div class="flex items-start w-full gap-2 cursor-pointer">
+        <div
+            class="flex-1 p-3 border rounded bg-gray-50 flex justify-between items-start"
+        >
+            <div class="left">
+                <div class="company font-semibold"></div>
+                <div class="title text-sm text-gray-700"></div>
+                <div class="dates text-xs text-gray-500 mt-1"></div>
+                <ul
+                    class="details mt-2 list-disc list-inside pl-4 space-y-1 text-sm text-gray-700"
+                ></ul>
+            </div>
+        </div>
+
+        <div class="controls flex flex-col gap-2">
+            <button class="edit text-sm text-blue-600">
+                <svg class="size-6">
+                    <use href="#icon-edit"></use>
+                </svg>
+            </button>
+            <button class="delete text-sm text-red-600">
+                <svg class="size-6">
+                    <use href="#icon-delete"></use>
+                </svg>
+            </button>
+        </div>
+    </div>
+</template>

@@ -21,7 +21,9 @@ export function verifyAuth(callback) {
         callback(user || null);
     });
 }
-
+export async function logout() {
+    await signOut(auth);
+}
 verifyAuth((user) => {
     const accountEl = document.getElementById("account");
     if (accountEl) {
@@ -42,11 +44,6 @@ verifyAuth((user) => {
             ></div>
 
         `;
-
-            accountEl.querySelector("div").addEventListener("click", () => {
-                const redirectUrl = encodeURIComponent(window.location.href);
-                window.location.href = `/login.html?redirect=${redirectUrl}`;
-            });
         }
     }
 });

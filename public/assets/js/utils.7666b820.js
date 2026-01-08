@@ -197,3 +197,62 @@ export function escapeHtml(s) {
             }[c])
     );
 }
+// Cache for multiple templates
+const templateCache = new Map();
+
+/**
+ * Load a template from an external HTML file.
+ * @param {string} url - URL of the HTML file containing a <template>.
+ * @returns {HTMLTemplateElement} - The <template> element from the file.
+ */
+export async function loadTemplate(url) {
+    if (templateCache.has(url)) {
+        return templateCache.get(url);
+    }
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to load template: ${url}`);
+
+    const html = await res.text();
+    const container = document.createElement("div");
+    container.innerHTML = html;
+
+    const template = container.querySelector("template");
+    if (!template) throw new Error(`No <template> found in ${url}`);
+
+    templateCache.set(url, template); // cache it
+    return template;
+}
+// Cache to track loaded dialogs
+const dialogCache = new Map();
+
+/**
+ * Load a dialog from external HTML and append it to the body.
+ * Only loads once.
+ * @param {string} url - URL of the HTML file containing a <template> or dialog HTML.
+ * @param {string} dialogId - The id of the dialog element inside the HTML.
+ * @returns {HTMLElement} - The dialog element in the DOM.
+ */
+export async function loadDialog(url, dialogId) {
+    if (dialogCache.has(dialogId)) {
+        return dialogCache.get(dialogId);
+    }
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to load dialog: ${url}`);
+
+    const html = await res.text();
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = html;
+
+    let dialog = wrapper.querySelector(`#${dialogId}`);
+    if (!dialog) {
+        const tpl = wrapper.querySelector("template");
+        if (!tpl) throw new Error(`No dialog or template found in ${url}`);
+        dialog = tpl.content.firstElementChild;
+    }
+
+    document.body.appendChild(dialog);
+    dialogCache.set(dialogId, dialog);
+    return dialog;
+}
