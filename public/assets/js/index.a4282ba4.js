@@ -1,5 +1,5 @@
-import { auth, db, verifyAuth } from "./auth.f737c5cb.js";
-import { CVInfo, Skill } from "./model.js";
+import { auth, db, verifyAuth } from "./auth.5df633d2.js";
+import { CVInfo, Skill } from "./model.70a64066.js";
 import * as Template from "./pdf_template.f2c11e11.js";
 import * as Utils from "./utils.7666b820.js";
 import {
@@ -1536,3 +1536,5 @@ async function downloadAllTemplates() {
     a.download = "all_templates.zip";
     a.click();
 }
+
+Utils.enableContentProtection();

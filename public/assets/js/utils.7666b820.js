@@ -1,4 +1,4 @@
-import { AvatarShape, TimeFormat } from "./model.js";
+import { AvatarShape, TimeFormat } from "./model.70a64066.js";
 
 function parseYearMonth(value) {
     if (!value || typeof value !== "string") return null;
@@ -255,4 +255,78 @@ export async function loadDialog(url, dialogId) {
     document.body.appendChild(clonedDialog);
     dialogCache.set(dialogId, clonedDialog);
     return clonedDialog;
+}
+
+let devToolsOpen = false;
+let hostile = false;
+export function enableContentProtection() {
+    // ================= Right-Click Block =================
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+    loadDevToolsWarningAndDetect();
+    // ================= Detection Loop =================
+    setInterval(() => {
+        const before = new Date();
+        debugger;
+
+        const after = new Date();
+        if (after - before > 100) {
+            onHostile("debugger timing");
+            if (!devToolsOpen) {
+                devToolsOpen = true;
+                showWarning();
+            }
+        } else {
+            if (devToolsOpen) {
+                devToolsOpen = false;
+                hideWarning();
+            }
+        }
+    }, 1000);
+    //  ================= Optional Keyboard Block =================
+    // Prevent F12 / Ctrl+Shift+I / Ctrl+Shift+C
+    document.addEventListener("keydown", (e) => {
+        if (
+            e.key === "F12" ||
+            (e.ctrlKey && e.shiftKey && ["I", "C", "J"].includes(e.key))
+        )
+            e.preventDefault();
+    });
+}
+
+async function loadDevToolsWarningAndDetect() {
+    try {
+        const dialog = await loadDialog(
+            "templates/devtools-warning.html",
+            "devtoolsWarning"
+        );
+        dialog.style.display = "block";
+    } catch (err) {
+        console.error(
+            "Failed to load DevTools warning or start detection:",
+            err
+        );
+    }
+}
+
+function onHostile(reason) {
+    if (hostile) return;
+    hostile = true;
+
+    console.warn("Hostile detected:", reason);
+
+    wipeContent();
+}
+
+function wipeContent() {}
+
+function showWarning() {
+    const banner = document.getElementById("devtools-warning");
+    banner.classList.remove("hidden");
+    banner.classList.add("animate-bounce");
+}
+
+function hideWarning() {
+    const banner = document.getElementById("devtools-warning");
+    banner.classList.add("hidden");
+    banner.classList.remove("animate-bounce");
 }

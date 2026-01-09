@@ -5,7 +5,7 @@ import {
     TimeFormat,
     SkillListType,
     ContactInfoType,
-} from "./model.js";
+} from "./model.70a64066.js";
 import * as Utils from "./utils.7666b820.js";
 
 async function contactSvgString(color = [0, 0, 0]) {
