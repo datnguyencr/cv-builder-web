@@ -219,9 +219,9 @@ export async function loadTemplate(url) {
 
     const template = container.querySelector("template");
     if (!template) throw new Error(`No <template> found in ${url}`);
-
-    templateCache.set(url, template); // cache it
-    return template;
+    const clonedTemplate = template.cloneNode(true);
+    templateCache.set(url, clonedTemplate);
+    return clonedTemplate;
 }
 // Cache to track loaded dialogs
 const dialogCache = new Map();
@@ -251,8 +251,8 @@ export async function loadDialog(url, dialogId) {
         if (!tpl) throw new Error(`No dialog or template found in ${url}`);
         dialog = tpl.content.firstElementChild;
     }
-
-    document.body.appendChild(dialog);
-    dialogCache.set(dialogId, dialog);
-    return dialog;
+    const clonedDialog = dialog.cloneNode(true);
+    document.body.appendChild(clonedDialog);
+    dialogCache.set(dialogId, clonedDialog);
+    return clonedDialog;
 }
