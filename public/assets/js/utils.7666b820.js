@@ -299,7 +299,6 @@ async function loadDevToolsWarningAndDetect() {
             "templates/devtools-warning.html",
             "devtoolsWarning"
         );
-        dialog.style.display = "block";
     } catch (err) {
         console.error(
             "Failed to load DevTools warning or start detection:",
