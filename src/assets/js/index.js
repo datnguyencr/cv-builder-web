@@ -1,7 +1,7 @@
-import { auth, db, verifyAuth } from "./auth.5df633d2.js";
-import { CVInfo, Skill } from "./model.70a64066.js";
-import * as Template from "./pdf_template.f2c11e11.js";
-import * as Utils from "./utils.7666b820.js";
+import { auth, db, verifyAuth } from "./auth.js";
+import { CVInfo, Skill } from "./model.js";
+import * as Template from "./pdf_template.js";
+import * as Utils from "./utils.js";
 import {
     ref,
     set,
@@ -877,7 +877,7 @@ async function generatePDF() {
 
     const file =
         avatarFile ||
-        (await fetch("assets/images/default.avif").then((r) => r.blob()));
+        (await fetch("images/default.avif").then((r) => r.blob()));
 
     const img = await Utils.fileToJsPdfImage(
         file,
@@ -1293,7 +1293,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             templates.push({
                 id: i,
                 name: `Template ${i}`,
-                src: `assets/images/templates/template_${i}.avif`,
+                src: `images/templates/template_${i}.avif`,
             });
         }
         const templateGrid = document.getElementById("templateGrid");

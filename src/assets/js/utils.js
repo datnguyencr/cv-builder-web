@@ -1,4 +1,4 @@
-import { AvatarShape, TimeFormat } from "./model.70a64066.js";
+import { AvatarShape, TimeFormat } from "./model.js";
 
 function parseYearMonth(value) {
     if (!value || typeof value !== "string") return null;
