@@ -156,7 +156,7 @@ function showToast(message, { type = "error", duration = 2000 } = {}) {
 function resetCVToDefault() {
     localStorage.removeItem("cvInfo");
     cvInfo = CVInfo.default();
-    cvInfo.save();
+    save(cvInfo);
     resetUIFromCV(cvInfo);
 }
 function resetUIFromCV(cv) {
