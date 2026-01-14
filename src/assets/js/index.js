@@ -2,6 +2,7 @@ import { auth, db, logout, verifyAuth } from "./auth.js";
 import { CVInfo, Skill } from "./model.js";
 import * as Template from "./pdf_template.js";
 import * as Utils from "./utils.js";
+
 import {
     ref,
     set,
@@ -12,7 +13,6 @@ import {
 
 import {
     signInWithPopup,
-    signOut,
     GoogleAuthProvider,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
