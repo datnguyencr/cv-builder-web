@@ -65,12 +65,12 @@ body {
     pointer-events: auto;
 }
 
-/* 3️⃣ Tailwind */
+/* Tailwind */
 @import "tailwindcss";
 
-/* 4️⃣ Sources */
+/* Sources */
 @source "../**/*.html";
 @source "../**/*.js";
 
-/* 5️⃣ Variants */
+/* Variants */
 @custom-variant dark (&:where(.dark, .dark *));

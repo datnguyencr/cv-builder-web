@@ -1,4 +1,4 @@
-import { auth, db, verifyAuth } from "./auth.js";
+import { auth, db, logout, verifyAuth } from "./auth.js";
 import { CVInfo, Skill } from "./model.js";
 import * as Template from "./pdf_template.js";
 import * as Utils from "./utils.js";
@@ -1416,7 +1416,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         openBtn: signOutBtn,
         onNegativePressed: () => {},
         onPositivePressed: async () => {
-            await signOut(auth);
+            await logout();
         },
     });
     await Utils.loadDialog("templates/login-dialog.html", "loginDialog");
@@ -1536,5 +1536,6 @@ async function downloadAllTemplates() {
     a.download = "all_templates.zip";
     a.click();
 }
-
-Utils.enableContentProtection();
+if (Utils.isProduction()) {
+    Utils.enableContentProtection();
+}

@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import {
     getAuth,
+    signOut,
     onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
