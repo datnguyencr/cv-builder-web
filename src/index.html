@@ -112,14 +112,14 @@
                         <label class="block font-semibold">Full Name</label>
                         <input
                             id="inputName"
-                            class="border p-2 w-full mb-4 rounded"
+                            class="border p-2 w-full mb-4 rounded border border-gray-400"
                         />
                     </div>
                     <div>
                         <label class="block font-semibold">Job Title</label>
                         <input
                             id="inputTitle"
-                            class="border p-2 w-full mb-4 rounded"
+                            class="border p-2 w-full mb-4 rounded border border-gray-400"
                         />
                     </div>
                 </div>
@@ -128,14 +128,14 @@
                         <label class="block font-semibold">Email</label>
                         <input
                             id="inputEmail"
-                            class="border p-2 w-full mb-4 rounded"
+                            class="border p-2 w-full mb-4 rounded border border-gray-400"
                         />
                     </div>
                     <div>
                         <label class="block font-semibold">Phone</label>
                         <input
                             id="inputPhone"
-                            class="border p-2 w-full mb-4 rounded"
+                            class="border p-2 w-full mb-4 rounded border border-gray-400"
                         />
                     </div>
                 </div>
@@ -144,18 +144,29 @@
                         <label class="block font-semibold">Link</label>
                         <input
                             id="inputLinks"
-                            class="border p-2 w-full mb-4 rounded"
+                            class="border p-2 w-full mb-4 rounded border border-gray-400"
                         />
                     </div>
-                    <div>
-                        <label class="block font-semibold">Avatar</label>
-                        <input id="inputAvatar" type="file" accept="image/*" />
+                    <div class="space-y-1">
+                        <label
+                            for="inputAvatar"
+                            class="block text-sm font-semibold text-black"
+                        >
+                            Avatar
+                        </label>
+
+                        <input
+                            id="inputAvatar"
+                            type="file"
+                            accept="image/*"
+                            class="block w-full text-sm text-black file:mr-4 file:rounded-md file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-black hover:file:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
                     </div>
                 </div>
                 <label class="block mb-2 font-semibold">Introduction</label>
                 <textarea
                     id="inputIntroduction"
-                    class="border p-2 w-full mb-4 rounded"
+                    class="border p-2 w-full mb-4 rounded border border-gray-400"
                     rows="4"
                 ></textarea>
                 <div class="mb-4 section" data-section="experience">
@@ -181,7 +192,7 @@
                                         id="title"
                                         type="text"
                                         placeholder="Role (e.g. Software Developer)"
-                                        class="border p-2 w-full rounded"
+                                        class="border p-2 w-full rounded border border-gray-400"
                                     />
                                 </div>
                                 <div>
@@ -192,7 +203,7 @@
                                         id="company"
                                         type="text"
                                         placeholder="Company Name"
-                                        class="border p-2 w-full rounded"
+                                        class="border p-2 w-full rounded border border-gray-400"
                                     />
                                 </div>
                             </div>
@@ -204,7 +215,7 @@
                                     <input
                                         id="experienceFrom"
                                         type="month"
-                                        class="border p-2 rounded w-full"
+                                        class="border p-2 rounded w-full border border-gray-400"
                                     />
                                 </div>
                                 <div>
@@ -214,7 +225,7 @@
                                     <input
                                         id="experienceTo"
                                         type="month"
-                                        class="border p-2 rounded w-full"
+                                        class="border p-2 rounded w-full border border-gray-400"
                                     />
                                 </div>
                             </div>
@@ -281,7 +292,7 @@
                                         id="eduDegree"
                                         type="text"
                                         placeholder="Degree (e.g. BSc Computer Science)"
-                                        class="border p-2 w-full rounded"
+                                        class="border p-2 w-full rounded border border-gray-400"
                                     />
                                 </div>
                                 <div>
@@ -292,7 +303,7 @@
                                         id="eduSchool"
                                         type="text"
                                         placeholder="School / Institution"
-                                        class="border p-2 w-full rounded"
+                                        class="border p-2 w-full rounded border border-gray-400"
                                     />
                                 </div>
                             </div>
@@ -304,7 +315,7 @@
                                     <input
                                         id="eduFrom"
                                         type="month"
-                                        class="border p-2 rounded w-full"
+                                        class="border p-2 rounded w-full border border-gray-400"
                                     />
                                 </div>
                                 <div>
@@ -314,7 +325,7 @@
                                     <input
                                         id="eduTo"
                                         type="month"
-                                        class="border p-2 rounded w-full"
+                                        class="border p-2 rounded w-full border border-gray-400"
                                     />
                                 </div>
                             </div>
@@ -366,7 +377,7 @@
                                 id="skill"
                                 type="text"
                                 placeholder="HTML/CSS"
-                                class="border py-2 px-4 w-full rounded"
+                                class="border py-2 px-4 w-full rounded border border-gray-400"
                             />
                             <div class="flex items-center gap-3">
                                 <input
@@ -376,7 +387,7 @@
                                     max="100"
                                     step="10"
                                     value="0"
-                                    class="w-full max-w-[300px] accent-blue-500"
+                                    class="w-full max-w-[300px] accent-blue-500 border border-gray-400"
                                 />
 
                                 <span
@@ -422,7 +433,7 @@
                                 id="reference"
                                 type="text"
                                 placeholder="Dr.Pepper, chief of medicine, General Hospital"
-                                class="border py-2 px-4 w-full rounded"
+                                class="border py-2 px-4 w-full rounded border border-gray-400"
                             />
                             <div class="flex gap-2">
                                 <button
@@ -460,7 +471,7 @@
                                 id="award"
                                 type="text"
                                 placeholder="Top Employee of the Month"
-                                class="border py-2 px-4 w-full rounded"
+                                class="border py-2 px-4 w-full rounded border border-gray-400"
                             />
                             <div class="flex gap-2">
                                 <button
@@ -498,7 +509,7 @@
                                 id="hobby"
                                 type="text"
                                 placeholder="Football"
-                                class="border py-2 px-4 w-full rounded"
+                                class="border py-2 px-4 w-full rounded border border-gray-400"
                             />
                             <div class="flex gap-2">
                                 <button

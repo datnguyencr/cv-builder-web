@@ -132,25 +132,34 @@ skillCancelBtn.addEventListener("click", clearSkillForm);
 
 function showToast(message, { type = "error", duration = 2000 } = {}) {
     const toast = document.getElementById("toast");
-    toast.textContent = message;
 
     const isSmallScreen = window.innerWidth < 768;
     const bottomClass = isSmallScreen ? "bottom-40" : "bottom-20";
 
-    toast.className = `
-        fixed ${bottomClass} left-1/2 -translate-x-1/2
-        px-4 py-3 rounded-md text-sm text-white
-        ${type === "error" ? "bg-red-600" : "bg-green-600"}
-        z-[9999]
-        opacity-100
-        transition-opacity duration-300
-        pointer-events-none
-    `;
+    toast.textContent = message;
 
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(() => {
+    toast.className = `
+    fixed ${bottomClass} left-1/2 -translate-x-1/2
+    px-4 py-3 rounded-md text-sm text-white
+    ${type === "error" ? "bg-red-600" : "bg-green-600"}
+    z-[9999]
+    transition-opacity duration-300
+    opacity-100
+    pointer-events-none
+  `;
+
+    clearTimeout(toast._fadeTimer);
+    clearTimeout(toast._hideTimer);
+
+    // Start fade out
+    toast._fadeTimer = setTimeout(() => {
         toast.classList.add("opacity-0");
     }, duration);
+
+    // Fully hide after transition
+    toast._hideTimer = setTimeout(() => {
+        toast.classList.add("hidden");
+    }, duration + 300);
 }
 
 function resetCVToDefault() {
