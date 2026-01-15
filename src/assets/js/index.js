@@ -1,6 +1,7 @@
 import { auth, db, logout, verifyAuth } from "./auth.js";
 import { CVInfo, Skill } from "./model.js";
-import * as Template from "./pdf_template.js";
+import { PDFGenerator } from "./templates/pdf_template.js";
+
 import * as Utils from "./utils.js";
 
 import {
@@ -16,38 +17,6 @@ import {
     GoogleAuthProvider,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
-window.TEMPLATES = {
-    1: Template.Template1,
-    2: Template.Template2,
-    3: Template.Template3,
-    4: Template.Template4,
-    5: Template.Template5,
-    6: Template.Template6,
-    7: Template.Template7,
-    8: Template.Template8,
-    9: Template.Template9,
-    10: Template.Template10,
-    11: Template.Template11,
-    12: Template.Template12,
-    13: Template.Template13,
-    14: Template.Template14,
-    15: Template.Template15,
-    16: Template.Template16,
-    17: Template.Template17,
-    18: Template.Template18,
-    19: Template.Template19,
-    20: Template.Template20,
-    21: Template.Template21,
-    22: Template.Template22,
-    23: Template.Template23,
-    24: Template.Template24,
-    25: Template.Template25,
-    26: Template.Template26,
-    27: Template.Template27,
-    28: Template.Template28,
-    29: Template.Template29,
-    30: Template.Template30,
-};
 const EYE_ICON = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
         <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
@@ -878,7 +847,7 @@ async function initInfo() {
 }
 
 function getTemplate(id) {
-    return new (window.TEMPLATES[id] || Template1)(cvInfo);
+    return PDFGenerator.getTemplate(id, cvInfo);
 }
 
 async function generatePDF() {
@@ -1308,14 +1277,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         const templateGrid = document.getElementById("templateGrid");
         templateGrid.innerHTML = "";
         templateGrid.style.gridTemplateColumns =
-            "repeat(auto-fill, minmax(192px, 1fr))";
+            "repeat(auto-fill, minmax(185px, 1fr))";
         templates.forEach((t) => {
             const item = document.createElement("div");
 
             item.dataset.templateId = t.id;
 
             item.className =
-                "template-item w-48 aspect-[616/800] overflow-hidden rounded cursor-pointer " +
+                "template-item w-48 aspect-[497/702] overflow-hidden rounded cursor-pointer " +
                 "border hover:border-blue-500 hover:border-2 transition-all";
             if (selectedTemplateId == item.dataset.templateId) {
                 item.classList.add("border-blue-500", "border-2");
