@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -103,84 +103,113 @@
         ></div>
         <div
             id="userInfoBottomSheet"
-            class="fixed bottom-0 left-0 w-full max-h-[80%] bg-white rounded-t-lg shadow-lg flex flex-col transform translate-y-full transition-transform duration-300 z-[150]"
+            class="fixed bottom-0 left-0 w-full max-h-[85%] bg-white rounded-t-2xl shadow-2xl flex flex-col transform translate-y-full transition-transform duration-300 z-[150] border-t border-gray-200"
         >
-            <div class="flex-1 overflow-y-auto p-6">
-                <h2 class="text-xl font-bold mb-4">Edit CV</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6">
+                <div
+                    class="flex items-center justify-between mb-4 border-b pb-2"
+                >
+                    <h2 class="text-xl font-bold text-gray-800">
+                        Edit Professional Information
+                    </h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
                     <div>
-                        <label class="block font-semibold">Full Name</label>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Full Name</label
+                        >
                         <input
                             id="inputName"
-                            class="border p-2 w-full mb-4 rounded border border-gray-400"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold">Job Title</label>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Job Title</label
+                        >
                         <input
                             id="inputTitle"
-                            class="border p-2 w-full mb-4 rounded border border-gray-400"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                         />
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
                     <div>
-                        <label class="block font-semibold">Email</label>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Email Address</label
+                        >
                         <input
                             id="inputEmail"
-                            class="border p-2 w-full mb-4 rounded border border-gray-400"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                         />
                     </div>
                     <div>
-                        <label class="block font-semibold">Phone</label>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Phone Number</label
+                        >
                         <input
                             id="inputPhone"
-                            class="border p-2 w-full mb-4 rounded border border-gray-400"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                         />
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
                     <div>
-                        <label class="block font-semibold">Link</label>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Portfolio/Links</label
+                        >
                         <input
                             id="inputLinks"
-                            class="border p-2 w-full mb-4 rounded border border-gray-400"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                         />
                     </div>
-                    <div class="space-y-1">
+                    <div>
                         <label
                             for="inputAvatar"
-                            class="block text-sm font-semibold text-black"
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
                         >
-                            Avatar
+                            Profile Photo
                         </label>
-
                         <input
                             id="inputAvatar"
                             type="file"
                             accept="image/*"
-                            class="block w-full text-sm text-black file:mr-4 file:rounded-md file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-black hover:file:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
                         />
                     </div>
                 </div>
-                <label class="block mb-2 font-semibold">Introduction</label>
+                <label
+                    class="block text-xs font-bold text-gray-600 uppercase mb-1 mt-1"
+                    >Professional Introduction</label
+                >
                 <textarea
                     id="inputIntroduction"
-                    class="border p-2 w-full mb-4 rounded border border-gray-400"
-                    rows="4"
+                    class="border border-gray-300 px-3 py-2 w-full mb-4 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                    rows="3"
                 ></textarea>
-                <div class="mb-4 section" data-section="experience">
+                <div
+                    class="mb-4 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="experience"
+                >
                     <div
-                        class="flex items-center gap-2 mb-2 cursor-pointer section-toggle"
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
                     >
-                        <span class="toggle-icon select-none">
-                            <svg class="toggle-icon w-5 h-5">
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
                                 <use href="#icon-eye"></use>
                             </svg>
                         </span>
-                        <span class="font-semibold">Work Experience</span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700"
+                            >Work Experience</span
+                        >
                     </div>
-                    <div class="section-body">
+                    <div class="section-body p-3">
                         <div id="experienceList" class="space-y-3 mb-3"></div>
                         <div id="experienceForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -246,21 +275,22 @@
 
                             <button
                                 id="addWorkExpDetail"
-                                class="text-base text-blue-600 hover:underline"
+                                class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
                             >
-                                + Add responsibility / achievement
+                                <span class="text-lg">+</span> Add
+                                responsibility / achievement
                             </button>
 
                             <div class="flex gap-2 mt-4">
                                 <button
                                     id="experienceSaveBtn"
-                                    class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Add
                                 </button>
                                 <button
                                     id="experienceCancelBtn"
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md"
                                 >
                                     Clear
                                 </button>
@@ -268,64 +298,69 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-4 section" data-section="education">
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="education"
+                >
                     <div
-                        class="flex items-center gap-2 mb-2 cursor-pointer section-toggle"
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
                     >
-                        <span class="toggle-icon select-none">
-                            <svg class="toggle-icon w-5 h-5">
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
                                 <use href="#icon-eye"></use>
                             </svg>
                         </span>
-                        <span class="font-semibold">Education</span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700"
+                            >Education</span
+                        >
                     </div>
-
-                    <div class="section-body">
+                    <div class="section-body p-3">
                         <div id="eduList" class="space-y-3 mb-3"></div>
                         <div id="eduForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block font-semibold"
+                                    <label class="block text-sm font-semibold"
                                         >Degree</label
                                     >
                                     <input
                                         id="eduDegree"
                                         type="text"
                                         placeholder="Degree (e.g. BSc Computer Science)"
-                                        class="border p-2 w-full rounded border border-gray-400"
+                                        class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400"
                                     />
                                 </div>
                                 <div>
-                                    <label class="block font-semibold"
+                                    <label class="block text-sm font-semibold"
                                         >School</label
                                     >
                                     <input
                                         id="eduSchool"
                                         type="text"
                                         placeholder="School / Institution"
-                                        class="border p-2 w-full rounded border border-gray-400"
+                                        class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400"
                                     />
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block font-semibold"
+                                    <label class="block text-sm font-semibold"
                                         >From</label
                                     >
                                     <input
                                         id="eduFrom"
                                         type="month"
-                                        class="border p-2 rounded w-full border border-gray-400"
+                                        class="border px-2.5 py-1.5 rounded w-full text-sm border-gray-400"
                                     />
                                 </div>
                                 <div>
-                                    <label class="block font-semibold"
+                                    <label class="block text-sm font-semibold"
                                         >To</label
                                     >
                                     <input
                                         id="eduTo"
                                         type="month"
-                                        class="border p-2 rounded w-full border border-gray-400"
+                                        class="border px-2.5 py-1.5 rounded w-full text-sm border-gray-400"
                                     />
                                 </div>
                             </div>
@@ -337,20 +372,21 @@
 
                             <button
                                 id="addEducationDetail"
-                                class="text-base text-blue-600 hover:underline"
+                                class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
                             >
-                                + Add achievement, or activity
+                                <span class="text-lg">+</span> Add achievement,
+                                or activity
                             </button>
                             <div class="flex gap-2 mt-4">
                                 <button
                                     id="eduSaveBtn"
-                                    class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md"
                                 >
                                     Add
                                 </button>
                                 <button
                                     id="eduCancelBtn"
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md"
                                 >
                                     Clear
                                 </button>
@@ -358,19 +394,24 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-4 section" data-section="skills">
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="skills"
+                >
                     <div
-                        class="flex items-center gap-2 mb-2 cursor-pointer section-toggle"
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
                     >
-                        <span class="toggle-icon select-none">
-                            <svg class="toggle-icon w-5 h-5">
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
                                 <use href="#icon-eye"></use>
                             </svg>
                         </span>
-                        <span class="font-semibold">Skills</span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700"
+                            >Skills</span
+                        >
                     </div>
-
-                    <div class="section-body">
+                    <div class="section-body p-3">
                         <div id="skillList" class="space-y-3 mb-3"></div>
                         <div id="skillForm" class="space-y-2">
                             <input
@@ -399,13 +440,13 @@
                             <div class="flex gap-2">
                                 <button
                                     id="skillSaveBtn"
-                                    class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Add
                                 </button>
                                 <button
                                     id="skillCancelBtn"
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Clear
                                 </button>
@@ -413,38 +454,43 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-4 section" data-section="references">
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="references"
+                >
                     <div
-                        class="flex items-center gap-2 mb-2 cursor-pointer section-toggle"
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
                     >
-                        <span class="toggle-icon select-none">
-                            <svg class="toggle-icon w-5 h-5">
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
                                 <use href="#icon-eye"></use>
                             </svg>
                         </span>
-                        <span class="font-semibold">References</span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700"
+                            >References</span
+                        >
                     </div>
 
-                    <div class="section-body">
-                        <h3 class="font-semibold mb-2"></h3>
+                    <div class="section-body p-3">
                         <div id="referenceList" class="space-y-3 mb-3"></div>
                         <div id="referenceForm" class="space-y-2">
                             <input
                                 id="reference"
                                 type="text"
-                                placeholder="Dr.Pepper, chief of medicine, General Hospital"
-                                class="border py-2 px-4 w-full rounded border border-gray-400"
+                                placeholder="Dr. Pepper, Chief of Medicine, General Hospital"
+                                class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                             />
                             <div class="flex gap-2">
                                 <button
                                     id="referenceSaveBtn"
-                                    class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Add
                                 </button>
                                 <button
                                     id="referenceCancelBtn"
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Clear
                                 </button>
@@ -452,37 +498,43 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-4 section" data-section="awards">
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="awards"
+                >
                     <div
-                        class="flex items-center gap-2 mb-2 cursor-pointer section-toggle"
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
                     >
-                        <span class="toggle-icon select-none">
-                            <svg class="toggle-icon w-5 h-5">
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
                                 <use href="#icon-eye"></use>
                             </svg>
                         </span>
-                        <span class="font-semibold">Awards</span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700"
+                            >Awards</span
+                        >
                     </div>
 
-                    <div class="section-body">
+                    <div class="section-body p-3">
                         <div id="awardList" class="space-y-3 mb-3"></div>
                         <div id="awardForm" class="space-y-2">
                             <input
                                 id="award"
                                 type="text"
                                 placeholder="Top Employee of the Month"
-                                class="border py-2 px-4 w-full rounded border border-gray-400"
+                                class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                             />
                             <div class="flex gap-2">
                                 <button
                                     id="awardSaveBtn"
-                                    class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Add
                                 </button>
                                 <button
                                     id="awardCancelBtn"
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Clear
                                 </button>
@@ -490,37 +542,43 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-4 section" data-section="hobbies">
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="hobbies"
+                >
                     <div
-                        class="flex items-center gap-2 mb-2 cursor-pointer section-toggle"
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
                     >
-                        <span class="toggle-icon select-none">
-                            <svg class="toggle-icon w-5 h-5">
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
                                 <use href="#icon-eye"></use>
                             </svg>
                         </span>
-                        <span class="font-semibold">Hobbies</span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700"
+                            >Hobbies</span
+                        >
                     </div>
 
-                    <div class="section-body">
+                    <div class="section-body p-3">
                         <div id="hobbyList" class="space-y-3 mb-3"></div>
                         <div id="hobbyForm" class="space-y-2">
                             <input
                                 id="hobby"
                                 type="text"
                                 placeholder="Football"
-                                class="border py-2 px-4 w-full rounded border border-gray-400"
+                                class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                             />
                             <div class="flex gap-2">
                                 <button
                                     id="hobbySaveBtn"
-                                    class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Add
                                 </button>
                                 <button
                                     id="hobbyCancelBtn"
-                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-40 shadow-sm hover:shadow-md"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
                                 >
                                     Clear
                                 </button>
@@ -531,14 +589,14 @@
             </div>
 
             <div
-                class="sticky bottom-0 bg-white backdrop-blur border-t p-4 border-gray-300"
+                class="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-3"
             >
                 <div class="flex justify-center">
                     <button
                         id="updateContent"
-                        class="bg-green-500 text-white py-2 rounded-full min-w-[240px] shadow-lg hover:shadow-xl hover:bg-green-600 transition"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-10 rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
                     >
-                        Update CV
+                        Update Preview
                     </button>
                 </div>
             </div>
