@@ -630,35 +630,6 @@ async function renderReferenceList() {
     });
 }
 
-function section({ titleText, id, hasBottomLine, uppercase, fontBold = true }) {
-    const container = document.createElement("div");
-    container.className = "mb-6";
-    const title = document.createElement("h2");
-    title.className = "text-xl text-teal-800 pb-1 mb-2";
-
-    if (hasBottomLine) {
-        title.classList.add("border-b-2", "border-gray-300", "border-teal-800");
-    }
-
-    if (uppercase) {
-        title.classList.add("uppercase");
-    }
-
-    if (fontBold) {
-        title.classList.add("font-bold");
-    }
-
-    title.textContent = titleText;
-
-    const content = document.createElement("div");
-    content.id = id;
-
-    container.appendChild(title);
-    container.appendChild(content);
-
-    return container;
-}
-
 function clearReferenceForm() {
     editingReferenceId = null;
     referenceInput.value = "";
@@ -978,6 +949,7 @@ async function renderHistoryWithData(pdfs) {
         list.appendChild(node);
     });
 }
+
 async function deleteLocalPDF(id) {
     const db = await openDB();
 
@@ -1027,6 +999,7 @@ async function renderHistory() {
         historyLoading = false;
     }
 }
+
 function isSameList(a, b) {
     if (!a || !b) return false;
     if (a.length !== b.length) return false;
@@ -1051,6 +1024,7 @@ function openDB() {
         req.onerror = () => reject(req.error);
     });
 }
+
 function blobToBase64(blob) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1059,6 +1033,7 @@ function blobToBase64(blob) {
         reader.readAsDataURL(blob);
     });
 }
+
 function base64ToBlob(base64, type = "application/pdf") {
     const binary = atob(base64);
     const len = binary.length;
@@ -1070,6 +1045,7 @@ function base64ToBlob(base64, type = "application/pdf") {
 
     return new Blob([bytes], { type });
 }
+
 function getBlob(item) {
     if (item.blob instanceof Blob) {
         return item.blob; // IndexedDB case
@@ -1122,6 +1098,7 @@ async function savePDF(blob, filename) {
         tx.onerror = () => reject(tx.error);
     });
 }
+
 async function savePDFFile() {
     const doc = await generatePDF();
     const timestamp = Date.now();
@@ -1152,6 +1129,7 @@ function applySectionVisibility() {
         icon.innerHTML = enabled ? EYE_ICON : EYE_SLASH_ICON;
     });
 }
+
 function setupDialog({
     dialogId,
     openBtn,
@@ -1193,6 +1171,7 @@ function setupDialog({
 
     return { openDialog, closeDialog };
 }
+
 async function load() {
     const user = auth.currentUser;
     if (user) {
@@ -1212,6 +1191,7 @@ async function load() {
         return CVInfo.default();
     }
 }
+
 async function save(data) {
     const user = auth.currentUser;
     data.updatedAt = Date.now();
@@ -1221,6 +1201,7 @@ async function save(data) {
         localStorage.setItem("cvInfo", JSON.stringify(data));
     }
 }
+
 document.addEventListener("DOMContentLoaded", async () => {
     const provider = new GoogleAuthProvider();
     const templateMenu = document.querySelector("#template-menu");
@@ -1379,9 +1360,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         previewPDF();
         save(cvInfo);
     });
+
     document.getElementById("save-info").addEventListener("click", () => {
         savePDFFile();
     });
+
     document.getElementById("generate").addEventListener("click", () => {
         downloadPDF();
     });
@@ -1413,6 +1396,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             await logout();
         },
     });
+    
     await Utils.loadDialog("templates/login-dialog.html", "loginDialog");
 
     setupDialog({
