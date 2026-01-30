@@ -189,17 +189,17 @@ export class BaseTemplate {
         await this.loadFont(
             `assets/fonts/${this.normalFont}`,
             name,
-            FontStyle.NORMAL
+            FontStyle.NORMAL,
         );
         await this.loadFont(
             `assets/fonts/${this.boldFont}`,
             name,
-            FontStyle.BOLD
+            FontStyle.BOLD,
         );
         await this.loadFont(
             `assets/fonts/${this.normalFont}`,
             name,
-            FontStyle.ITALIC
+            FontStyle.ITALIC,
         );
         this.font = name;
     }
@@ -257,7 +257,7 @@ export class BaseTemplate {
             markerWidth = this.markerWidth,
             timeLineColor = this.mainColor,
             gap = 10,
-        } = {}
+        } = {},
     ) {
         const totalWidth = ctx.width - padding * 2;
 
@@ -299,7 +299,7 @@ export class BaseTemplate {
             padding = 5,
             customWidth = null,
             align = "left",
-        } = {}
+        } = {},
     ) {
         this.doc.setFont(this.font, style.style);
         this.doc.setFontSize(style.size);
@@ -340,7 +340,7 @@ export class BaseTemplate {
                     ? {
                           align: "right",
                       }
-                    : undefined
+                    : undefined,
             );
 
             usedHeight += lineHeight;
@@ -357,7 +357,7 @@ export class BaseTemplate {
             dates = new Text(),
             timeLineColor = this.mainColor,
             showTimeLine = false,
-        } = {}
+        } = {},
     ) {
         const marker = TIMELINE_MARKERS["circle"];
         ctx.advance(
@@ -365,7 +365,7 @@ export class BaseTemplate {
                 style: title.style,
                 marker: showTimeLine ? marker : null,
                 timeLineColor: timeLineColor,
-            })
+            }),
         );
         ctx.advance(5);
         ctx.advance(
@@ -379,44 +379,44 @@ export class BaseTemplate {
                           });
                       }
                     : null,
-            })
+            }),
         );
         ctx.advance(10);
     }
 
     async loadImages() {
         this.educationImage = await Utils.svgToPngData(
-            await educationSvgString(this.educationImageColor)
+            await educationSvgString(this.educationImageColor),
         );
         this.workExpImage = await Utils.svgToPngData(
-            await workExpSvgString(this.workExpImageColor)
+            await workExpSvgString(this.workExpImageColor),
         );
         this.contactImage = await Utils.svgToPngData(
-            await contactSvgString(this.contactImageColor)
+            await contactSvgString(this.contactImageColor),
         );
         this.skillImage = await Utils.svgToPngData(
-            await skillSvgString(this.skillImageColor)
+            await skillSvgString(this.skillImageColor),
         );
         this.referenceImage = await Utils.svgToPngData(
-            await referenceSvgString(this.referenceImageColor)
+            await referenceSvgString(this.referenceImageColor),
         );
         this.awardImage = await Utils.svgToPngData(
-            await awardSvgString(this.awardImageColor)
+            await awardSvgString(this.awardImageColor),
         );
         this.introductionImage = await Utils.svgToPngData(
-            await introductionSvgString(this.introductionImageColor)
+            await introductionSvgString(this.introductionImageColor),
         );
         this.hobbyImage = await Utils.svgToPngData(
-            await hobbySvgString(this.hobbyImageColor)
+            await hobbySvgString(this.hobbyImageColor),
         );
         this.phoneImage = await Utils.svgToPngData(
-            await phoneSvgString(this.phoneImageColor)
+            await phoneSvgString(this.phoneImageColor),
         );
         this.linkImage = await Utils.svgToPngData(
-            await linkSvgString(this.linkImageColor)
+            await linkSvgString(this.linkImageColor),
         );
         this.emailImage = await Utils.svgToPngData(
-            await emailSvgString(this.emailImageColor)
+            await emailSvgString(this.emailImageColor),
         );
     }
 
@@ -468,7 +468,7 @@ export class BaseTemplate {
                 0,
                 this.pageWidth - this.leftWidth,
                 this.pageHeight,
-                "F"
+                "F",
             );
         }
 
@@ -480,7 +480,7 @@ export class BaseTemplate {
                 this.leftWidth,
                 this.margin,
                 this.leftWidth,
-                this.pageHeight - this.margin
+                this.pageHeight - this.margin,
             );
         }
     }
@@ -498,7 +498,7 @@ export class BaseTemplate {
             padding = 5,
             textColor = this.textColor,
             bulletColor = this.textColor,
-        } = {}
+        } = {},
     ) {
         this.doc.setFontSize(this.textSize);
         this.doc.setFont(this.font, FontStyle.NORMAL);
@@ -514,12 +514,12 @@ export class BaseTemplate {
         items.forEach((item) => {
             const lines = this.doc.splitTextToSize(
                 item,
-                ctx.width - (showTimeLine ? markerWidth + gap : 0) - indent
+                ctx.width - (showTimeLine ? markerWidth + gap : 0) - indent,
             );
             const blockHeight = lines.length * lineHeight;
 
             ctx.ensureSpace(blockHeight, (column) =>
-                this.addPageFor(ctx, column)
+                this.addPageFor(ctx, column),
             );
 
             if (showTimeLine) {
@@ -549,14 +549,18 @@ export class BaseTemplate {
             indent = 10,
             padding = 5,
             bulletColor = this.textColor,
-        } = {}
+        } = {},
     ) {
-        this.ul(ctx, [items.map((h) => h.name).join(", ")], {
-            textColor: textColor,
-            indent: indent,
-            padding: padding,
-            bulletColor: bulletColor,
-        });
+        this.ul(
+            ctx,
+            items.map((h) => h.name),
+            {
+                textColor: textColor,
+                indent: indent,
+                padding: padding,
+                bulletColor: bulletColor,
+            },
+        );
     }
 
     skillbar(
@@ -569,7 +573,7 @@ export class BaseTemplate {
             barHeight = 6,
             gap = 5,
             maxValue = 100,
-        } = {}
+        } = {},
     ) {
         this.doc.setFont(this.font, FontStyle.NORMAL);
         this.doc.setFontSize(this.textSize);
@@ -578,7 +582,7 @@ export class BaseTemplate {
 
         items.forEach((item) => {
             ctx.ensureSpace(this.lineHeight + barHeight + gap, (column) =>
-                this.addPageFor(ctx, column)
+                this.addPageFor(ctx, column),
             );
 
             this.doc.setTextColor(...textColor);
@@ -652,7 +656,7 @@ export class BaseTemplate {
             textSize = this.headerTextSize,
             backgroundColor = null,
             lineThickness = 1,
-        } = {}
+        } = {},
     ) {
         ctx.goToCurrentPage();
         ctx.advance(paddingTop);
@@ -694,7 +698,7 @@ export class BaseTemplate {
                 rectY,
                 ctx.width,
                 rectHeight + paddingBottom,
-                "F"
+                "F",
             );
             ctx.advance(10);
         }
@@ -711,7 +715,7 @@ export class BaseTemplate {
                     startX,
                     y - iconH * 0.8,
                     iconW,
-                    iconH
+                    iconH,
                 );
                 this.doc.text(title, startX + iconW + gap, y);
             } else {
@@ -727,7 +731,7 @@ export class BaseTemplate {
                     x,
                     y - iconH * 0.8,
                     iconW,
-                    iconH
+                    iconH,
                 );
             }
             this.doc.text(title, icon ? x + iconW + gap : x, y);
@@ -779,7 +783,7 @@ export class BaseTemplate {
             timeLineColor = this.mainColor,
             bulletColor = this.textColor,
             lineGap = 10,
-        } = {}
+        } = {},
     ) {
         this.blockHeader(ctx, {
             title: title,
@@ -811,7 +815,7 @@ export class BaseTemplate {
             borderColor = this.mainColor,
             borderSize = 5,
             padding = 0,
-        } = {}
+        } = {},
     ) {
         if (borderSize > 0) {
             this.doc.setDrawColor(...borderColor);
@@ -820,7 +824,7 @@ export class BaseTemplate {
                 this.doc.circle(
                     x + width / 2,
                     y + height / 2,
-                    width / 2 + padding
+                    width / 2 + padding,
                 );
             } else {
                 this.doc.rect(x, y, width, height);
@@ -840,12 +844,12 @@ export class BaseTemplate {
             borderSize = 5,
             padding = 0,
             center = false,
-        } = {}
+        } = {},
     ) {
         if (!imageBase64) return 0;
 
         const totalSize = height + padding * 2;
-        const x = starX ?? center ? ctx.x + (ctx.width - width) / 2 : ctx.x;
+        const x = (starX ?? center) ? ctx.x + (ctx.width - width) / 2 : ctx.x;
 
         const y = startY ?? ctx.y;
         this.drawAvatar(imageBase64, {
@@ -870,7 +874,7 @@ export class BaseTemplate {
             center = false,
             uppercase = false,
             padding = 0,
-        } = {}
+        } = {},
     ) {
         ctx.goToCurrentPage();
         const content = uppercase ? text.toUpperCase() : text;
@@ -895,7 +899,7 @@ export class BaseTemplate {
             center = false,
             uppercase = false,
             padding = 0,
-        } = {}
+        } = {},
     ) {
         ctx.goToCurrentPage();
         const content = uppercase ? text.toUpperCase() : text;
@@ -922,7 +926,7 @@ export class BaseTemplate {
             textSize = this.textSize,
             textColor = this.textColor,
             padding = 0,
-        } = {}
+        } = {},
     ) {
         this.doc.setFont(this.font, style);
         this.doc.setFontSize(textSize);
@@ -953,7 +957,7 @@ export class BaseTemplate {
             }),
             padding = 4,
             lineHeight = this.lineHeight,
-        } = {}
+        } = {},
     ) {
         const x = ctx.x;
         let y = ctx.y;
@@ -975,7 +979,7 @@ export class BaseTemplate {
 
         const wrappedLines = this.doc.splitTextToSize(
             value.text || "",
-            maxValueWidth
+            maxValueWidth,
         );
 
         wrappedLines.forEach((line, i) => {
@@ -991,7 +995,7 @@ export class BaseTemplate {
 
         const usedHeight = Math.max(
             lineHeight,
-            wrappedLines.length * lineHeight
+            wrappedLines.length * lineHeight,
         );
         ctx.advance(usedHeight);
     }
@@ -1007,7 +1011,7 @@ export class BaseTemplate {
             padding = 6,
             icon = null,
             lineHeight = this.lineHeight,
-        } = {}
+        } = {},
     ) {
         if (!text && !icon) return;
 
@@ -1029,7 +1033,7 @@ export class BaseTemplate {
                 x,
                 y - iconSize * 0.8,
                 iconSize,
-                iconSize
+                iconSize,
             );
         }
 
@@ -1105,7 +1109,7 @@ export class BaseTemplate {
         {
             bgColor = this.contactBackgroundColor,
             lineHeight = this.lineHeight,
-        } = {}
+        } = {},
     ) {
         const columns = [
             { title: "Phone:", value: this.cvInfo.phone, ratio: 0.2 },
@@ -1120,7 +1124,7 @@ export class BaseTemplate {
                 ctx.y - lineHeight,
                 this.pageWidth,
                 this.textSize * 2 + lineHeight,
-                "F"
+                "F",
             );
         }
 
@@ -1171,7 +1175,7 @@ export class BaseTemplate {
 
             usedHeight = Math.max(
                 usedHeight,
-                Math.max(lineHeight, lines.length * lineHeight)
+                Math.max(lineHeight, lines.length * lineHeight),
             );
 
             offsetX += colWidth;
@@ -1199,7 +1203,7 @@ export class BaseTemplate {
             style = ContactInfoType.LIST,
             header = true,
             lineThickness = 1,
-        } = {}
+        } = {},
     ) {
         ctx.advance(10);
         switch (style) {
@@ -1253,7 +1257,7 @@ export class BaseTemplate {
             header = true,
             backgroundColor = this.headerBackgroundColor,
             lineThickness = 1,
-        } = {}
+        } = {},
     ) {
         if (header) {
             this.header(ctx, {
@@ -1290,7 +1294,7 @@ export class BaseTemplate {
             timeLineColor: this.mainColor,
             indent: 10,
             padding: 5,
-        }
+        },
     ) {
         if (!this.cvInfo.sections.experience) return;
         if (!this.cvInfo.workExpArr.length) return;
@@ -1339,7 +1343,7 @@ export class BaseTemplate {
             spacing = 5,
             marginHorizontal = 0,
             customWidth = null,
-        } = {}
+        } = {},
     ) {
         ctx.ensureSpace(spacing, (column) => {
             this.addPageFor(ctx, column);
@@ -1362,7 +1366,7 @@ export class BaseTemplate {
         y1 = 0,
         x2 = 0,
         y2 = 0,
-        { thickness = 1, dash = false, color = this.textColor } = {}
+        { thickness = 1, dash = false, color = this.textColor } = {},
     ) {
         if (dash) {
             this.doc.setLineDash([2]);
@@ -1385,7 +1389,7 @@ export class BaseTemplate {
             timeLineColor: this.mainColor,
             indent: 10,
             padding: 5,
-        }
+        },
     ) {
         if (!this.cvInfo.sections.education) return;
         if (!this.cvInfo.educationArr.length) return;
@@ -1442,7 +1446,7 @@ export class BaseTemplate {
             lineThickness = 1,
             header = true,
             headerBackgroundColor = this.headerBackgroundColor,
-        } = {}
+        } = {},
     ) {
         if (!this.cvInfo.sections.skills) return;
         if (!this.cvInfo.skillArr.length) return;
@@ -1509,7 +1513,7 @@ export class BaseTemplate {
             lineThickness = 1,
             header = true,
             headerBackgroundColor = this.headerBackgroundColor,
-        } = {}
+        } = {},
     ) {
         if (!this.cvInfo.sections.references) return;
         if (!this.cvInfo.referenceArr.length) return;
@@ -1542,7 +1546,7 @@ export class BaseTemplate {
                 indent: indent,
                 padding: padding,
                 bulletColor: bulletColor,
-            }
+            },
         );
     }
 
@@ -1568,7 +1572,7 @@ export class BaseTemplate {
             lineThickness = 1,
             header = true,
             headerBackgroundColor = this.headerBackgroundColor,
-        } = {}
+        } = {},
     ) {
         if (!this.cvInfo.sections.awards) return;
         if (!this.cvInfo.awardArr.length) return;
@@ -1601,7 +1605,7 @@ export class BaseTemplate {
                 indent: indent,
                 padding: padding,
                 bulletColor: bulletColor,
-            }
+            },
         );
     }
 
@@ -1627,7 +1631,7 @@ export class BaseTemplate {
             lineThickness = 1,
             header = true,
             headerBackgroundColor = this.headerBackgroundColor,
-        } = {}
+        } = {},
     ) {
         if (!this.cvInfo.sections.hobbies) return;
         if (!this.cvInfo.hobbyArr.length) return;
@@ -1660,7 +1664,7 @@ export class BaseTemplate {
                 indent: indent,
                 padding: padding,
                 bulletColor: bulletColor,
-            }
+            },
         );
     }
 
@@ -1674,7 +1678,7 @@ export class BaseTemplate {
             center = false,
             lineHeight = this.lineHeight,
             padding = 0,
-        } = {}
+        } = {},
     ) {
         const availableWidth = ctx.width - indent - padding;
         const lines = this.doc.splitTextToSize(text, availableWidth);
@@ -1695,7 +1699,7 @@ export class BaseTemplate {
                     ? {
                           align: "center",
                       }
-                    : undefined
+                    : undefined,
             );
             ctx.advance(lineHeight);
             usedHeight += lineHeight;
