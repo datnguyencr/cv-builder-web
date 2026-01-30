@@ -36,7 +36,7 @@ const menuOverlay = document.getElementById("menuOverlay");
 const userInfoBottomSheet = document.getElementById("userInfoBottomSheet");
 const sheetOverlay = document.getElementById("sheetOverlay");
 const openUserInfoBottomSheet = document.getElementById(
-    "openUserInfoBottomSheet"
+    "openUserInfoBottomSheet",
 );
 
 const templateBottomSheet = document.getElementById("templateBottomSheet");
@@ -197,7 +197,7 @@ avatarInput.addEventListener("change", async (e) => {
 
 async function showEmpty({ container, text }) {
     const template = await Utils.loadTemplate(
-        "templates/empty-state-template.html"
+        "templates/empty-state-template.html",
     );
     const clone = template.content.cloneNode(true);
     clone.querySelector(".empty-message").textContent = text;
@@ -217,14 +217,14 @@ async function renderWorkExpList() {
     }
 
     const template = await Utils.loadTemplate(
-        "templates/work-exp-item-template.html"
+        "templates/work-exp-item-template.html",
     );
     cvInfo.workExpArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
         const left = clone.querySelector(".left");
         left.querySelector(".title").textContent = Utils.escapeHtml(item.title);
         left.querySelector(".company").textContent = Utils.escapeHtml(
-            item.company
+            item.company,
         );
         left.querySelector(".dates").textContent = item.current
             ? `${Utils.formatMonth(item.from)} - Present`
@@ -246,7 +246,7 @@ async function renderWorkExpList() {
         controls.querySelector(".delete").addEventListener("click", () => {
             if (!confirm("Delete this work experience item?")) return;
             cvInfo.workExpArr = cvInfo.workExpArr.filter(
-                (e) => e.id !== item.id
+                (e) => e.id !== item.id,
             );
             renderWorkExpList();
         });
@@ -256,7 +256,7 @@ async function renderWorkExpList() {
 }
 document.getElementById("addWorkExpDetail").onclick = async () => {
     const workExpDetailTemplate = await Utils.loadTemplate(
-        "templates/work-exp-detail-template.html"
+        "templates/work-exp-detail-template.html",
     );
 
     const node = workExpDetailTemplate.content.cloneNode(true);
@@ -324,7 +324,7 @@ workExpSaveBtn.addEventListener("click", () => {
     if (!current && !to) {
         if (
             !confirm(
-                'No end date provided. Save as "Present"? Click OK to mark as Present, Cancel to set end date.'
+                'No end date provided. Save as "Present"? Click OK to mark as Present, Cancel to set end date.',
             )
         ) {
             return;
@@ -348,7 +348,7 @@ workExpSaveBtn.addEventListener("click", () => {
 
     if (editingWorkExpId) {
         const idx = cvInfo.workExpArr.findIndex(
-            (e) => e.id === editingWorkExpId
+            (e) => e.id === editingWorkExpId,
         );
         if (idx >= 0) {
             opts.id = editingWorkExpId;
@@ -380,20 +380,20 @@ async function renderEducationList() {
     }
 
     const template = await Utils.loadTemplate(
-        "templates/education-item-template.html"
+        "templates/education-item-template.html",
     );
     cvInfo.educationArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
 
         const left = clone.querySelector(".left");
         left.querySelector(".degree").textContent = Utils.escapeHtml(
-            item.degree
+            item.degree,
         );
         left.querySelector(".school").textContent = Utils.escapeHtml(
-            item.school
+            item.school,
         );
         left.querySelector(".dates").textContent = `${Utils.formatMonth(
-            item.from
+            item.from,
         )} - ${Utils.formatMonth(item.to)}`;
         const detailsEl = clone.querySelector(".details");
         detailsEl.innerHTML = "";
@@ -411,7 +411,7 @@ async function renderEducationList() {
         controls.querySelector(".delete").addEventListener("click", () => {
             if (!confirm("Delete this education item?")) return;
             cvInfo.educationArr = cvInfo.educationArr.filter(
-                (e) => e.id !== item.id
+                (e) => e.id !== item.id,
             );
             renderEducationList();
         });
@@ -421,7 +421,7 @@ async function renderEducationList() {
 }
 document.getElementById("addEducationDetail").onclick = async () => {
     const educationDetailTemplate = await Utils.loadTemplate(
-        "templates/education-detail-template.html"
+        "templates/education-detail-template.html",
     );
     const node = educationDetailTemplate.content.cloneNode(true);
     node.querySelector(".remove").onclick = (e) =>
@@ -442,7 +442,7 @@ async function startEditEducation(id) {
 
     educationDetailsList.innerHTML = "";
     const educationDetailTemplate = await Utils.loadTemplate(
-        "templates/education-detail-template.html"
+        "templates/education-detail-template.html",
     );
     (it.details || []).forEach((detail) => {
         const node = educationDetailTemplate.content.cloneNode(true);
@@ -498,7 +498,7 @@ eduSaveBtn.addEventListener("click", () => {
     };
     if (editingEducationId) {
         const idx = cvInfo.educationArr.findIndex(
-            (e) => e.id === editingEducationId
+            (e) => e.id === editingEducationId,
         );
         if (idx >= 0) {
             opts.id = editingEducationId;
@@ -541,7 +541,7 @@ async function renderSkillList() {
     }
 
     const template = await Utils.loadTemplate(
-        "templates/skill-item-template.html"
+        "templates/skill-item-template.html",
     );
     cvInfo.skillArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
@@ -583,7 +583,7 @@ skillSaveBtn.addEventListener("click", () => {
         cvInfo.skillArr.push(
             skill.copy({
                 id: id,
-            })
+            }),
         );
     }
 
@@ -612,14 +612,14 @@ async function renderReferenceList() {
     }
 
     const template = await Utils.loadTemplate(
-        "templates/reference-item-template.html"
+        "templates/reference-item-template.html",
     );
     cvInfo.referenceArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
         clone.querySelector(".item").textContent = item.name;
         clone.querySelector(".delete").addEventListener("click", () => {
             cvInfo.referenceArr = cvInfo.referenceArr.filter(
-                (s) => s.id !== item.id
+                (s) => s.id !== item.id,
             );
             renderReferenceList();
         });
@@ -675,7 +675,7 @@ referenceSaveBtn.addEventListener("click", () => {
 
     if (editingReferenceId) {
         const idx = cvInfo.referenceArr.findIndex(
-            (r) => r.id === editingReferenceId
+            (r) => r.id === editingReferenceId,
         );
         if (idx >= 0) cvInfo.referenceArr[idx].name = name;
     } else {
@@ -712,7 +712,7 @@ async function renderAwardList() {
         return;
     }
     const template = await Utils.loadTemplate(
-        "templates/award-item-template.html"
+        "templates/award-item-template.html",
     );
     cvInfo.awardArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
@@ -779,7 +779,7 @@ async function renderHobbyList() {
         return;
     }
     const template = await Utils.loadTemplate(
-        "templates/hobby-item-template.html"
+        "templates/hobby-item-template.html",
     );
     cvInfo.hobbyArr.forEach((item) => {
         const clone = template.content.cloneNode(true);
@@ -861,7 +861,7 @@ async function generatePDF() {
         file,
         template.avatarWidth,
         template.avatarHeight,
-        template.avatarShape
+        template.avatarShape,
     );
 
     cvInfo.avatar = img.base64;
@@ -922,14 +922,14 @@ async function renderHistoryWithData(pdfs) {
 
     if (!pdfs.length) {
         const emptyTpl = await Utils.loadTemplate(
-            "templates/history-empty-template.html"
+            "templates/history-empty-template.html",
         );
         list.appendChild(emptyTpl.content.cloneNode(true));
         return;
     }
 
     const itemTpl = await Utils.loadTemplate(
-        "templates/history-item-template.html"
+        "templates/history-item-template.html",
     );
 
     // Sort by newest first
@@ -948,7 +948,7 @@ async function renderHistoryWithData(pdfs) {
         if (dateEl) {
             const d = new Date(item.createdAt);
             dateEl.textContent = `${d.getFullYear()}/${String(
-                d.getMonth() + 1
+                d.getMonth() + 1,
             ).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
         }
 
@@ -1277,30 +1277,46 @@ document.addEventListener("DOMContentLoaded", async () => {
         const templateGrid = document.getElementById("templateGrid");
         templateGrid.innerHTML = "";
         templateGrid.style.gridTemplateColumns =
-            "repeat(auto-fill, minmax(185px, 1fr))";
+            "repeat(auto-fill, minmax(320px, 1fr))";
         templates.forEach((t) => {
             const item = document.createElement("div");
 
             item.dataset.templateId = t.id;
 
             item.className =
-                "template-item w-48 aspect-[497/702] overflow-hidden rounded cursor-pointer " +
-                "border hover:border-blue-500 hover:border-2 transition-all";
+                "template-item w-full max-w-[340px] aspect-[497/702] overflow-hidden rounded-xl cursor-pointer " +
+                "border-1 border-gray-300 hover:border-blue-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 bg-gray-50";
+
             if (selectedTemplateId == item.dataset.templateId) {
-                item.classList.add("border-blue-500", "border-2");
+                item.classList.add(
+                    "border-blue-600",
+                    "shadow-md",
+                    "ring-4",
+                    "ring-blue-100",
+                );
             }
             const img = document.createElement("img");
             img.src = t.src;
             img.alt = t.name;
-            img.className = "w-full h-full object-contain";
+            img.className = "w-full h-full object-cover";
             item.appendChild(img);
             templateGrid.appendChild(item);
 
             item.addEventListener("click", (e) => {
-                templateGrid
-                    .querySelectorAll(".template-item")
-                    .forEach((i) => i.classList.remove("border-blue-500"));
-                item.classList.add("border-blue-500", "border-2");
+                templateGrid.querySelectorAll(".template-item").forEach((i) => {
+                    i.classList.remove(
+                        "border-blue-600",
+                        "shadow-md",
+                        "ring-4",
+                        "ring-blue-100",
+                    );
+                });
+                item.classList.add(
+                    "border-blue-600",
+                    "shadow-md",
+                    "ring-4",
+                    "ring-blue-100",
+                );
                 selectedTemplateId = t.id;
                 localStorage.setItem("selectedTemplateId", selectedTemplateId);
                 previewPDF();
@@ -1387,7 +1403,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await Utils.loadDialog(
         "templates/confirm-sign-out-dialog.html",
-        "confirmSignOutDialog"
+        "confirmSignOutDialog",
     );
     setupDialog({
         dialogId: "confirmSignOutDialog",
@@ -1418,7 +1434,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await Utils.loadDialog(
         "templates/confirm-new-cv-dialog.html",
-        "confirmNewCvDialog"
+        "confirmNewCvDialog",
     );
     setupDialog({
         dialogId: "confirmNewCvDialog",
