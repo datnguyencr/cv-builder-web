@@ -265,7 +265,7 @@ document.getElementById("addWorkExpDetail").onclick = async () => {
     workExpDetailsList.appendChild(node);
 };
 
-function startEditWorkExperience(id) {
+async function startEditWorkExperience(id) {
     const it = cvInfo.workExpArr.find((e) => e.id === id);
     if (!it) return;
     editingWorkExpId = id;
@@ -278,6 +278,9 @@ function startEditWorkExperience(id) {
     workExpTitleEl.focus();
 
     workExpDetailsList.innerHTML = "";
+    const workExpDetailTemplate = await Utils.loadTemplate(
+        "templates/work-exp-detail-template.html",
+    );
     (it.details || []).forEach((detail) => {
         const node = workExpDetailTemplate.content.cloneNode(true);
         const input = node.querySelector(".work-exp-detail-input");
