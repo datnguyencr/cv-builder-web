@@ -914,6 +914,9 @@ async function renderHistoryWithData(pdfs) {
         const previewBtn = node.querySelector(".history-preview");
         const downloadBtn = node.querySelector(".history-download");
         const deleteBtn = node.querySelector(".history-delete");
+        const thumbnailContainer = node.querySelector(
+            ".history-thumbnail-container",
+        );
 
         nameEl.textContent = item.name;
 
@@ -924,6 +927,19 @@ async function renderHistoryWithData(pdfs) {
             dateEl.textContent = `${d.getFullYear()}/${String(
                 d.getMonth() + 1,
             ).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
+        }
+
+        // Render PDF Thumbnail
+        if (thumbnailContainer) {
+            const blob = getBlob(item);
+            const url = URL.createObjectURL(blob);
+            const embed = document.createElement("embed");
+            embed.src = `${url}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+            embed.type = "application/pdf";
+            // Scale and styling for a miniature preview
+            embed.className =
+                "w-full h-full object-cover pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity";
+            thumbnailContainer.appendChild(embed);
         }
 
         previewBtn.onclick = () => {
