@@ -1,0 +1,33 @@
+<template>
+    <div
+        id="confirmSignOutDialog"
+        class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/60 backdrop-blur-sm"
+    >
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[360px] p-8 flex flex-col items-center">
+            <!-- Warning Icon -->
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </div>
+
+            <h1 class="text-xl font-bold text-gray-900 mb-2 text-center">Sign Out?</h1>
+            <p class="text-gray-500 text-center text-sm mb-8 leading-relaxed">
+                You will need to sign back in to access your saved CVs and sync progress.
+            </p>
+
+            <div class="w-full flex flex-col gap-3">
+                <button
+                    class="positive-btn w-full bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition-all shadow-sm active:scale-[0.98]"
+                >
+                    Sign Out
+                </button>
+                <button
+                    class="negative-btn w-full bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-200 transition-all"
+                >
+                    Stay Logged In
+                </button>
+            </div>
+        </div>
+    </div>
+</template>

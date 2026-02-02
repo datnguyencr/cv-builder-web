@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CV Builder</title>
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="stylesheet" href="assets/css/site.css" />
+    </head>
+
+    <body class="bg-gray-100 min-h-screen flex">
+        <div
+            id="menuOverlay"
+            class="fixed inset-0 bg-black bg-opacity-40 z-[90] hidden md:hidden"
+        ></div>
+        <div
+            id="sideMenu"
+            class="fixed top-0 left-0 w-64 h-full bg-white shadow-md border-r border-gray-300 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-[100]"
+        >
+            <div
+                id="account"
+                class="flex items-center justify-center gap-2 p-4 border-b border-gray-300"
+            ></div>
+            <h2
+                class="text-3xl font-bold p-4 border-b uppercase border-gray-300"
+            >
+                CV Builder
+            </h2>
+            <nav class="flex flex-col p-4 space-y-2">
+                <button
+                    id="sign-in"
+                    class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md hidden"
+                >
+                    Sign In
+                </button>
+                <button
+                    id="new-cv-menu"
+                    class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md"
+                >
+                    New CV
+                </button>
+                <button
+                    id="template-menu"
+                    class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md"
+                >
+                    Templates
+                </button>
+                <button
+                    id="my-pdf-menu"
+                    class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md"
+                >
+                    My PDF
+                </button>
+                <button
+                    id="about-us-menu"
+                    class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md"
+                >
+                    About Site
+                </button>
+                <button
+                    id="sign-out"
+                    class="bg-gray-100 hover:bg-gray-200 p-2 rounded uppercase hover:font-bold hover:shadow-md hidden text-red-500"
+                >
+                    Sign Out
+                </button>
+            </nav>
+        </div>
+        <button
+            id="hamburger"
+            class="md:hidden fixed top-4 left-4 z-[120] bg-blue-500 p-4 rounded shadow-md text-white"
+        >
+            &#9776;
+        </button>
+        <div class="flex-1 p-6 md:ml-64 overflow-auto pb-24 pt-24">
+            <div id="content" class="bg-white shadow-md"></div>
+        </div>
+        <div
+            class="bottom-action-bar flex flex-row justify-center items-center bg-white/70"
+        >
+            <button
+                id="openUserInfoBottomSheet"
+                class="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-700 hover:font-bold min-w-33 shadow-lg hover:shadow-xl"
+            >
+                Edit
+            </button>
+            <button
+                id="save-info"
+                class="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-700 hover:font-bold min-w-33 shadow-lg hover:shadow-xl"
+            >
+                Save
+            </button>
+            <button
+                id="generate"
+                class="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-700 hover:font-bold min-w-33 shadow-lg hover:shadow-xl"
+            >
+                Download
+            </button>
+        </div>
+
+        <div
+            id="sheetOverlay"
+            class="fixed inset-0 bg-black/50 bg-opacity-40 z-[140] hidden"
+        ></div>
+        <div
+            id="userInfoBottomSheet"
+            class="fixed bottom-0 left-0 w-full max-h-[85%] bg-white rounded-t-2xl shadow-2xl flex flex-col transform translate-y-full transition-transform duration-300 z-[150] border-t border-gray-200"
+        >
+            <div class="flex-1 overflow-y-auto p-4 md:p-6">
+                <div
+                    class="flex items-center justify-between mb-4 border-b pb-2"
+                >
+                    <h2 class="text-xl font-bold text-gray-800">
+                        Edit Professional Information
+                    </h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Full Name</label
+                        >
+                        <input
+                            id="inputName"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Job Title</label
+                        >
+                        <input
+                            id="inputTitle"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                        />
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Email Address</label
+                        >
+                        <input
+                            id="inputEmail"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Phone Number</label
+                        >
+                        <input
+                            id="inputPhone"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                        />
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                            >Portfolio/Links</label
+                        >
+                        <input
+                            id="inputLinks"
+                            class="border border-gray-300 px-3 py-2 w-full mb-3 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            for="inputAvatar"
+                            class="block text-xs font-bold text-gray-600 uppercase mb-1"
+                        >
+                            Profile Photo
+                        </label>
+                        <input
+                            id="inputAvatar"
+                            type="file"
+                            accept="image/*"
+                            class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
+                        />
+                    </div>
+                </div>
+                <label
+                    class="block text-xs font-bold text-gray-600 uppercase mb-1 mt-1"
+                    >Professional Introduction</label
+                >
+                <textarea
+                    id="inputIntroduction"
+                    class="border border-gray-300 px-3 py-2 w-full mb-4 rounded-md text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                    rows="3"
+                ></textarea>
+                <div
+                    class="mb-4 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="experience"
+                >
+                    <div
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
+                    >
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
+                                <use href="#icon-eye"></use>
+                            </svg>
+                        </span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700 section-header-title"
+                            data-key="experience"
+                            >Work Experience</span
+                        >
+                        <span
+                            class="ml-2 text-gray-400 hover:text-blue-500 transition-colors edit-section-title"
+                            title="Edit Section Title"
+                        >
+                            <svg
+                                class="w-3.5 h-3.5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                                ></path>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="section-body p-3">
+                        <div id="experienceList" class="space-y-3 mb-3"></div>
+                        <div id="experienceForm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold"
+                                        >Role</label
+                                    >
+                                    <input
+                                        id="title"
+                                        type="text"
+                                        placeholder="Role (e.g. Software Developer)"
+                                        class="border p-2 w-full rounded border border-gray-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block font-semibold"
+                                        >Company</label
+                                    >
+                                    <input
+                                        id="company"
+                                        type="text"
+                                        placeholder="Company Name"
+                                        class="border p-2 w-full rounded border border-gray-400"
+                                    />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-semibold"
+                                        >From</label
+                                    >
+                                    <input
+                                        id="experienceFrom"
+                                        type="text"
+                                        placeholder="YYYY-MM (e.g. 2024-03)"
+                                        class="border p-2 rounded w-full border border-gray-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block font-semibold"
+                                        >To</label
+                                    >
+                                    <input
+                                        id="experienceTo"
+                                        type="text"
+                                        placeholder="YYYY-MM"
+                                        class="border p-2 rounded w-full border border-gray-400"
+                                    />
+                                </div>
+                            </div>
+                            <label
+                                class="inline-flex items-center gap-2 text-sm mt-2"
+                            >
+                                <input
+                                    id="experienceCurrent"
+                                    type="checkbox"
+                                    class="form-checkbox h-4 w-4"
+                                />
+                                <span>Currently company (hide "To" date)</span>
+                            </label>
+                            <div
+                                id="workExpDetailsList"
+                                class="space-y-2 my-2"
+                            ></div>
+
+                            <button
+                                id="addWorkExpDetail"
+                                class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
+                            >
+                                <span class="text-lg">+</span> Add
+                                responsibility / achievement
+                            </button>
+
+                            <div class="flex gap-2 mt-4">
+                                <button
+                                    id="experienceSaveBtn"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    id="experienceCancelBtn"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="education"
+                >
+                    <div
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
+                    >
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
+                                <use href="#icon-eye"></use>
+                            </svg>
+                        </span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700 section-header-title"
+                            data-key="education"
+                            >Education</span
+                        >
+                        <span
+                            class="ml-2 text-gray-400 hover:text-blue-500 transition-colors edit-section-title"
+                            title="Edit Section Title"
+                        >
+                            <svg
+                                class="w-3.5 h-3.5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                                ></path>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="section-body p-3">
+                        <div id="eduList" class="space-y-3 mb-3"></div>
+                        <div id="eduForm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold"
+                                        >Degree</label
+                                    >
+                                    <input
+                                        id="eduDegree"
+                                        type="text"
+                                        placeholder="Degree (e.g. BSc Computer Science)"
+                                        class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold"
+                                        >School</label
+                                    >
+                                    <input
+                                        id="eduSchool"
+                                        type="text"
+                                        placeholder="School / Institution"
+                                        class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400"
+                                    />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold"
+                                        >From</label
+                                    >
+                                    <input
+                                        id="eduFrom"
+                                        type="text"
+                                        placeholder="YYYY-MM (e.g. 2022-09)"
+                                        class="border px-2.5 py-1.5 rounded w-full text-sm border-gray-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold"
+                                        >To</label
+                                    >
+                                    <input
+                                        id="eduTo"
+                                        type="text"
+                                        placeholder="YYYY-MM"
+                                        class="border px-2.5 py-1.5 rounded w-full text-sm border-gray-400"
+                                    />
+                                </div>
+                            </div>
+
+                            <div
+                                id="educationDetailsList"
+                                class="space-y-2 my-2"
+                            ></div>
+
+                            <button
+                                id="addEducationDetail"
+                                class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
+                            >
+                                <span class="text-lg">+</span> Add achievement,
+                                or activity
+                            </button>
+                            <div class="flex gap-2 mt-4">
+                                <button
+                                    id="eduSaveBtn"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    id="eduCancelBtn"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="skills"
+                >
+                    <div
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
+                    >
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
+                                <use href="#icon-eye"></use>
+                            </svg>
+                        </span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700 section-header-title"
+                            data-key="skills"
+                            >Skills</span
+                        >
+                        <span
+                            class="ml-2 text-gray-400 hover:text-blue-500 transition-colors edit-section-title"
+                            title="Edit Section Title"
+                        >
+                            <svg
+                                class="w-3.5 h-3.5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                                ></path>
+                            </svg>
+                        </span>
+                    </div>
+                    <div class="section-body p-3">
+                        <div id="skillList" class="space-y-3 mb-3"></div>
+                        <div id="skillForm" class="space-y-2">
+                            <input
+                                id="skill"
+                                type="text"
+                                placeholder="HTML/CSS"
+                                class="border py-2 px-4 w-full rounded border border-gray-400"
+                            />
+                            <div class="flex items-center gap-3">
+                                <input
+                                    id="skillValue"
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    step="10"
+                                    value="0"
+                                    class="w-full max-w-[300px] accent-blue-500 border border-gray-400"
+                                />
+
+                                <span
+                                    id="skillValueLabel"
+                                    class="w-10 text-sm font-semibold"
+                                    >0%</span
+                                >
+                            </div>
+                            <div class="flex gap-2">
+                                <button
+                                    id="skillSaveBtn"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    id="skillCancelBtn"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="references"
+                >
+                    <div
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
+                    >
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
+                                <use href="#icon-eye"></use>
+                            </svg>
+                        </span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700 section-header-title"
+                            data-key="references"
+                            >References</span
+                        >
+                        <span
+                            class="ml-2 text-gray-400 hover:text-blue-500 transition-colors edit-section-title"
+                            title="Edit Section Title"
+                        >
+                            <svg
+                                class="w-3.5 h-3.5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                                ></path>
+                            </svg>
+                        </span>
+                    </div>
+
+                    <div class="section-body p-3">
+                        <div id="referenceList" class="space-y-3 mb-3"></div>
+                        <div id="referenceForm" class="space-y-2">
+                            <input
+                                id="reference"
+                                type="text"
+                                placeholder="Dr. Pepper, Chief of Medicine, General Hospital"
+                                class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                            />
+                            <div class="flex gap-2">
+                                <button
+                                    id="referenceSaveBtn"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    id="referenceCancelBtn"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="awards"
+                >
+                    <div
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
+                    >
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
+                                <use href="#icon-eye"></use>
+                            </svg>
+                        </span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700 section-header-title"
+                            data-key="awards"
+                            >Awards</span
+                        >
+                        <span
+                            class="ml-2 text-gray-400 hover:text-blue-500 transition-colors edit-section-title"
+                            title="Edit Section Title"
+                        >
+                            <svg
+                                class="w-3.5 h-3.5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                                ></path>
+                            </svg>
+                        </span>
+                    </div>
+
+                    <div class="section-body p-3">
+                        <div id="awardList" class="space-y-3 mb-3"></div>
+                        <div id="awardForm" class="space-y-2">
+                            <input
+                                id="award"
+                                type="text"
+                                placeholder="Top Employee of the Month"
+                                class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                            />
+                            <div class="flex gap-2">
+                                <button
+                                    id="awardSaveBtn"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    id="awardCancelBtn"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="mb-3 border border-gray-200 rounded-lg overflow-hidden section"
+                    data-section="hobbies"
+                >
+                    <div
+                        class="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-200 section-toggle"
+                    >
+                        <span class="toggle-icon select-none text-gray-500">
+                            <svg class="toggle-icon w-4 h-4">
+                                <use href="#icon-eye"></use>
+                            </svg>
+                        </span>
+                        <span
+                            class="font-bold text-xs uppercase tracking-wider text-gray-700 section-header-title"
+                            data-key="hobbies"
+                            >Hobbies</span
+                        >
+                        <span
+                            class="ml-2 text-gray-400 hover:text-blue-500 transition-colors edit-section-title"
+                            title="Edit Section Title"
+                        >
+                            <svg
+                                class="w-3.5 h-3.5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                                ></path>
+                            </svg>
+                        </span>
+                    </div>
+
+                    <div class="section-body p-3">
+                        <div id="hobbyList" class="space-y-3 mb-3"></div>
+                        <div id="hobbyForm" class="space-y-2">
+                            <input
+                                id="hobby"
+                                type="text"
+                                placeholder="Football"
+                                class="border px-2.5 py-1.5 w-full rounded text-sm border-gray-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                            />
+                            <div class="flex gap-2">
+                                <button
+                                    id="hobbySaveBtn"
+                                    class="bg-green-500 hover:bg-green-600 text-white py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
+                                >
+                                    Add
+                                </button>
+                                <button
+                                    id="hobbyCancelBtn"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-1.5 px-3 rounded-md text-sm shadow-sm hover:shadow-md transition-all"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="sticky bottom-0 bg-gray-50 border-t border-gray-200 p-3"
+            >
+                <div class="flex justify-center">
+                    <button
+                        id="updateContent"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-10 rounded-full shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                        Update Preview
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div
+            id="templateBottomSheet"
+            class="fixed bottom-0 left-0 w-full max-h-[80%] bg-white rounded-t-lg shadow-lg flex flex-col transform translate-y-full transition-transform duration-300 z-[150]"
+        >
+            <div class="flex-1 overflow-y-auto p-6">
+                <h2 class="text-xl font-bold mb-4">Select a Template</h2>
+                <div id="templateGrid" class="grid gap-4"></div>
+            </div>
+            <div
+                class="sticky bottom-0 bg-white backdrop-blur border-t p-4 border-gray-300"
+            >
+                <div class="flex justify-center">
+                    <button
+                        id="closeTemplateSheet"
+                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-full min-w-60"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+            <symbol id="icon-eye" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+                <path
+                    fill-rule="evenodd"
+                    d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
+                    clip-rule="evenodd"
+                />
+            </symbol>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+            <symbol
+                id="icon-edit"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-6"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+                />
+            </symbol>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+            <symbol
+                id="icon-delete"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-6"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                />
+            </symbol>
+        </svg>
+        <div id="toast"></div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+        <script src="assets/js/index.js" type="module"></script>
+    </body>
+</html>
